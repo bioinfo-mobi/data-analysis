@@ -1,1 +1,1 @@
-Sitemap: https://lisaduttenhoefer.github.io/data-analysis-course/sitemap.xml
+Sitemap: https://bioinfo-mobi.github.io/data-analysis/sitemap.xml
