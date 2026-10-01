@@ -16,15 +16,19 @@ läuft über zwei Dinge:
    speichert — wechselt jemand den Browser oder Rechner, ist der Fortschritt weg. Das ist bewusst
    so (einfach, kostenlos, kein Login nötig), sollte aber bekannt sein.
 
-**Wichtig zu verstehen:** Es gibt zwei git-Branches im Repo:
+**Wichtig zu verstehen:** Aktiv genutzt wird nur **ein** git-Branch:
 
-- **`main`** — hier arbeitest du, hier liegt der Quellcode und ein bereits gerenderter Stand im
-  Ordner `docs/`.
-- **`gh-pages`** — das ist der Branch, von dem GitHub Pages die *tatsächlich live sichtbare* Seite
-  ausliefert (`https://lisaduttenhoefer.github.io/data-analysis-course`).
+- **`main`** — hier arbeitest du, hier liegt der Quellcode **und** die gerenderte Website im Ordner
+  `docs/`. GitHub Pages ist so eingestellt, dass die live sichtbare Seite direkt aus diesem Ordner
+  ausgeliefert wird (GitHub → *Settings → Pages → Build and deployment → „Deploy from a branch" →
+  Branch `main`, Ordner `/docs`*). Adresse: `https://bioinfo-mobi.github.io/data-analysis/`.
+- **`gh-pages`** — alter Branch (letzter Stand 2026-09-07). Wird **nicht mehr** ausgeliefert und kann
+  gelöscht werden. Steht die Pages-Quelle irgendwann wieder auf `gh-pages`, sieht man auf der
+  Live-Seite nur diesen veralteten Stand (siehe Abschnitt 8).
 
 **Seit 2026-09-07 passiert das automatisch:** eine GitHub Action
-(`.github/workflows/publish.yml`) rendert die Seite neu und veröffentlicht sie auf `gh-pages`,
+(`.github/workflows/publish.yml`) rendert die Seite neu und schreibt das Ergebnis als Commit
+„Auto-render site [skip ci]" in den Ordner `docs/` auf `main`,
 **sobald irgendetwas auf `main` gepusht wird** — auch ein Commit, der direkt über den
 GitHub-Webeditor gemacht wurde. Du musst dafür nichts mehr im Terminal ausführen. Fortschritt
 siehst du im Reiter **Actions** oben im GitHub-Repo; ein Durchlauf dauert ca. 1–2 Minuten, danach
@@ -38,12 +42,19 @@ den Rest.
 hindert — nicht wegen manifest.txt/quiz.md-Inhalten, die werden ja erst im Browser interpretiert):
 im Actions-Tab auf den roten Lauf klicken, Log lesen, Fehler beheben, erneut pushen.
 
-*Nur falls du mal ohne Internet/Action manuell veröffentlichen willst:* der alte Weg funktioniert
-weiterhin als Fallback, lokal im Projektordner:
+**Lokal und GitHub synchron halten** (wichtig, sonst gibt es abgelehnte Pushes und Konflikte):
 
-```
-quarto publish gh-pages --no-prompt --no-browser
-```
+- Die Action fügt nach jedem Push einen Commit auf `main` hinzu. Deshalb **vor dem Arbeiten und vor
+  jedem Push `git pull` ausführen** — sonst meldet git „rejected / behind".
+- **`docs/` nicht von Hand committen.** Das lokale Rendern (`quarto render`) verändert `docs/`,
+  und dieselben Dateien schreibt auch die Action — das führt zu Merge-Konflikten. Nur die
+  Quelldateien committen (`content/`, `materials/`, `engine/`, `figures/`, `*.qmd`, `_quarto.yml`).
+  Lokale Änderungen in `docs/` verwirft man mit `git restore docs/`.
+
+*Nur falls du mal ohne Action manuell veröffentlichen willst:* lokal im Projektordner
+`quarto render` ausführen und danach `docs/` committen und nach `main` pushen (Pages liefert
+`main`/`docs` aus). **Nicht** mehr `quarto publish gh-pages` verwenden — das würde nur den alten,
+nicht mehr ausgelieferten Branch aktualisieren.
 
 ---
 
@@ -59,7 +70,7 @@ einmal eingerichtet wurde und die man normalerweise nie anfasst:
 | **`pages/`-Dateien im Root** (`index.qmd`, `1_datentypen.qmd`, ...) | Die Grundgerüst-Dateien jeder Seite | So gut wie nie — jede Datei hat oben einen Kommentar „nicht diese Datei bearbeiten" |
 
 ```
-data-analysis-course/
+data-analysis/
 │
 ├── content/                    ← ORDNER A: hier bearbeitest du fast immer
 │   └── week1/ ... week9/
@@ -78,7 +89,10 @@ data-analysis-course/
 ├── engine/                     ← Gemeinsamer Code/Design, nicht anfassen:
 │   ├── week-loader.html        ← DAS Herzstück: lädt & rendert den Wocheninhalt zur Laufzeit
 │   ├── language-switch.html    ← R/Python-Umschalter oben auf jeder Seite
-│   └── custom.scss             ← gemeinsames Design (Farben, Quiz-Karten, etc.)
+│   └── custom.scss             ← gemeinsames Design (Farben nach Uni-Heidelberg-Corporate-Design,
+│                                  Quiz-Karten, etc. — siehe Abschnitt 6.6)
+│
+├── figures/                    ← Logo (`logo-white.png`) und Bilder
 │
 ├── _quarto.yml                 ← Quarto-Konfiguration (Sidebar, welche Ordner mit ausgeliefert werden)
 ├── ANLEITUNG.md                ← diese Datei
@@ -301,7 +315,7 @@ id: lists)
 Diese Aufgaben (6.1, 6.2) sind reine Textdatei-Änderungen — dafür muss **kein** Quarto/R/Python
 installiert sein. Am einfachsten direkt auf github.com (Datei öffnen → Stift-Symbol → Änderung →
 „Commit changes"). Die GitHub Action übernimmt danach automatisch das Rendern und Veröffentlichen
-auf `gh-pages` — nach ca. 1–2 Minuten ist die Änderung live.
+(Commit „Auto-render site" nach `main`/`docs/`) — nach ca. 1–2 Minuten ist die Änderung live.
 
 ### 6.3 Ein Python-Notebook für eine Woche hinzufügen (Platzhalter „Coming Soon“ ablösen)
 
@@ -367,6 +381,47 @@ Das Dashboard (`index.qmd`) wird **bewusst nicht automatisch** aus den Manifests
 eine Absicherung gegen Tippfehler, die die Startseite kaputt machen, und weil sich das Dashboard nur
 selten ändert (neue Woche = seltenes Ereignis), im Gegensatz zu Text-/Fragen-Änderungen (häufig).
 
+### 6.6 Farben oder Logo ändern (Corporate Design)
+
+Die Seite verwendet die Farben des Corporate Designs der Universität Heidelberg
+([Gestaltungshandbuch](https://backend.uni-heidelberg.de/de/dokumente/corporate-design-handbuch/download)):
+
+| Farbe | Hex | Verwendung |
+|---|---|---|
+| **Rot** (Siegelhintergrund, Pantone 1805 C) | `#C61826` | Hauptfarbe: Sidebar, Buttons, Überschriften, Haken, Umschalter R/Python |
+| **Rot-Braun** (Siegelumrandung, Pantone 175 C) | `#590D08` | Zweiter Farbton im Verlauf des Fortschrittsbanners, Schatten |
+| **Sand** (Zusatzfarbe, Warm Gray 1 C) | `#F4F1EA` | Hintergründe von Karten, Quiz-Boxen, Fortschrittsbalken auf Rot |
+| Sand dunkel (abgeleitet) | `#E4DDCF` | Rahmen/Trennlinien |
+| Anthrazit | `#4A4743` | Akzent für die Python-Abschnitte (damit R = Rot und Python unterscheidbar bleiben) |
+| Grün | `#2E7D32` | Rückmeldung „richtige Antwort" im Quiz (bewusst nicht Markenfarbe) |
+
+**Wo ändert man das?**
+- **`engine/custom.scss`** — ganz oben stehen die Farben als Variablen (`$uhd-red`, `$uhd-brown`,
+  `$uhd-sand`, `$uhd-sand-dark`, `$uhd-ink`); der Rest der Datei verwendet diese Variablen. Hier
+  zuerst ändern.
+- Einige Hex-Werte stehen **fest im Code** und müssen bei einer neuen Hauptfarbe per
+  Suchen & Ersetzen mitgeändert werden: `engine/week-loader.html`, `engine/language-switch.html`
+  (Variable `brandRed`), `index.qmd` und `coding_basics.qmd`. Nach `#C61826` suchen.
+- Falsche Antworten und Fehlermeldungen sind ebenfalls Rot, Hinweisboxen bleiben gelb.
+
+**Logo:** Die Datei `figures/logo-white.png` (weiß, transparenter Hintergrund, passend für die rote
+Sidebar) wird in `_quarto.yml` eingebunden:
+
+```yaml
+website:
+  sidebar:
+    logo: figures/logo-white.png
+    style: "floating"
+    contents: ...
+```
+
+Zu beachten: Es darf nur **einen** `sidebar:`-Block geben (ein zweiter führt zu
+„YAMLException: duplicated mapping key" beim Rendern), der Dateiname ist groß-/kleinschreibungs-
+abhängig, und für ein Logo auf farbigem Hintergrund braucht man ein PNG mit Transparenz (ein JPG
+hat immer einen weißen Hintergrund).
+
+Änderungen vor dem Pushen mit `quarto preview` ansehen (Abschnitt 7).
+
 ---
 
 ## 7. Lokal testen, bevor man live schaltet
@@ -404,6 +459,21 @@ Syntax stimmt (siehe Abschnitt 4/5).
 Erst 1-2 Minuten warten (die GitHub Action muss noch durchlaufen — Fortschritt im **Actions**-Tab
 des Repos einsehbar) und dann Browser-Cache leeren (Hard-Reload: Cmd+Shift+R). Läuft die Action
 rot/fehlgeschlagen, im Actions-Tab reinklicken und das Fehler-Log lesen.
+
+**Auch nach Warten und Hard-Reload noch die alte Version live (obwohl die Action grün war):**
+Prüfen, ob GitHub Pages die richtige Quelle hat: *Settings → Pages → Build and deployment* muss auf
+„Deploy from a branch" mit Branch **`main`** und Ordner **`/docs`** stehen. Steht dort `gh-pages`,
+wird nur der alte Stand vom 2026-09-07 ausgeliefert. Zur Kontrolle: Gibt es auf `main` einen
+aktuellen Commit „Auto-render site"?
+
+**`git push` wird abgelehnt („rejected", „behind"):**
+Die Action hat nach deinem letzten Push einen Commit auf `main` ergänzt. Erst `git pull`, dann
+erneut pushen (siehe Abschnitt 1). Bei Konflikten in `docs/`: `git restore docs/` bzw. die
+Konflikte dort verwerfen — `docs/` wird ohnehin von der Action neu erzeugt.
+
+**Rendern bricht mit „YAMLException: duplicated mapping key (_quarto.yml …)" ab:**
+In `_quarto.yml` kommt ein Schlüssel doppelt vor, typischerweise ein zweiter `sidebar:`-Block nach dem
+Einfügen des Logos. Alles unter **einem** `sidebar:` zusammenführen (Abschnitt 6.6).
 
 **Ein/e Studierende/r verliert ihren Fortschritt:**
 Fortschritt liegt nur im `localStorage` des jeweiligen Browsers — kein Backend, kein Cloud-Sync.
