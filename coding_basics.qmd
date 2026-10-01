@@ -33,7 +33,7 @@ format:
 </style>
 ```
 
-This page is a **quick-reference** for the coding basics covered in Week 1. Keep it open in a browser tab while working through the markdowns. Use the language toggle above to switch between **R** and **Python**.
+This page is a **quick-reference** for the coding basics covered in Week 1, plus a short introduction to **dplyr / pandas** (data manipulation) and **ggplot2 / seaborn** (plotting). Keep it open in a browser tab while working through the markdowns. Use the language toggle above to switch between **R** and **Python**.
 
 ---
 
@@ -307,6 +307,170 @@ sum(is.na(x))         # count of NA values
   <tr><td>is.na(x)</td><td>TRUE for each NA element</td></tr>
   <tr><td>na.omit(x)</td><td>Remove NA values from a vector or dataframe</td></tr>
 </table>
+</div>
+```
+
+---
+
+## dplyr: Data Manipulation
+
+```{=html}
+<div class="ref-section">
+<h3>The core verbs &amp; the pipe</h3>
+```
+
+`dplyr` provides a small set of **verbs** to work on dataframes. Each verb takes a dataframe as first argument and returns a new dataframe. Column names are written **without quotes and without `df$`**. Install once with `install.packages("dplyr")`, then load it in every session.
+
+```r
+library(dplyr)
+
+head(iris)    # built-in data set: 150 flowers, 3 species
+
+# filter(): keep ROWS that satisfy a condition
+filter(iris, Species == "setosa")
+filter(iris, Sepal.Length > 7, Species != "setosa")   # comma = AND
+
+# select(): keep COLUMNS
+select(iris, Sepal.Length, Species)
+select(iris, -Petal.Width)           # all columns except Petal.Width
+
+# arrange(): sort rows
+arrange(iris, desc(Sepal.Length))    # largest first
+
+# mutate(): add or change columns
+mutate(iris, Sepal.Ratio = Sepal.Length / Sepal.Width)
+```
+
+```{=html}
+<table class="fn-table">
+  <tr><th>Function</th><th>What it does</th></tr>
+  <tr><td>filter(df, cond)</td><td>Keep the rows where the condition is TRUE</td></tr>
+  <tr><td>select(df, a, b)</td><td>Keep (or with <code>-a</code> drop) columns</td></tr>
+  <tr><td>arrange(df, a)</td><td>Sort rows by a (use <code>desc(a)</code> for descending)</td></tr>
+  <tr><td>mutate(df, new = ...)</td><td>Create a new column or modify an existing one</td></tr>
+  <tr><td>rename(df, new = old)</td><td>Rename a column</td></tr>
+  <tr><td>distinct(df, a)</td><td>Unique values (rows) of a</td></tr>
+</table>
+<div class="tip-box">
+  <strong>The pipe <code>|&gt;</code>:</strong> <code>x |&gt; f(y)</code> means <code>f(x, y)</code> — read it as
+  "and then". It lets you chain several steps without nesting functions or creating temporary variables.
+  <code>|&gt;</code> is built into R (&ge; 4.1); the older <code>%&gt;%</code> (loaded with dplyr) works the same way.
+</div>
+</div>
+```
+
+```{=html}
+<div class="ref-section">
+<h3>Group, summarise &amp; join</h3>
+```
+
+`group_by()` splits the data into groups, and `summarise()` then computes **one row per group**. This replaces many `sapply()`/`apply()` loops.
+
+```r
+iris |>
+  group_by(Species) |>
+  summarise(n           = n(),
+            mean_length = mean(Sepal.Length),
+            sd_length   = sd(Sepal.Length))
+
+count(iris, Species)      # shortcut: number of rows per group
+
+# A typical chain: filter -> new column -> summary
+iris |>
+  filter(Sepal.Length > 5) |>
+  mutate(Sepal.Ratio = Sepal.Length / Sepal.Width) |>
+  group_by(Species) |>
+  summarise(mean_ratio = mean(Sepal.Ratio))
+
+# Joining two dataframes (df and Full_Names from the Dataframes section)
+left_join(df, Full_Names, by = "First_Name")   # keep all rows of df
+inner_join(df, Full_Names, by = "First_Name")  # keep only matching rows
+```
+
+```{=html}
+<table class="fn-table">
+  <tr><th>Function</th><th>What it does</th></tr>
+  <tr><td>group_by(df, a)</td><td>Split the data into groups defined by a</td></tr>
+  <tr><td>summarise(df, m = mean(x))</td><td>Collapse each group to one row of summary values</td></tr>
+  <tr><td>n()</td><td>Number of rows in the current group (inside summarise/mutate)</td></tr>
+  <tr><td>count(df, a)</td><td>Number of rows per value of a</td></tr>
+  <tr><td>left_join(a, b, by = "id")</td><td>Add the columns of b to a, matching on id</td></tr>
+  <tr><td>inner_join(a, b, by = "id")</td><td>Keep only rows present in both</td></tr>
+</table>
+<div class="tip-box">
+  <strong>Tip:</strong> the result of <code>summarise()</code> is again a dataframe, so you can pass it straight
+  into <code>ggplot()</code> (next section) or save it with <code>result &lt;- ...</code>.
+</div>
+</div>
+```
+
+---
+
+## ggplot2: Plotting
+
+```{=html}
+<div class="ref-section">
+<h3>Building a plot in layers</h3>
+```
+
+A `ggplot2` plot is built **layer by layer**, joined with `+`: first the data and the **aesthetic mapping** `aes()` (which column goes on which axis / colour), then one or more **geoms** that draw the data, then optional labels, scales and themes.
+
+```r
+library(ggplot2)
+
+# Scatter plot, coloured by species
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point() +
+  labs(x = "Sepal length (cm)", y = "Sepal width (cm)", title = "Iris sepals")
+
+# Other common plot types
+ggplot(iris, aes(x = Sepal.Length)) + geom_histogram(bins = 20)
+ggplot(iris, aes(x = Species, y = Sepal.Length)) + geom_boxplot()
+ggplot(iris, aes(x = Sepal.Length, fill = Species)) + geom_density(alpha = 0.5)
+
+# One panel per species
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() +
+  facet_wrap(~ Species)
+
+# Reference line + own colours
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point() +
+  geom_vline(xintercept = mean(iris$Sepal.Length), linetype = "dashed") +
+  scale_color_manual(values = c(setosa = "#C61826", versicolor = "#590D08", virginica = "#4A4743")) +
+  theme_minimal()
+
+# dplyr + ggplot2: summarise first, then plot
+iris |>
+  group_by(Species) |>
+  summarise(mean_length = mean(Sepal.Length)) |>
+  ggplot(aes(x = Species, y = mean_length)) +
+  geom_col()
+
+ggsave("plot.png", width = 6, height = 4)   # saves the last plot
+```
+
+```{=html}
+<table class="fn-table">
+  <tr><th>Function</th><th>What it does</th></tr>
+  <tr><td>ggplot(data, aes(x, y))</td><td>Start a plot: data and aesthetic mapping</td></tr>
+  <tr><td>geom_point() / geom_line()</td><td>Points / lines</td></tr>
+  <tr><td>geom_histogram() / geom_density()</td><td>Distribution of one variable</td></tr>
+  <tr><td>geom_boxplot()</td><td>Boxplot per group</td></tr>
+  <tr><td>geom_col() / geom_bar()</td><td>Bars from a value column / from counts</td></tr>
+  <tr><td>geom_vline() / geom_hline()</td><td>Vertical / horizontal reference line</td></tr>
+  <tr><td>facet_wrap(~ a)</td><td>One panel per value of a</td></tr>
+  <tr><td>labs(x, y, title)</td><td>Axis labels and title</td></tr>
+  <tr><td>scale_color_manual(values = ...)</td><td>Choose your own colours</td></tr>
+  <tr><td>theme_minimal()</td><td>Clean look (also theme_bw(), theme_classic())</td></tr>
+  <tr><td>ggsave("file.png")</td><td>Save the last plot to a file</td></tr>
+</table>
+<div class="tip-box">
+  <strong>Two common mistakes:</strong> (1) the <code>+</code> must be at the <em>end</em> of a line, not at the
+  start of the next one. (2) Variables from your data go <em>inside</em> <code>aes()</code>
+  (<code>aes(color = Species)</code>); a fixed value goes <em>outside</em> (<code>geom_point(color = "red")</code>).
+  Also remember that <code>ggplot()</code> needs a <strong>dataframe</strong>, not a bare vector.
+</div>
 </div>
 
 </div><!-- end .lang-r -->
@@ -583,6 +747,137 @@ np.isnan(x.astype(float))          # array of bool (for float arrays)
   <tr><td>np.isnan(x)</td><td>True for each NaN in a NumPy float array</td></tr>
   <tr><td>df.dropna()</td><td>Remove rows with any missing value</td></tr>
 </table>
+</div>
+```
+
+---
+
+## pandas: Data Manipulation (R: dplyr)
+
+```{=html}
+<div class="ref-section py">
+<h3>Filter, select, sort, new columns, group &amp; summarise</h3>
+```
+
+`pandas` does everything R's `dplyr` does. Here the column names are **strings** and you work with the DataFrame methods (`df.method()`). The example uses the iris data set that ships with seaborn.
+
+```python
+import pandas as pd
+import seaborn as sns
+
+iris = sns.load_dataset("iris")   # columns: sepal_length, sepal_width, petal_length, petal_width, species
+iris.head()
+
+# filter: keep ROWS that satisfy a condition   (R: filter)
+iris[iris["species"] == "setosa"]
+iris.query("sepal_length > 7 and species != 'setosa'")    # same idea, readable text condition
+
+# select: keep COLUMNS                         (R: select)
+iris[["sepal_length", "species"]]
+iris.drop(columns="petal_width")                          # all columns except petal_width
+
+# sort                                          (R: arrange)
+iris.sort_values("sepal_length", ascending=False)
+
+# new column                                    (R: mutate)
+iris.assign(sepal_ratio = iris["sepal_length"] / iris["sepal_width"])
+
+# group + summarise                             (R: group_by + summarise)
+iris.groupby("species").agg(n           = ("species", "size"),
+                            mean_length = ("sepal_length", "mean"),
+                            sd_length   = ("sepal_length", "std"))
+
+iris["species"].value_counts()                            # (R: count)
+
+# Chain several steps with parentheses            (R: the |> pipe)
+(iris
+   .query("sepal_length > 5")
+   .groupby("species")
+   .agg(mean_length=("sepal_length", "mean"))
+   .reset_index())
+```
+
+```{=html}
+<table class="fn-table">
+  <tr><th>Function</th><th>What it does (R equivalent)</th></tr>
+  <tr><td>df[df["a"] &gt; 5]  /  df.query("a &gt; 5")</td><td>Keep rows matching a condition (filter)</td></tr>
+  <tr><td>df[["a", "b"]]  /  df.drop(columns="a")</td><td>Keep / drop columns (select)</td></tr>
+  <tr><td>df.sort_values("a")</td><td>Sort rows (arrange)</td></tr>
+  <tr><td>df.assign(new = ...)</td><td>Add or change a column (mutate)</td></tr>
+  <tr><td>df.rename(columns={"old": "new"})</td><td>Rename a column (rename)</td></tr>
+  <tr><td>df.groupby("a").agg(m=("x", "mean"))</td><td>Group and summarise (group_by + summarise)</td></tr>
+  <tr><td>df["a"].value_counts()</td><td>Number of rows per value (count)</td></tr>
+  <tr><td>pd.merge(a, b, on="id", how="left")</td><td>Join two DataFrames (left_join)</td></tr>
+  <tr><td>.reset_index()</td><td>Turn the group labels back into a normal column</td></tr>
+</table>
+<div class="tip-box">
+  <strong>Tip:</strong> most pandas methods <em>return a new DataFrame</em> and leave the original unchanged.
+  Save the result (<code>result = iris.query(...)</code>) if you want to keep it.
+  After <code>groupby().agg()</code> the group names sit in the index — <code>.reset_index()</code> moves them back into a column.
+</div>
+</div>
+```
+
+---
+
+## Plotting: matplotlib &amp; seaborn (R: ggplot2)
+
+```{=html}
+<div class="ref-section py">
+<h3>Quick plots with seaborn, fine-tuning with matplotlib</h3>
+```
+
+`seaborn` draws statistical plots directly from a DataFrame (like `ggplot2`); `matplotlib` (`plt`) is the layer underneath, used for labels, titles, reference lines and saving. In seaborn you pass `data=` and the **column names** for `x`, `y` and `hue` (= colour groups, like `color`/`fill` in `aes()`).
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Scatter plot, coloured by species
+sns.scatterplot(data=iris, x="sepal_length", y="sepal_width", hue="species")
+plt.xlabel("Sepal length (cm)")
+plt.ylabel("Sepal width (cm)")
+plt.title("Iris sepals")
+plt.show()
+
+# Other common plot types
+sns.histplot(data=iris, x="sepal_length", bins=20)
+sns.boxplot(data=iris, x="species", y="sepal_length")
+sns.kdeplot(data=iris, x="sepal_length", hue="species", fill=True, alpha=0.5)
+
+# One panel per species                          (R: facet_wrap)
+sns.relplot(data=iris, x="sepal_length", y="sepal_width", col="species")
+
+# Reference line + own colours
+sns.scatterplot(data=iris, x="sepal_length", y="sepal_width", hue="species",
+                palette={"setosa": "#C61826", "versicolor": "#590D08", "virginica": "#4A4743"})
+plt.axvline(iris["sepal_length"].mean(), linestyle="--")
+
+# dplyr-style summary first, then plot
+means = iris.groupby("species").agg(mean_length=("sepal_length", "mean")).reset_index()
+sns.barplot(data=means, x="species", y="mean_length")
+
+plt.savefig("plot.png", dpi=300, bbox_inches="tight")   # call BEFORE plt.show()
+```
+
+```{=html}
+<table class="fn-table">
+  <tr><th>Function</th><th>What it does (R equivalent)</th></tr>
+  <tr><td>sns.scatterplot(data, x, y, hue)</td><td>Scatter plot (geom_point)</td></tr>
+  <tr><td>sns.lineplot(...)</td><td>Line plot (geom_line)</td></tr>
+  <tr><td>sns.histplot() / sns.kdeplot()</td><td>Histogram / density (geom_histogram, geom_density)</td></tr>
+  <tr><td>sns.boxplot()</td><td>Boxplot per group (geom_boxplot)</td></tr>
+  <tr><td>sns.barplot()</td><td>Bars of a mean (or other estimate) per group (geom_col)</td></tr>
+  <tr><td>sns.relplot(..., col="a")</td><td>One panel per value of a (facet_wrap)</td></tr>
+  <tr><td>plt.axvline() / plt.axhline()</td><td>Vertical / horizontal reference line (geom_vline / geom_hline)</td></tr>
+  <tr><td>plt.xlabel() / plt.ylabel() / plt.title()</td><td>Axis labels and title (labs)</td></tr>
+  <tr><td>plt.savefig("file.png")</td><td>Save the figure (ggsave)</td></tr>
+</table>
+<div class="tip-box">
+  <strong>Tip:</strong> if you prefer the <code>ggplot2</code> syntax (<code>ggplot(...) + geom_point()</code>) in Python,
+  the optional package <code>plotnine</code> offers it. In this course we use <code>matplotlib</code>
+  and <code>seaborn</code>, as in the Python notebooks.
+</div>
 </div>
 
 </div><!-- end .lang-python -->
