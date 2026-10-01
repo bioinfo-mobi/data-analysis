@@ -10,7 +10,7 @@ url: https://www.youtube.com/watch?v=wJm3-Ev5tRw
 video: 7.2 t-Test
 url: https://www.youtube.com/watch?v=do6Sgq4ZmjU
 
-markdown_r: materials/week7/_06_hypothesis_testing.Rmd | Week 7 – Hypothesis Testing (R Markdown)
+markdown_r: materials/week7/_06_hypothesis_testing_dplyr.Rmd | Week 7 – Hypothesis Testing (R Markdown)
 markdown_python: materials/week7/_06_hypothesis_testing_python.ipynb | Week 7 – Hypothesis Testing (Python Notebook)
 dataset_note: **Dataset:** This sheet reuses the diabetes dataset from earlier weeks, loaded directly inside the R Markdown file — no separate download needed.
 bonus_note: **Bonus reference:** two companion scripts with more worked t-test examples, plus comprehension questions with solutions. Quizzes 2 & 4 below draw on this material.

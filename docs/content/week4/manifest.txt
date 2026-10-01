@@ -12,6 +12,6 @@ url: https://youtu.be/OiQdxG9I0Tk
 video: 4.4.2 PCA (part 2)
 url: https://youtu.be/LrSqVYHi23g
 
-markdown_r: materials/week4/_03_unsupervised_learning.Rmd | Week 4 – Hierarchical Clustering & PCA (R Markdown)
+markdown_r: materials/week4/_03_unsupervised_learning_dplyr.Rmd | Week 4 – Hierarchical Clustering & PCA (R Markdown)
 markdown_python: materials/week4/_03_unsupervised_learning_python.ipynb | Week 4 – Hierarchical Clustering & PCA (Python Notebook)
 dataset_note: **Datasets:** This sheet uses a leukemia gene expression dataset (ALL vs. AML) for hierarchical clustering, and the Breast Cancer Wisconsin dataset for PCA. Both are loaded directly inside the R Markdown file — no separate download needed.

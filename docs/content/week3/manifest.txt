@@ -14,7 +14,7 @@ url: https://youtu.be/5J5k26YfKig
 video: 4.2 K-means clustering
 url: https://youtu.be/FHaIoNhHcKY
 
-markdown_r: materials/week3/_02_correlation_clustering.Rmd | Week 3 – Correlation & Clustering (R Markdown)
+markdown_r: materials/week3/_02_correlation_clustering_dplyr.Rmd | Week 3 – Correlation & Clustering (R Markdown)
 markdown_python: materials/week3/_02_correlation_clustering_python.ipynb | Week 3 – Correlation & Clustering (Python Notebook)
 
 dataset_note: **Datasets:** This sheet reuses the cleaned diabetes dataset from Week 2, and introduces a new gene expression dataset (TCGA breast cancer, 200 samples × 300 genes) for the clustering part. Both are loaded directly inside the R Markdown file — no separate download needed.

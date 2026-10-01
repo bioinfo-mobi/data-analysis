@@ -16,6 +16,6 @@ url: https://www.youtube.com/watch?v=X3mYHgkWWxo
 video: 9.5 Multiple regression
 url: https://www.youtube.com/watch?v=LF9m43W325c
 
-markdown_r: materials/week9/_08_regression_analysis.Rmd | Week 9 – Regression Analysis (R Markdown)
+markdown_r: materials/week9/_08_regression_analysis_dplyr.Rmd | Week 9 – Regression Analysis (R Markdown)
 markdown_python: materials/week9/_08_regression_analysis_python.ipynb | Week 9 – Regression Analysis (Python Notebook)
 dataset_note: **Dataset:** This sheet uses the full diabetes dataset to predict cholesterol level, loaded directly inside the R Markdown file — no separate download needed.
