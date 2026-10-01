@@ -12,7 +12,7 @@ url: https://www.youtube.com/watch?v=CwFh76QrHQo
 video: 8 Power of a test
 url: https://www.youtube.com/watch?v=t0z9tu4J3AU
 
-markdown_r: materials/week8/_07_hypothesis_testing:prop.Rmd | Week 8 – Non-Parametric & Proportion Tests (R Markdown) | | _07_hypothesis_testing_prop.Rmd
+markdown_r: materials/week8/_07_hypothesis_testing_prop_dplyr.Rmd | Week 8 – Non-Parametric & Proportion Tests (R Markdown) | | _07_hypothesis_testing_prop.Rmd
 markdown_python: materials/week8/_07_hypothesis_testing_prop_python.ipynb | Week 8 – Non-Parametric & Proportion Tests (Python Notebook)
 dataset_note: **Datasets:** This sheet uses the ALL/AML leukemia gene expression data and a breast cancer clinical dataset, both loaded directly inside the R Markdown file — no separate download needed.
 bonus_note: **Bonus reference:** a plenum recap computing the Wilcoxon test by hand and exploring false-positive/false-negative rates in depth. Quizzes 1 & 4 below draw on this material.

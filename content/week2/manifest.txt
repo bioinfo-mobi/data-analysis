@@ -14,7 +14,7 @@ url: https://youtu.be/DU3IEnVr2kA
 video: Describing data 2
 url: https://youtu.be/jFt72U7xiHk
 
-markdown_r: materials/week2/_01_data_cleanup.Rmd | Week 2 – Data Cleanup (R Markdown)
+markdown_r: materials/week2/_01_data_cleanup_dplyr.Rmd | Week 2 – Data Cleanup (R Markdown)
 dataset_note: **Course dataset:** Load the diabetes data in RStudio with:
 dataset_code_r:
     dat <- read.delim('https://www.dropbox.com/scl/fi/zqjdoi7naolmruyxrraxq/diabetes_2025.tsv?rlkey=txnps3ccr0vj47yvjmpecbeom&dl=1')
