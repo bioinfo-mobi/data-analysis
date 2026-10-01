@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -39,10 +42,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-96a3b58b183e04cee8e7772981a61a8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-8951a5c156bac9e01d26fe670e5c8e40.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,7 +106,7 @@ ul.task-list li input[type="checkbox"] {
         return;
       }
 
-      const darkGreen = "#1a4d1a";
+      const brandRed = "#C61826";
 
       function updateView(lang) {
         // IMPORTANT: persist the new language BEFORE dispatching visibility/langchange —
@@ -115,10 +118,10 @@ ul.task-list li input[type="checkbox"] {
         window.applyLangVisibility(lang);
 
         // Style Python
-        pyBtn.style.cssText = `background-color: ${lang === 'python' ? darkGreen : 'white'} !important; color: ${lang === 'python' ? 'white' : darkGreen} !important; border: 2px solid ${darkGreen} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
+        pyBtn.style.cssText = `background-color: ${lang === 'python' ? brandRed : 'white'} !important; color: ${lang === 'python' ? 'white' : brandRed} !important; border: 2px solid ${brandRed} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
 
         // Style R
-        rBtn.style.cssText = `background-color: ${lang === 'r' ? darkGreen : 'white'} !important; color: ${lang === 'r' ? 'white' : darkGreen} !important; border: 2px solid ${darkGreen} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
+        rBtn.style.cssText = `background-color: ${lang === 'r' ? brandRed : 'white'} !important; color: ${lang === 'r' ? 'white' : brandRed} !important; border: 2px solid ${brandRed} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
       }
 
       pyBtn.addEventListener('click', (e) => { e.preventDefault(); updateView('python'); });
@@ -181,8 +184,8 @@ ul.task-list li input[type="checkbox"] {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
       <a href="./index.html" class="sidebar-logo-link">
-      <img src="./figures/logo.jp" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
-      <img src="./figures/logo.jp" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      <img src="./figures/logo-white.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="./figures/logo-white.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
       </a>
       </div>
     <div class="sidebar-menu-container"> 
@@ -542,7 +545,7 @@ Loading…
   // ═══════════════════════════════════════════════════════════════════════
   function renderProgressBar(weekNum, title) {
     return h(
-      '<div style="background:linear-gradient(135deg,#1a4d1a 0%,#2d7a2d 100%);border-radius:14px;padding:20px 28px;color:white;margin-bottom:2rem;box-shadow:0 4px 18px rgba(26,77,26,0.15);">' +
+      '<div style="background:linear-gradient(135deg,#C61826 0%,#590D08 100%);border-radius:14px;padding:20px 28px;color:white;margin-bottom:2rem;box-shadow:0 4px 18px rgba(89,13,8,0.15);">' +
         '<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">' +
           '<div>' +
             '<strong style="font-size:1.1rem;">' + escapeHtml(title) + ' Progress</strong>' +
@@ -551,7 +554,7 @@ Loading…
           '<a href="index.html" style="color:rgba(255,255,255,0.8);font-size:0.85rem;text-decoration:none;">← Dashboard</a>' +
         '</div>' +
         '<div style="background:rgba(255,255,255,0.2);border-radius:50px;height:16px;overflow:hidden;">' +
-          '<div id="week' + weekNum + '-progress-bar" style="height:16px;background:#a8d5a2;color:#1a4d1a;font-weight:900;font-size:0.75rem;line-height:16px;text-align:center;border-radius:50px;width:0%;transition:width 0.6s ease;"></div>' +
+          '<div id="week' + weekNum + '-progress-bar" style="height:16px;background:#F4F1EA;color:#C61826;font-weight:900;font-size:0.75rem;line-height:16px;text-align:center;border-radius:50px;width:0%;transition:width 0.6s ease;"></div>' +
         '</div>' +
       '</div>'
     );
@@ -670,7 +673,7 @@ Loading…
     } else {
       pyInner = '<div class="step-header"><div class="step-badge">2</div><h2>Work Through the Practical Notebook</h2></div>' +
         '<div class="placeholder-card">' +
-          '<p style="color:#7c9cef;font-weight:700;margin-bottom:0.5rem;">🐍 Python Notebook — Coming Soon</p>' +
+          '<p style="color:#4A4743;font-weight:700;margin-bottom:0.5rem;">🐍 Python Notebook — Coming Soon</p>' +
           '<p style="color:#555;margin-bottom:0;">A Python version of this week\'s exercise is in preparation. Use the R Markdown material for now — the underlying concepts transfer directly.</p>' +
         '</div>';
     }
@@ -705,7 +708,7 @@ Loading…
         });
         html += '<div id="' + radioName + '-feedback" class="mt-1 fw-bold"></div></div>';
       });
-      html += '<button class="btn btn-primary w-100 check-quiz-btn" data-quiz-full-id="' + domId + '" style="background-color:#1a4d1a;border:none;font-weight:700;">CHECK ANSWERS</button>' +
+      html += '<button class="btn btn-primary w-100 check-quiz-btn" data-quiz-full-id="' + domId + '" style="background-color:#C61826;border:none;font-weight:700;">CHECK ANSWERS</button>' +
         '<div id="' + domId + '-result" class="mt-3 fw-bold text-center"></div></div></div>';
     });
     return html;
@@ -727,8 +730,8 @@ Loading…
       pyHtml = '<p style="color:#555;margin-bottom:1.5rem;">Python quizzes are in preparation — one per topic.</p>';
       quizCards.forEach(function (card, cardIdx) {
         pyHtml += '<h3 style="margin-top:' + (cardIdx === 0 ? '0.5rem' : '1.5rem') + ';">Quiz ' + (cardIdx + 1) + ': ' + escapeHtml(card.title) +
-          ' <span style="font-size:0.8rem;color:#7c9cef;font-weight:normal;">(Coming Soon)</span></h3>' +
-          '<div class="placeholder-card"><p style="color:#7c9cef;font-weight:700;margin-bottom:0.5rem;">🐍 Python Quiz — Coming Soon</p>' +
+          ' <span style="font-size:0.8rem;color:#4A4743;font-weight:normal;">(Coming Soon)</span></h3>' +
+          '<div class="placeholder-card"><p style="color:#4A4743;font-weight:700;margin-bottom:0.5rem;">🐍 Python Quiz — Coming Soon</p>' +
           '<p style="color:#555;margin-bottom:0;">A Python version of this quiz is in preparation.</p></div>';
       });
     }
@@ -823,21 +826,21 @@ Loading…
           var answer = q.answers[aIdx];
           if (answer && answer.correct) {
             score++;
-            if (fb) { fb.innerHTML = '✅ ' + formatInline(answer.feedback || 'Correct!'); fb.style.color = '#1a4d1a'; }
+            if (fb) { fb.innerHTML = '✅ ' + formatInline(answer.feedback || 'Correct!'); fb.style.color = '#2E7D32'; }
           } else if (fb) {
             fb.innerHTML = '❌ ' + formatInline((answer && answer.feedback) || 'Not quite — try again.');
-            fb.style.color = '#d9534f';
+            fb.style.color = '#C61826';
           }
         });
         var result = document.getElementById(domId + '-result');
         if (score === total) {
-          if (result) { result.innerHTML = '🎉 All correct!'; result.style.color = '#1a4d1a'; }
+          if (result) { result.innerHTML = '🎉 All correct!'; result.style.color = '#2E7D32'; }
           localSet(quizStorageKey(weekNum, card.id, lang), 'true');
           var badge2 = document.getElementById('quiz-done-' + domId);
           if (badge2) badge2.style.display = 'inline';
         } else if (result) {
           result.innerHTML = score + ' of ' + total + ' correct. Try again!';
-          result.style.color = '#d9534f';
+          result.style.color = '#C61826';
         }
         updateWeekBar(weekNum, manifest, quizCards);
       });
@@ -862,7 +865,7 @@ Loading…
     container.appendChild(h(
       '<div class="placeholder-card" style="text-align:center;padding:3rem 2rem;">' +
         '<p style="font-size:2rem;margin-bottom:0.5rem;">🔒</p>' +
-        '<p style="color:#1a4d1a;font-weight:700;font-size:1.1rem;margin-bottom:0.5rem;">' +
+        '<p style="color:#C61826;font-weight:700;font-size:1.1rem;margin-bottom:0.5rem;">' +
           escapeHtml(manifest.title || 'This week') + ' is not available yet</p>' +
         '<p style="color:#555;margin-bottom:1.5rem;">It unlocks on <strong>' + escapeHtml(manifest.unlockDate) + '</strong>.</p>' +
         '<a href="index.html" class="btn btn-outline-danger btn-sm">← Back to dashboard</a>' +
@@ -871,8 +874,8 @@ Loading…
   }
 
   function renderError(container, weekNum, err) {
-    container.innerHTML = '<div class="placeholder-card" style="border-left-color:#d9534f;">' +
-      '<p style="color:#d9534f;font-weight:700;">⚠️ Could not load this week\'s content.</p>' +
+    container.innerHTML = '<div class="placeholder-card" style="border-left-color:#C61826;">' +
+      '<p style="color:#C61826;font-weight:700;">⚠️ Could not load this week\'s content.</p>' +
       '<p style="color:#555;">content/week' + weekNum + '/manifest.txt or quiz.md failed to load or failed to parse. ' +
       'Check the browser console for details, and verify both files exist and are correctly formatted.</p></div>';
     console.error('week-loader error for week ' + weekNum + ':', err);

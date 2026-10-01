@@ -31,7 +31,7 @@
         return;
       }
 
-      const darkGreen = "#1a4d1a";
+      const brandRed = "#C61826";
 
       function updateView(lang) {
         // IMPORTANT: persist the new language BEFORE dispatching visibility/langchange —
@@ -43,10 +43,10 @@
         window.applyLangVisibility(lang);
 
         // Style Python
-        pyBtn.style.cssText = `background-color: ${lang === 'python' ? darkGreen : 'white'} !important; color: ${lang === 'python' ? 'white' : darkGreen} !important; border: 2px solid ${darkGreen} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
+        pyBtn.style.cssText = `background-color: ${lang === 'python' ? brandRed : 'white'} !important; color: ${lang === 'python' ? 'white' : brandRed} !important; border: 2px solid ${brandRed} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
 
         // Style R
-        rBtn.style.cssText = `background-color: ${lang === 'r' ? darkGreen : 'white'} !important; color: ${lang === 'r' ? 'white' : darkGreen} !important; border: 2px solid ${darkGreen} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
+        rBtn.style.cssText = `background-color: ${lang === 'r' ? brandRed : 'white'} !important; color: ${lang === 'r' ? 'white' : brandRed} !important; border: 2px solid ${brandRed} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
       }
 
       pyBtn.addEventListener('click', (e) => { e.preventDefault(); updateView('python'); });

@@ -9,27 +9,27 @@ format:
 ```{=html}
 <style>
   .ref-section {
-    background: #f8f9fa; border-radius: 12px; padding: 20px 24px;
-    margin-bottom: 1.5rem; border-left: 4px solid #1a4d1a;
+    background: #F4F1EA; border-radius: 12px; padding: 20px 24px;
+    margin-bottom: 1.5rem; border-left: 4px solid #C61826;
   }
-  .ref-section h3 { color: #1a4d1a; margin-top: 0; margin-bottom: 0.8rem; font-size: 1.15rem; }
-  .ref-section code { background: #e8f5e9; padding: 2px 5px; border-radius: 4px; }
+  .ref-section h3 { color: #C61826; margin-top: 0; margin-bottom: 0.8rem; font-size: 1.15rem; }
+  .ref-section code { background: #E9E3D6; padding: 2px 5px; border-radius: 4px; }
   .fn-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
-  .fn-table th { background: #1a4d1a; color: white; padding: 8px 12px; text-align: left; }
+  .fn-table th { background: #C61826; color: white; padding: 8px 12px; text-align: left; }
   .fn-table td { padding: 7px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
   .fn-table tr:last-child td { border-bottom: none; }
-  .fn-table td:first-child { font-family: monospace; color: #1a4d1a; white-space: nowrap; }
+  .fn-table td:first-child { font-family: monospace; color: #C61826; white-space: nowrap; }
   .tip-box {
-    background: #e8f5e9; border-radius: 8px; padding: 12px 16px;
-    margin: 1rem 0; font-size: 0.9rem; border-left: 3px solid #1a4d1a;
+    background: #E9E3D6; border-radius: 8px; padding: 12px 16px;
+    margin: 1rem 0; font-size: 0.9rem; border-left: 3px solid #C61826;
   }
   /* Python variant — blue accent */
-  .ref-section.py { border-left-color: #7c9cef; }
-  .ref-section.py h3 { color: #4a6cbf; }
-  .ref-section.py code { background: #eef2ff; }
-  .ref-section.py .fn-table th { background: #4a6cbf; }
-  .ref-section.py .fn-table td:first-child { color: #4a6cbf; }
-  .ref-section.py .tip-box { background: #eef2ff; border-left-color: #7c9cef; }
+  .ref-section.py { border-left-color: #4A4743; }
+  .ref-section.py h3 { color: #4A4743; }
+  .ref-section.py code { background: #ECE8E1; }
+  .ref-section.py .fn-table th { background: #4A4743; }
+  .ref-section.py .fn-table td:first-child { color: #4A4743; }
+  .ref-section.py .tip-box { background: #ECE8E1; border-left-color: #4A4743; }
 </style>
 ```
 
@@ -371,7 +371,7 @@ y[0] = 10            # replace first element (index 0)
 ```
 
 ```{=html}
-<div class="tip-box" style="background:#eef2ff;border-left-color:#7c9cef;">
+<div class="tip-box" style="background:#ECE8E1;border-left-color:#4A4743;">
   <strong>Mixed types:</strong> Unlike R vectors, Python lists allow mixed types:
   <code>[True, "hello", 3]</code> stays as-is — no automatic conversion.
   Indexing starts at <strong>0</strong>, not 1.
@@ -446,7 +446,7 @@ del L["size"]        # delete a key
 ```
 
 ```{=html}
-<div class="tip-box" style="background:#eef2ff;border-left-color:#7c9cef;">
+<div class="tip-box" style="background:#ECE8E1;border-left-color:#4A4743;">
   <strong>R vs Python:</strong> R's <code>L[["color"]]</code> → Python's <code>L["color"]</code>.
   Square brackets always return the value directly in Python — no double-bracket distinction.
 </div>

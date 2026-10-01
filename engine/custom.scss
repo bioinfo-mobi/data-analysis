@@ -1,13 +1,17 @@
 /*-- scss:defaults --*/
-$dark-green: #1a4d1a;
-$light-green-bg: #ebf1e7;
-$primary: $dark-green;
+// Universität Heidelberg Corporate Design (Gestaltungshandbuch)
+$uhd-red:        #C61826;  // Rot (Siegelhintergrund)  Pantone 1805 C
+$uhd-brown:      #590D08;  // Rot-Braun (Siegelumrandung)  Pantone 175 C
+$uhd-sand:       #F4F1EA;  // Zusatzfarbe Sand  Warm Gray 1 C
+$uhd-sand-dark:  #E4DDCF;  // derived from Sand: borders / dividers
+$uhd-ink:        #4A4743;  // neutral charcoal, accent for the Python track
+$primary: $uhd-red;
 
 /*-- scss:rules --*/
 
 // Sidebar Styling
 #quarto-sidebar {
-  background-color: $dark-green !important;
+  background-color: $uhd-red !important;
   margin: 0 !important;
   border-radius: 0 !important;
   height: 100vh;
@@ -58,12 +62,12 @@ $primary: $dark-green;
 
 // Global Progress Banner & Leaderboard Kachel
 .global-progress-banner {
-  background: linear-gradient(135deg, $dark-green 0%, #2d7a2d 100%);
+  background: linear-gradient(135deg, $uhd-red 0%, #590D08 100%);
   border-radius: 16px; 
   padding: 28px 36px; 
   color: white;
   margin-bottom: 2rem; 
-  box-shadow: 0 4px 18px rgba(26,77,26,0.15);
+  box-shadow: 0 4px 18px rgba(89,13,8,0.15);
   position: relative;
   z-index: 150; // Hoch genug, um über der Abdunkelung zu liegen
 
@@ -82,8 +86,8 @@ $primary: $dark-green;
   }
 
   .progress-bar { 
-    background-color: #a8d5a2 !important; 
-    color: $dark-green !important; 
+    background-color: #F4F1EA !important; 
+    color: $uhd-red !important; 
     font-weight: 900; 
     font-size: 0.8rem; 
     border-radius: 50px; 
@@ -107,28 +111,28 @@ $primary: $dark-green;
   cursor: pointer; 
   text-decoration: none !important;
   color: inherit !important; 
-  border: 1.5px solid #d6e4d6; 
+  border: 1.5px solid #E4DDCF; 
   background-color: #ffffff;
 
   &:hover {
-    background-color: $dark-green !important; 
+    background-color: $uhd-red !important; 
     color: white !important;
     transform: translateY(-3px); 
-    box-shadow: 0 8px 24px rgba(26,77,26,0.18);
+    box-shadow: 0 8px 24px rgba(89,13,8,0.18);
     .week-card-title, .week-card-topics, .week-card-status { color: white !important; }
     .week-card-progress-bar-bg { background-color: rgba(255,255,255,0.25) !important; }
-    .week-card-progress-fill   { background-color: #a8d5a2 !important; }
+    .week-card-progress-fill   { background-color: #F4F1EA !important; }
   }
 }
 
-.week-card-title  { color: $dark-green; font-weight: 800; font-size: 1.05rem; margin-bottom: 0.3rem; }
-.week-card-topics { color: #4a6741; font-size: 0.85rem; margin-bottom: 0.6rem; }
+.week-card-title  { color: $uhd-red; font-weight: 800; font-size: 1.05rem; margin-bottom: 0.3rem; }
+.week-card-topics { color: #6B625C; font-size: 0.85rem; margin-bottom: 0.6rem; }
 .week-card-status { font-size: 0.78rem; color: #6c757d; }
 .week-card-progress-bar-bg {
   background-color: #e9ecef; border-radius: 50px; height: 10px; margin-top: 8px; border: 1px solid #ced4da;
 }
 .week-card-progress-fill {
-  height: 10px; border-radius: 50px; background-color: $dark-green; transition: width 0.6s ease;
+  height: 10px; border-radius: 50px; background-color: $uhd-red; transition: width 0.6s ease;
 }
 
 // --- LOCK & OVERLAY SYSTEM ---
@@ -191,7 +195,7 @@ $primary: $dark-green;
   display: flex; align-items: center; gap: 14px; margin-bottom: 1.2rem;
 }
 .step-badge {
-  background: #1a4d1a; color: white; border-radius: 50%;
+  background: #C61826; color: white; border-radius: 50%;
   width: 38px; height: 38px; display: flex; align-items: center;
   justify-content: center; font-weight: 900; font-size: 1.1rem;
   flex-shrink: 0;
@@ -202,30 +206,30 @@ $primary: $dark-green;
 .resource-item {
   display: flex; align-items: center; gap: 14px;
   padding: 12px 16px; border-radius: 10px; margin-bottom: 8px;
-  background: #f8f9fa; border: 2px solid transparent;
+  background: #F4F1EA; border: 2px solid transparent;
   transition: background 0.2s, border-color 0.2s;
 }
-.resource-item.is-checked { background: #f0fff0; border-color: #a8d5a2; }
+.resource-item.is-checked { background: #FBF9F5; border-color: #C61826; }
 .resource-item input[type="checkbox"] {
-  width: 20px; height: 20px; cursor: pointer; accent-color: #1a4d1a; flex-shrink: 0;
+  width: 20px; height: 20px; cursor: pointer; accent-color: #C61826; flex-shrink: 0;
 }
 .resource-item label { margin: 0; cursor: pointer; flex: 1; font-size: 0.97rem; }
-.resource-item label a { color: #1a4d1a; font-weight: 600; }
+.resource-item label a { color: #C61826; font-weight: 600; }
 .resource-item label a:hover { text-decoration: underline; }
 
 .quiz-card {
-  background: #f8f9fa; border-radius: 12px;
+  background: #F4F1EA; border-radius: 12px;
   padding: 20px 24px; margin-bottom: 1.5rem;
-  border-left: 4px solid #1a4d1a;
+  border-left: 4px solid #C61826;
 }
 .quiz-done-badge {
-  display: none; background: #a8d5a2; color: #1a4d1a;
+  display: none; background: #F4F1EA; color: #C61826;
   border-radius: 50px; padding: 2px 12px; font-size: 0.8rem;
   font-weight: 800; margin-left: 10px; vertical-align: middle;
 }
 .placeholder-card {
-  background: #eef2ff; border-radius: 12px; padding: 20px 24px;
-  margin-bottom: 1.5rem; border-left: 4px solid #7c9cef;
+  background: #ECE8E1; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 1.5rem; border-left: 4px solid #4A4743;
 }
 .lang-note {
   background: #fff8e1; border-radius: 8px; padding: 10px 14px;
@@ -233,7 +237,7 @@ $primary: $dark-green;
   border-left: 3px solid #ffc107; color: #555;
 }
 .warning-note {
-  background: #fdecea; border-radius: 8px; padding: 10px 14px;
+  background: #FBE9EB; border-radius: 8px; padding: 10px 14px;
   margin-top: 0.8rem; margin-bottom: 0; font-size: 0.9rem;
-  border-left: 3px solid #d9534f; color: #555;
+  border-left: 3px solid #C61826; color: #555;
 }

@@ -11,13 +11,13 @@ title: "Course Dashboard"
   </div>
   <div class="d-flex align-items-center gap-3 mt-3">
     <div class="progress" style="height:22px; flex-grow: 1; background-color: rgba(255,255,255,0.2);">
-      <div id="global-progress-bar" class="progress-bar" role="progressbar" style="width:0%;background-color:#a8d5a2;color:#1a4d1a;font-weight:900;border-radius:50px;"></div>
+      <div id="global-progress-bar" class="progress-bar" role="progressbar" style="width:0%;background-color:#F4F1EA;color:#C61826;font-weight:900;border-radius:50px;"></div>
     </div>
     <div style="font-size:2.4rem;font-weight:900;opacity:0.9; line-height: 1; color: white;" id="gp-percent-badge">0%</div>
   </div>
 </div>
 
-<h3 style="color:#1a4d1a;font-weight:800;margin-bottom:1.2rem;margin-top:2rem;">Course Content</h3>
+<h3 style="color:#C61826;font-weight:800;margin-bottom:1.2rem;margin-top:2rem;">Course Content</h3>
 <div class="grid" id="week-cards-grid" style="align-items: stretch;"></div>
 
 <script>

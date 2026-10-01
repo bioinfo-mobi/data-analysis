@@ -14,7 +14,7 @@ website:
   title: "Methods in Data Analysis"
   site-url: "https://bioinfo-mobi.github.io/data-analysis/"
   sidebar:
-    logo: figures/logo.jp
+    logo: figures/logo-white.png
     style: "floating"
     contents:
       - text: "WELCOME"
