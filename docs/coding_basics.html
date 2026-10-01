@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-96a3b58b183e04cee8e7772981a61a8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-023e11e097dbef293517cdcfa520180e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -138,7 +138,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         return;
       }
 
-      const darkGreen = "#1a4d1a";
+      const brandRed = "#C61826";
 
       function updateView(lang) {
         // IMPORTANT: persist the new language BEFORE dispatching visibility/langchange —
@@ -150,10 +150,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         window.applyLangVisibility(lang);
 
         // Style Python
-        pyBtn.style.cssText = `background-color: ${lang === 'python' ? darkGreen : 'white'} !important; color: ${lang === 'python' ? 'white' : darkGreen} !important; border: 2px solid ${darkGreen} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
+        pyBtn.style.cssText = `background-color: ${lang === 'python' ? brandRed : 'white'} !important; color: ${lang === 'python' ? 'white' : brandRed} !important; border: 2px solid ${brandRed} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
 
         // Style R
-        rBtn.style.cssText = `background-color: ${lang === 'r' ? darkGreen : 'white'} !important; color: ${lang === 'r' ? 'white' : darkGreen} !important; border: 2px solid ${darkGreen} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
+        rBtn.style.cssText = `background-color: ${lang === 'r' ? brandRed : 'white'} !important; color: ${lang === 'r' ? 'white' : brandRed} !important; border: 2px solid ${brandRed} !important; border-radius: 50px !important; padding: 5px 20px !important; margin: 5px !important; font-weight: 800 !important;`;
       }
 
       pyBtn.addEventListener('click', (e) => { e.preventDefault(); updateView('python'); });
@@ -216,8 +216,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
       <a href="./index.html" class="sidebar-logo-link">
-      <img src="./figures/logo.jp" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
-      <img src="./figures/logo.jp" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      <img src="./figures/logo-white.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="./figures/logo-white.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
       </a>
       </div>
     <div class="sidebar-menu-container"> 
@@ -324,27 +324,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <style>
   .ref-section {
-    background: #f8f9fa; border-radius: 12px; padding: 20px 24px;
-    margin-bottom: 1.5rem; border-left: 4px solid #1a4d1a;
+    background: #F4F1EA; border-radius: 12px; padding: 20px 24px;
+    margin-bottom: 1.5rem; border-left: 4px solid #C61826;
   }
-  .ref-section h3 { color: #1a4d1a; margin-top: 0; margin-bottom: 0.8rem; font-size: 1.15rem; }
-  .ref-section code { background: #e8f5e9; padding: 2px 5px; border-radius: 4px; }
+  .ref-section h3 { color: #C61826; margin-top: 0; margin-bottom: 0.8rem; font-size: 1.15rem; }
+  .ref-section code { background: #E9E3D6; padding: 2px 5px; border-radius: 4px; }
   .fn-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
-  .fn-table th { background: #1a4d1a; color: white; padding: 8px 12px; text-align: left; }
+  .fn-table th { background: #C61826; color: white; padding: 8px 12px; text-align: left; }
   .fn-table td { padding: 7px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
   .fn-table tr:last-child td { border-bottom: none; }
-  .fn-table td:first-child { font-family: monospace; color: #1a4d1a; white-space: nowrap; }
+  .fn-table td:first-child { font-family: monospace; color: #C61826; white-space: nowrap; }
   .tip-box {
-    background: #e8f5e9; border-radius: 8px; padding: 12px 16px;
-    margin: 1rem 0; font-size: 0.9rem; border-left: 3px solid #1a4d1a;
+    background: #E9E3D6; border-radius: 8px; padding: 12px 16px;
+    margin: 1rem 0; font-size: 0.9rem; border-left: 3px solid #C61826;
   }
   /* Python variant — blue accent */
-  .ref-section.py { border-left-color: #7c9cef; }
-  .ref-section.py h3 { color: #4a6cbf; }
-  .ref-section.py code { background: #eef2ff; }
-  .ref-section.py .fn-table th { background: #4a6cbf; }
-  .ref-section.py .fn-table td:first-child { color: #4a6cbf; }
-  .ref-section.py .tip-box { background: #eef2ff; border-left-color: #7c9cef; }
+  .ref-section.py { border-left-color: #4A4743; }
+  .ref-section.py h3 { color: #4A4743; }
+  .ref-section.py code { background: #ECE8E1; }
+  .ref-section.py .fn-table th { background: #4A4743; }
+  .ref-section.py .fn-table td:first-child { color: #4A4743; }
+  .ref-section.py .tip-box { background: #ECE8E1; border-left-color: #4A4743; }
 </style>
 <p>This page is a <strong>quick-reference</strong> for the coding basics covered in Week 1. Keep it open in a browser tab while working through the markdowns. Use the language toggle above to switch between <strong>R</strong> and <strong>Python</strong>.</p>
 <hr>
@@ -711,7 +711,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Modifying</span></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>y[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">10</span>            <span class="co"># replace first element (index 0)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="tip-box" style="background:#eef2ff;border-left-color:#7c9cef;">
+<div class="tip-box" style="background:#ECE8E1;border-left-color:#4A4743;">
   <strong>Mixed types:</strong> Unlike R vectors, Python lists allow mixed types:
   <code>[True, "hello", 3]</code> stays as-is — no automatic conversion.
   Indexing starts at <strong>0</strong>, not 1.
@@ -784,7 +784,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>L[<span class="st">"size"</span>] <span class="op">=</span> <span class="dv">10</span>       <span class="co"># change a value</span></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>L[<span class="st">"new"</span>]  <span class="op">=</span> <span class="st">"hi"</span>     <span class="co"># add a new key</span></span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="kw">del</span> L[<span class="st">"size"</span>]        <span class="co"># delete a key</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="tip-box" style="background:#eef2ff;border-left-color:#7c9cef;">
+<div class="tip-box" style="background:#ECE8E1;border-left-color:#4A4743;">
   <strong>R vs Python:</strong> R's <code>L[["color"]]</code> → Python's <code>L["color"]</code>.
   Square brackets always return the value directly in Python — no double-bracket distinction.
 </div>
