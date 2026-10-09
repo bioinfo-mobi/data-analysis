@@ -1,1 +1,0 @@
-Sitemap: https://bioinfo-mobi.github.io/data-analysis/sitemap.xml
