@@ -8,6 +8,6 @@ format:
       - engine/week-loader.html
 ---
 
-<!-- Content for this page is loaded at runtime from content/week5/manifest.txt and
-     content/week5/quiz.md by week-loader.html — edit those files, not this one. -->
+<!-- Content for this page is loaded at runtime from content/chapter5/manifest.txt and
+     content/chapter5/quiz.md by week-loader.html — edit those files, not this one. -->
 <div id="week-app" data-week="5">Loading…</div>

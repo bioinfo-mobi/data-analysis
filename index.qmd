@@ -226,7 +226,7 @@ function getLang() {
   try { return localStorage.getItem('da_course_lang') || 'python'; } catch(e) { return 'python'; }
 }
 
-// A chapter is locked if its content/weekN/manifest.txt has an "unlock_date:"
+// A chapter is locked if its content/chapterN/manifest.txt has an "unlock_date:"
 // line with a future date. No unlock_date (or a past/today date) = unlocked.
 // This is the exact same rule week-loader.html applies on the week's own
 // page, so a locked chapter is consistently locked everywhere, not just here.
@@ -240,7 +240,7 @@ function isDateLocked(dateStr) {
 async function loadUnlockStatus() {
   await Promise.all(WEEKS.map(async (week) => {
     try {
-      const resp = await fetch(`content/week${week.n}/manifest.txt`);
+      const resp = await fetch(`content/chapter${week.n}/manifest.txt`);
       const text = await resp.text();
       const m = text.match(/^unlock_date:\s*(.+)$/m);
       const dateStr = m ? m[1].trim() : '';

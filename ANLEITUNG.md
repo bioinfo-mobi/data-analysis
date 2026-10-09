@@ -35,7 +35,7 @@ cached teils kurz — ggf. Browser-Reload mit Cache leeren, Cmd+Shift+R).
 
 **Faustregel:** lokal arbeiten und mit `quarto preview` testen (Abschnitt 7) → wenn du zufrieden
 bist, committen & **einmal** nach `main` pushen → fertig. Erst der Push schaltet live; so lange du
-nicht pushst, ändert sich auf der Website nichts. Auch Änderungen an `content/weekN/manifest.txt`
+nicht pushst, ändert sich auf der Website nichts. Auch Änderungen an `content/chapterN/manifest.txt`
 oder `quiz.md` laufen so (oder direkt im GitHub-Webeditor).
 
 *Falls die Action mal fehlschlägt* (z. B. wegen eines Tippfehlers, der Quarto am Rendern
@@ -72,12 +72,12 @@ einmal eingerichtet wurde und die man normalerweise nie anfasst:
 data-analysis/
 │
 ├── content/                    ← ORDNER A: hier bearbeitest du fast immer
-│   └── week1/ ... week9/
+│   └── chapter1/ ... chapter9/
 │       ├── manifest.txt        ← Titel, Videos, Folien, Download-Links, Datensatz-Hinweise
 │       └── quiz.md             ← Quizfragen, Antworten, Feedback-Texte
 │
 ├── materials/                  ← ORDNER B: die verlinkten Dateien selbst
-│   └── week1/ ... week9/       ← .Rmd, .ipynb, .pdf — Nummerierung entspricht 1:1 der Website!
+│   └── chapter1/ ... chapter9/ ← .Rmd, .ipynb, .pdf — Nummerierung entspricht 1:1 der Website!
 │
 ├── 1_datentypen.qmd ... 9_regression_analysis.qmd   ← ORDNER C (lose im Root): dünne Hüllen,
 ├── index.qmd                                          NICHT bearbeiten (Kommentar oben in jeder
@@ -104,18 +104,21 @@ data-analysis/
 
 ### Die Wochen-Nummerierung ist überall konsistent
 
-*Hinweis zur Benennung:* Auf der Website heißen die früheren „Weeks" jetzt **„Chapter"** (Sidebar,
-Dashboard-Kacheln, Seitentitel, Anzeigenamen in den `manifest.txt`). Die **technischen Namen bleiben
-bewusst unverändert** — Ordner `content/weekN/` und `materials/weekN/`, `data-week`, Datei
-`week-loader.html` und alle IDs (`w3_q_…`, `check_w3_…`). Würde man diese umbenennen, brächen Links und
-der gespeicherte Fortschritt der Studierenden. Wo in dieser Anleitung noch „Woche" steht, ist ein
-„Chapter" gemeint.
+*Hinweis zur Benennung:* Die früheren „Weeks" heißen jetzt überall **„Chapter"** — auf der Website
+(Sidebar, Dashboard-Kacheln, Seitentitel, Anzeigenamen in den `manifest.txt`) **und** in den
+Ordnernamen: `content/chapterN/` und `materials/chapterN/`. Bewusst **unverändert** blieben interne
+Namen wie die Datei `engine/week-loader.html`, das Attribut `data-week`, `id="week-app"` und alle
+IDs (`w3_q_…`, `check_w3_…`) — sie sind für Besucher unsichtbar, und eine Umbenennung der IDs würde den
+gespeicherten Fortschritt der Studierenden zurücksetzen. Wo in dieser Anleitung noch „Woche" steht,
+ist ein „Chapter" gemeint.
 
-`materials/week1/` bis `materials/week9/` entsprechen **exakt** „Chapter 1" bis „Chapter 9" auf der
-Website — `content/week3/manifest.txt` verlinkt ausschließlich auf Dateien in `materials/week3/`.
-Keine Verschiebung, kein Umrechnen mehr nötig (früher hießen diese Ordner `WEEK0`–`WEEK8`, versetzt
-um eins zur Website-Nummerierung — das wurde bewusst aufgeräumt, weil es die Nummer-1-Fehlerquelle
-beim Verwechseln war).
+`materials/chapter1/` bis `materials/chapter9/` entsprechen **exakt** „Chapter 1" bis „Chapter 9" auf der
+Website — `content/chapter3/manifest.txt` verlinkt ausschließlich auf Dateien in `materials/chapter3/`.
+Auch die **Dateinamen** folgen dieser Nummer: das Präfix `_NN_` ist die Kapitelnummer
+(`materials/chapter3/_03_correlation_clustering.Rmd`), die Folien heißen `chapterN_lecture_slides.pdf`.
+Keine Verschiebung, kein Umrechnen nötig (früher begannen Ordner und Dateien bei `WEEK0`/`_00_`,
+versetzt um eins zur Website-Nummerierung — das wurde bewusst aufgeräumt, weil es die
+Nummer-1-Fehlerquelle beim Verwechseln war).
 
 ---
 
@@ -142,13 +145,13 @@ Sie enthält **keinen** eigenen Inhalt. Stattdessen:
 1. Der Browser lädt die Seite, sieht das leere `<div id="week-app" data-week="3">`.
 2. `week-loader.html` (auf **jeder** Wochenseite gleich eingebunden) läuft automatisch los und lädt
    per `fetch()`:
-   - `content/week3/manifest.txt` (Titel, Videos, Folien, Downloads, Datensatz-Hinweise)
-   - `content/week3/quiz.md` (Quizfragen)
+   - `content/chapter3/manifest.txt` (Titel, Videos, Folien, Downloads, Datensatz-Hinweise)
+   - `content/chapter3/quiz.md` (Quizfragen)
 3. Daraus baut es die komplette Seite: Fortschrittsbalken, Schritt 1 (Videos/Folien), Schritt 2
    (R-Markdown/Python-Notebook Download), Schritt 3 (Quiz).
 
 **WICHTIG: Das bedeutet:** Um den Inhalt einer Woche zu ändern, bearbeitest du **fast nie** die `.qmd`-Datei
-selbst — sondern `content/weekN/manifest.txt` bzw. `content/weekN/quiz.md`. Das kann man auch
+selbst — sondern `content/chapterN/manifest.txt` bzw. `content/chapterN/quiz.md`. Das kann man auch
 direkt im GitHub-Webeditor tun (Datei im Browser auf github.com öffnen → Stift-Symbol „Edit“), ganz
 ohne Quarto/R/Python zu installieren.
 
@@ -157,13 +160,13 @@ ohne Quarto/R/Python zu installieren.
 ## 4. Das Format von `manifest.txt`
 
 Einfaches `schlüssel: wert`-Format, eine Zeile pro Eintrag. Reihenfolge der Zeilen ist egal (außer
-`video:`/`url:` müssen als Paar direkt hintereinander stehen). Beispiel (`content/week3/manifest.txt`):
+`video:`/`url:` müssen als Paar direkt hintereinander stehen). Beispiel (`content/chapter3/manifest.txt`):
 
 ```
 title: Chapter 3: Correlation & Clustering
-description: This week you will measure **associations between variables**...
+description: In this chapter you will measure **associations between variables**...
 topics: Pearson vs Spearman · Missing Data · Intro to Clustering · K-means
-slides: materials/week3/week2_lecture_slides.pdf
+slides: materials/chapter3/chapter3_lecture_slides.pdf
 slides_label: Chapter 3 – Correlation & Clustering (PDF slides)
 
 video: 2.3 Correlations
@@ -171,12 +174,12 @@ url: https://youtu.be/l4spkWoXclw
 video: 3. Dealing with missing data points
 url: https://youtu.be/zJmp2SYoMts
 
-markdown_r: materials/week3/_02_correlation_clustering.Rmd | Chapter 3 – Correlation & Clustering (R Markdown)
-markdown_python: materials/week3/_02_correlation_clustering_python.ipynb | Chapter 3 – Correlation & Clustering (Python Notebook)
+markdown_r: materials/chapter3/_03_correlation_clustering.Rmd | Chapter 3 – Correlation & Clustering (R Markdown)
+markdown_python: materials/chapter3/_03_correlation_clustering_python.ipynb | Chapter 3 – Correlation & Clustering (Python Notebook)
 
 dataset_note: **Datasets:** This sheet reuses ...
 bonus_note: **Bonus reference:** a plenum recap ...
-bonus: materials/week3/_02_plenum.Rmd | Plenum Recap (R Markdown)
+bonus: materials/chapter3/_03_plenum.Rmd | Plenum Recap (R Markdown)
 ```
 
 Alle möglichen Felder:
@@ -214,7 +217,7 @@ dataset_code_r:
 **Pfad-Format** (`markdown_r`, `markdown_python`, `bonus`, `reference`): `Pfad | Anzeigename |
 Notiz | Datei-Name-Override`. Nur `Pfad` ist Pflicht, der Rest optional. Der optionale 4. Teil wird
 nur gebraucht, wenn der echte Dateiname Sonderzeichen enthält (Doppelpunkt, Umlaute), die man beim
-Herunterladen vermeiden will — siehe `content/week8/manifest.txt` als Beispiel.
+Herunterladen vermeiden will — siehe `content/chapter8/manifest.txt` als Beispiel.
 
 ---
 
@@ -260,7 +263,7 @@ den Gesamt-Fortschritt auf dem Dashboard.
 
 ### Python-spezifische Quizfragen hinzufügen
 
-Beispiel (aus `content/week1/quiz.md`) — eine Karte mit R-Frage, Python-Frage und einer
+Beispiel (aus `content/chapter1/quiz.md`) — eine Karte mit R-Frage, Python-Frage und einer
 sprachneutralen Frage gemischt:
 
 ```markdown
@@ -285,7 +288,7 @@ lang: python
 - Die zweite Frage hat `lang: python` → zeigt sich nur im Python-Tab.
 - Eine dritte Frage mit `lang: both` würde in **beiden** Tabs erscheinen (gut für Fragen ohne
   Code, z. B. reine Konzeptfragen — siehe die „Introduction to Bioinformatics"-Karte in
-  `content/week1/quiz.md` als Beispiel).
+  `content/chapter1/quiz.md` als Beispiel).
 
 Sobald **irgendeine** Frage einer Woche `lang: python` oder `lang: both` hat, verschwindet für
 diese Woche automatisch der „Coming Soon"-Platzhalter im Python-Tab — Karten ganz ohne
@@ -298,20 +301,20 @@ extra konfigurieren muss.
 
 ### 6.1 Einen Video-Link ändern
 
-1. `content/weekN/manifest.txt` öffnen (im GitHub-Webeditor oder lokal).
+1. `content/chapterN/manifest.txt` öffnen (im GitHub-Webeditor oder lokal).
 2. Die passende `url:`-Zeile unter dem gesuchten `video:`-Titel ändern.
 3. Speichern → committen → pushen. Die GitHub Action macht den Rest automatisch live.
 
 ### 6.2 Eine Quizfrage ändern oder hinzufügen
 
-1. `content/weekN/quiz.md` öffnen.
+1. `content/chapterN/quiz.md` öffnen.
 2. Frage/Antworten/Feedback nach obigem Format anpassen bzw. neuen `## Q:`-Block einfügen.
 3. **Nicht** die `id:` einer bestehenden Quiz-Karte ändern (sonst verlieren Studierende ihren
    Fortschritt für die Karte).
 4. Bei einer **neuen** Quiz-Karte (`# Quiz: ...`): die volle ID (`w{N}_q_<id>`) zusätzlich in
    `index.qmd` bei der passenden Woche in `quizIds` eintragen, sonst zählt sie nicht im
    Dashboard-Fortschritt (zählt aber auf der Wochenseite selbst auch ohne das schon mit). Format: w{weekNumber}_q_{card-id} , mit {card-id} als der exacte Name bei "id" in quiz.md. Also: 
-content/week1/quiz.md : 
+content/chapter1/quiz.md : 
 id: vectors
 id: matrices
 id: lists)
@@ -326,11 +329,11 @@ installiert sein. Am einfachsten direkt auf github.com (Datei öffnen → Stift-
 
 ### 6.3 Ein Python-Notebook für eine Woche hinzufügen (Platzhalter „Coming Soon“ ablösen)
 
-1. Das `.ipynb` im passenden `materials/weekN/`-Ordner ablegen (Namenskonvention:
-   `_0X_thema_python.ipynb`, siehe bestehende Beispiele).
-2. In `content/weekN/manifest.txt` eine `markdown_python:`-Zeile hinzufügen bzw. befüllen:
+1. Das `.ipynb` im passenden `materials/chapterN/`-Ordner ablegen (Namenskonvention:
+   `_0N_thema_python.ipynb` mit N = Kapitelnummer, siehe bestehende Beispiele).
+2. In `content/chapterN/manifest.txt` eine `markdown_python:`-Zeile hinzufügen bzw. befüllen:
    ```
-   markdown_python: materials/week3/_02_thema_python.ipynb | Chapter 3 – Thema (Python Notebook)
+   markdown_python: materials/chapter3/_03_thema_python.ipynb | Chapter 3 – Thema (Python Notebook)
    ```
 3. Fertig — der „Coming Soon“-Platzhalter verschwindet automatisch, sobald die Zeile einen Pfad
    enthält.
@@ -340,7 +343,7 @@ installiert sein. Am einfachsten direkt auf github.com (Datei öffnen → Stift-
 Jede Woche kann per Datum gesperrt werden — z. B. um den Kurs Woche für Woche freizuschalten,
 statt alles auf einmal freizugeben.
 
-1. `content/weekN/manifest.txt` öffnen.
+1. `content/chapterN/manifest.txt` öffnen.
 2. Eine Zeile hinzufügen:
    ```
    unlock_date: 2026-10-15
@@ -372,7 +375,7 @@ Datum kein Risiko für kaputte IDs birgt.
 
 1. Neue `.qmd`-Datei nach dem Muster der bestehenden anlegen (Abschnitt 3 — nur Frontmatter + `<div
    id="week-app" data-week="10">Loading…</div>`).
-2. `content/week10/manifest.txt` + `content/week10/quiz.md` anlegen.
+2. `content/chapter10/manifest.txt` + `content/chapter10/quiz.md` anlegen.
 3. In `_quarto.yml` unter `sidebar: contents:` einen neuen Eintrag hinzufügen.
 4. In `index.qmd` im `WEEKS`-Array einen neuen Eintrag anhängen — **hier müssen die `checkIds` und
    `quizIds` von Hand mit den tatsächlich generierten IDs übereinstimmen**:
@@ -459,7 +462,7 @@ beendet wurde): `lsof -ti:4848` zeigt die Prozess-ID(s), `kill <PID>` beendet si
 **„Loading…“ bleibt stehen und lädt nie fertig:**
 Meist ein falscher Pfad oder Tippfehler in `manifest.txt`/`quiz.md`, oder die Seite wurde nicht neu
 gerendert. Browser-Konsole öffnen (Rechtsklick → Untersuchen → Console) — dort steht eine
-Fehlermeldung mit Dateiname. Prüfen, ob `content/weekN/manifest.txt` wirklich existiert und die
+Fehlermeldung mit Dateiname. Prüfen, ob `content/chapterN/manifest.txt` wirklich existiert und die
 Syntax stimmt (siehe Abschnitt 4/5).
 
 **Änderung committed & gepusht, aber auf der Live-Seite nicht sichtbar:**

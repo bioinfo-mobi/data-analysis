@@ -575,7 +575,7 @@
   function renderError(container, weekNum, err) {
     container.innerHTML = '<div class="placeholder-card" style="border-left-color:#C61826;">' +
       '<p style="color:#C61826;font-weight:700;">⚠️ Could not load this chapter\'s content.</p>' +
-      '<p style="color:#555;">content/week' + weekNum + '/manifest.txt or quiz.md failed to load or failed to parse. ' +
+      '<p style="color:#555;">content/chapter' + weekNum + '/manifest.txt or quiz.md failed to load or failed to parse. ' +
       'Check the browser console for details, and verify both files exist and are correctly formatted.</p></div>';
     console.error('week-loader error for week ' + weekNum + ':', err);
   }
@@ -586,11 +586,11 @@
     var weekNum = container.getAttribute('data-week');
 
     Promise.all([
-      fetch('content/week' + weekNum + '/manifest.txt').then(function (r) {
+      fetch('content/chapter' + weekNum + '/manifest.txt').then(function (r) {
         if (!r.ok) throw new Error('manifest.txt HTTP ' + r.status);
         return r.text();
       }),
-      fetch('content/week' + weekNum + '/quiz.md').then(function (r) {
+      fetch('content/chapter' + weekNum + '/quiz.md').then(function (r) {
         if (!r.ok) throw new Error('quiz.md HTTP ' + r.status);
         return r.text();
       })

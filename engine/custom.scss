@@ -40,6 +40,28 @@ $primary: $uhd-red;
     background-color: rgba(255,255,255,0.15) !important; 
     border-radius: 0.5rem;
   }
+
+  // Credits at the bottom of the sidebar
+  .quarto-sidebar-footer {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    margin: 0;
+    padding: 14px 16px 18px 16px;
+    background-color: $uhd-red;
+    border-top: 1px solid rgba(255,255,255,0.35);
+    color: #ffffff;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  .quarto-sidebar-footer p { margin: 0; color: #ffffff; }
+  .sidebar-credits span {
+    display: inline-block;
+    min-width: 4.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    opacity: 0.75;
+  }
 }
 
 @media (min-width: 992px) {
@@ -187,6 +209,7 @@ $primary: $uhd-red;
 
 @media (max-width: 991px) {
   #quarto-sidebar { width: 100% !important; height: auto !important; position: relative !important; }
+  #quarto-sidebar .quarto-sidebar-footer { position: static; }
   #quarto-content { margin-left: 0 !important; }
 }
 

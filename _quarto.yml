@@ -16,6 +16,11 @@ website:
   sidebar:
     logo: figures/logo-white.png
     style: "floating"
+    footer: |
+      <div class="sidebar-credits">
+      <span>Website</span> Lisa Duttenhöfer<br>
+      <span>Course</span> Prof. Dr. Carl Herrmann
+      </div>
     contents:
       - text: "WELCOME"
         href: index.qmd
