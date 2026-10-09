@@ -1,5 +1,5 @@
 ---
-title: "Week 6: Central Limit Theorem & Confidence Intervals"
+title: "Chapter 6: Central Limit Theorem & Confidence Intervals"
 format:
   html:
     include-in-header:

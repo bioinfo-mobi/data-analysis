@@ -6,7 +6,7 @@ title: "Course Dashboard"
   <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
     <div>
       <h2 style="margin-bottom: 2px; font-weight: 800; color: white;">Your Progress</h2>
-      <div id="gp-subtext" style="opacity:0.85;font-size:0.95rem; color: white;">0 weeks completed</div>
+      <div id="gp-subtext" style="opacity:0.85;font-size:0.95rem; color: white;">0 chapters completed</div>
     </div>
   </div>
   <div class="d-flex align-items-center gap-3 mt-3">
@@ -24,7 +24,7 @@ title: "Course Dashboard"
 const WEEKS = [
   {
     n: 1,
-    title: "Week 1: Basic Data Structures",
+    title: "Chapter 1: Basic Data Structures",
     topics: "Syntax · Variables · Vectors · Matrices · Lists · Dataframes",
     href: "1_datentypen.html",
     checkIds: [
@@ -48,7 +48,7 @@ const WEEKS = [
   },
   {
     n: 2,
-    title: "Week 2: Data Cleanup & Visualisation",
+    title: "Chapter 2: Data Cleanup & Visualisation",
     topics: "Loading Data · which · apply · is.na · hist · boxplot · qqnorm",
     href: "2_data_cleanup.html",
     checkIds: [
@@ -71,7 +71,7 @@ const WEEKS = [
   },
   {
     n: 3,
-    title: "Week 3: Correlation & Clustering",
+    title: "Chapter 3: Correlation & Clustering",
     topics: "Pearson vs Spearman · Missing Data · Intro to Clustering · K-means",
     href: "3_correlation_clustering.html",
     checkIds: [
@@ -95,7 +95,7 @@ const WEEKS = [
   },
   {
     n: 4,
-    title: "Week 4: Hierarchical Clustering & PCA",
+    title: "Chapter 4: Hierarchical Clustering & PCA",
     topics: "Dendrograms · Linkage Methods · PCA · Scree Plots · Loadings",
     href: "4_unsupervised_learning.html",
     checkIds: [
@@ -116,7 +116,7 @@ const WEEKS = [
   },
   {
     n: 5,
-    title: "Week 5: Probability Distributions",
+    title: "Chapter 5: Probability Distributions",
     topics: "Random Variables · p/d/q/r Functions · Binomial · Poisson · Normal · t-Distribution",
     href: "5_probability_distributions.html",
     checkIds: [
@@ -138,7 +138,7 @@ const WEEKS = [
   },
   {
     n: 6,
-    title: "Week 6: CLT & Confidence Intervals",
+    title: "Chapter 6: CLT & Confidence Intervals",
     topics: "Central Limit Theorem · Standard Error · Confidence Intervals",
     href: "6_clt_confidence_intervals.html",
     checkIds: [
@@ -159,7 +159,7 @@ const WEEKS = [
   },
   {
     n: 7,
-    title: "Week 7: Hypothesis Testing & t-Tests",
+    title: "Chapter 7: Hypothesis Testing & t-Tests",
     topics: "H0/H1 · One- vs Two-Sided · t-Test · Normality",
     href: "7_hypothesis_testing.html",
     checkIds: [
@@ -179,7 +179,7 @@ const WEEKS = [
   },
   {
     n: 8,
-    title: "Week 8: Non-Parametric & Proportion Tests",
+    title: "Chapter 8: Non-Parametric & Proportion Tests",
     topics: "Wilcoxon Test · Fisher/Chi-Square · Power of a Test",
     href: "8_nonparametric_proportion_tests.html",
     checkIds: [
@@ -199,7 +199,7 @@ const WEEKS = [
   },
   {
     n: 9,
-    title: "Week 9: Regression Analysis",
+    title: "Chapter 9: Regression Analysis",
     topics: "Linear Regression · Multiple Regression · RMSE · F-Test",
     href: "9_regression_analysis.html",
     checkIds: [
@@ -226,10 +226,10 @@ function getLang() {
   try { return localStorage.getItem('da_course_lang') || 'python'; } catch(e) { return 'python'; }
 }
 
-// A week is locked if its content/weekN/manifest.txt has an "unlock_date:"
+// A chapter is locked if its content/weekN/manifest.txt has an "unlock_date:"
 // line with a future date. No unlock_date (or a past/today date) = unlocked.
 // This is the exact same rule week-loader.html applies on the week's own
-// page, so a locked week is consistently locked everywhere, not just here.
+// page, so a locked chapter is consistently locked everywhere, not just here.
 function isDateLocked(dateStr) {
   if (!dateStr) return false;
   var target = new Date(dateStr.trim() + 'T00:00:00');
@@ -312,7 +312,7 @@ function updateGlobalUI() {
   const gPct = total > 0 ? Math.round((done / total) * 100) : 0;
   document.getElementById('global-progress-bar').style.width = gPct + '%';
   document.getElementById('gp-percent-badge').innerText = gPct + '%';
-  document.getElementById('gp-subtext').innerText = `${completedW} weeks completed`;
+  document.getElementById('gp-subtext').innerText = `${completedW} ${completedW === 1 ? 'chapter' : 'chapters'} completed`;
 }
 
 loadUnlockStatus().then(() => {

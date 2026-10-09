@@ -10,7 +10,7 @@ Welcome! This course is divided into twelve thematic sections that will graduall
 
 On this platform you will find everything in one place: lecture videos and slide decks, practical markdown files to work through in RStudio or VS Code, and short comprehension quizzes to consolidate what you have learned.
 
-Each week page guides you through three steps: **watch the videos & download the slides** → **work through the practical markdown** → **complete the comprehension quiz**. Your progress is tracked automatically.
+Each chapter page guides you through three steps: **watch the videos & download the slides** → **work through the practical markdown** → **complete the comprehension quiz**. Your progress is tracked automatically.
 
 While the lecture videos and slides are only available for R, for the quizzes and markdown files you have full freedom of choice! Using the **button in the top right corner**, you can switch between the programming languages **R** and **Python** at any time.
 

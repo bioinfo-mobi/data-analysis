@@ -33,7 +33,7 @@ format:
 </style>
 ```
 
-This page is a **quick-reference** for the coding basics covered in Week 1, plus a short introduction to **dplyr / pandas** (data manipulation) and **ggplot2 / seaborn** (plotting). Keep it open in a browser tab while working through the markdowns. Use the language toggle above to switch between **R** and **Python**.
+This page is a **quick-reference** for the coding basics covered in Chapter 1, plus a short introduction to **dplyr / pandas** (data manipulation) and **ggplot2 / seaborn** (plotting). Keep it open in a browser tab while working through the markdowns. Use the language toggle above to switch between **R** and **Python**.
 
 ---
 

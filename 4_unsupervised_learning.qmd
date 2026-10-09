@@ -1,5 +1,5 @@
 ---
-title: "Week 4: Hierarchical Clustering & PCA"
+title: "Chapter 4: Hierarchical Clustering & PCA"
 format:
   html:
     include-in-header:

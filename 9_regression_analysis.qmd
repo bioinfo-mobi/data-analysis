@@ -1,5 +1,5 @@
 ---
-title: "Week 9: Regression Analysis"
+title: "Chapter 9: Regression Analysis"
 format:
   html:
     include-in-header:

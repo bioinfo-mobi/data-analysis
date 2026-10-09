@@ -1,5 +1,5 @@
 ---
-title: "Week 1: Basic Data Structures"
+title: "Chapter 1: Basic Data Structures"
 format:
   html:
     include-in-header:

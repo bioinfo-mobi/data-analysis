@@ -104,7 +104,14 @@ data-analysis/
 
 ### Die Wochen-Nummerierung ist überall konsistent
 
-`materials/week1/` bis `materials/week9/` entsprechen **exakt** „Week 1" bis „Week 9" auf der
+*Hinweis zur Benennung:* Auf der Website heißen die früheren „Weeks" jetzt **„Chapter"** (Sidebar,
+Dashboard-Kacheln, Seitentitel, Anzeigenamen in den `manifest.txt`). Die **technischen Namen bleiben
+bewusst unverändert** — Ordner `content/weekN/` und `materials/weekN/`, `data-week`, Datei
+`week-loader.html` und alle IDs (`w3_q_…`, `check_w3_…`). Würde man diese umbenennen, brächen Links und
+der gespeicherte Fortschritt der Studierenden. Wo in dieser Anleitung noch „Woche" steht, ist ein
+„Chapter" gemeint.
+
+`materials/week1/` bis `materials/week9/` entsprechen **exakt** „Chapter 1" bis „Chapter 9" auf der
 Website — `content/week3/manifest.txt` verlinkt ausschließlich auf Dateien in `materials/week3/`.
 Keine Verschiebung, kein Umrechnen mehr nötig (früher hießen diese Ordner `WEEK0`–`WEEK8`, versetzt
 um eins zur Website-Nummerierung — das wurde bewusst aufgeräumt, weil es die Nummer-1-Fehlerquelle
@@ -118,7 +125,7 @@ Jede Wochen-`.qmd`-Datei (z. B. `3_correlation_clustering.qmd`) ist bewusst winz
 
 ```markdown
 ---
-title: "Week 3: Correlation & Clustering"
+title: "Chapter 3: Correlation & Clustering"
 format:
   html:
     include-in-header:
@@ -153,19 +160,19 @@ Einfaches `schlüssel: wert`-Format, eine Zeile pro Eintrag. Reihenfolge der Zei
 `video:`/`url:` müssen als Paar direkt hintereinander stehen). Beispiel (`content/week3/manifest.txt`):
 
 ```
-title: Week 3: Correlation & Clustering
+title: Chapter 3: Correlation & Clustering
 description: This week you will measure **associations between variables**...
 topics: Pearson vs Spearman · Missing Data · Intro to Clustering · K-means
 slides: materials/week3/week2_lecture_slides.pdf
-slides_label: Week 3 – Correlation & Clustering (PDF slides)
+slides_label: Chapter 3 – Correlation & Clustering (PDF slides)
 
 video: 2.3 Correlations
 url: https://youtu.be/l4spkWoXclw
 video: 3. Dealing with missing data points
 url: https://youtu.be/zJmp2SYoMts
 
-markdown_r: materials/week3/_02_correlation_clustering.Rmd | Week 3 – Correlation & Clustering (R Markdown)
-markdown_python: materials/week3/_02_correlation_clustering_python.ipynb | Week 3 – Correlation & Clustering (Python Notebook)
+markdown_r: materials/week3/_02_correlation_clustering.Rmd | Chapter 3 – Correlation & Clustering (R Markdown)
+markdown_python: materials/week3/_02_correlation_clustering_python.ipynb | Chapter 3 – Correlation & Clustering (Python Notebook)
 
 dataset_note: **Datasets:** This sheet reuses ...
 bonus_note: **Bonus reference:** a plenum recap ...
@@ -183,7 +190,7 @@ Alle möglichen Felder:
 | `slides` | ja | Pfad zur PDF-Folien-Datei |
 | `slides_label` | nein | Anzeigetext für den Folien-Link (sonst wird `title` benutzt) |
 | `video:` + `url:` | nein, beliebig oft | **Immer im Paar!** Ein Video pro Zeilenpaar |
-| `markdown_r:` | nein, beliebig oft (auch mehrfach pro Woche, z. B. Week 1) | Format: `Pfad \| Anzeigename \| optionale Notiz \| optionaler Datei-Name-Override` |
+| `markdown_r:` | nein, beliebig oft (auch mehrfach pro Kapitel, z. B. Chapter 1) | Format: `Pfad \| Anzeigename \| optionale Notiz \| optionaler Datei-Name-Override` |
 | `markdown_python:` | nein, beliebig oft | Gleiches Format. **Leer/fehlend = "Coming Soon"-Platzhalter wird automatisch angezeigt** |
 | `markdown_python_note` | nein | Zusatztext unter den Python-Downloads (z. B. „Required packages: ...“) |
 | `dataset_note` / `dataset_note_python` | nein | Hinweistext zum Datensatz (R- bzw. Python-Version) |
@@ -323,7 +330,7 @@ installiert sein. Am einfachsten direkt auf github.com (Datei öffnen → Stift-
    `_0X_thema_python.ipynb`, siehe bestehende Beispiele).
 2. In `content/weekN/manifest.txt` eine `markdown_python:`-Zeile hinzufügen bzw. befüllen:
    ```
-   markdown_python: materials/week3/_02_thema_python.ipynb | Week 3 – Thema (Python Notebook)
+   markdown_python: materials/week3/_02_thema_python.ipynb | Chapter 3 – Thema (Python Notebook)
    ```
 3. Fertig — der „Coming Soon“-Platzhalter verschwindet automatisch, sobald die Zeile einen Pfad
    enthält.

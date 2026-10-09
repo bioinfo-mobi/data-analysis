@@ -1,5 +1,5 @@
 ---
-title: "Week 3: Correlation & Clustering"
+title: "Chapter 3: Correlation & Clustering"
 format:
   html:
     include-in-header:
