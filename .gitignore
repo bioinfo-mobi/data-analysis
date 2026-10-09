@@ -2,3 +2,7 @@
 **/*.quarto_ipynb
 **/*.quarto_ipynb_*
 _freeze/
+
+# Generated site (built by the GitHub Action, never committed)
+docs/
+.DS_Store
