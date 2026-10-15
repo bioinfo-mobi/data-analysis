@@ -1,5 +1,5 @@
 title: Chapter 5: Probability Distributions
-unlock_date: 2026-10-29
+unlock_date: 2026-11-05
 description: This chapter introduces **probability distributions**: random variables, the p/d/q/r function family in R, and the Binomial, Negative Binomial, Poisson, Normal and t-distributions — plus how they relate to each other. Use the language toggle above to switch between R and Python.
 topics: Random Variables · p/d/q/r Functions · Binomial · Poisson · Normal · t-Distribution
 slides: materials/chapter5/chapter5_lecture_slides.pdf

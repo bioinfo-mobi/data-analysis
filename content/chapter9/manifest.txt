@@ -1,5 +1,5 @@
 title: Chapter 9: Regression Analysis
-unlock_date: 2026-11-26
+unlock_date: 2026-12-03
 description: In this final chapter you will build **regression models** to predict quantitative variables: simple linear regression, multiple regression, and how to properly evaluate a model. Use the language toggle above to switch between R and Python.
 topics: Linear Regression · Multiple Regression · RMSE · F-Test
 slides: materials/chapter9/chapter9_lecture_slides.pdf
