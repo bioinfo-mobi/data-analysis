@@ -1,5 +1,5 @@
 title: Chapter 6: Central Limit Theorem & Confidence Intervals
-unlock_date: 2026-01-01
+unlock_date: 2026-11-05
 description: This chapter completes your training in distributions with the **Central Limit Theorem** and shows you how to construct **confidence intervals**. Use the language toggle above to switch between R and Python.
 topics: Central Limit Theorem · Standard Error · Confidence Intervals
 slides: materials/chapter6/chapter6_lecture_slides.pdf

@@ -1,5 +1,5 @@
 title: Chapter 3: Correlation & Clustering
-unlock_date: 2026-01-01
+unlock_date: 2026-10-15
 description: In this chapter you will measure **associations between variables** with correlation, handle **missing data points**, and take your first steps into **unsupervised learning** with clustering. Use the language toggle above to switch between R and Python.
 topics: Pearson vs Spearman · Missing Data · Intro to Clustering · K-means
 slides: materials/chapter3/chapter3_lecture_slides.pdf
