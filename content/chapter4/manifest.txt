@@ -1,5 +1,5 @@
 title: Chapter 4: Hierarchical Clustering & PCA
-unlock_date: 2026-10-22
+unlock_date: 2026-10-29
 description: This chapter concludes unsupervised learning: **hierarchical clustering** (building dendrograms from a distance matrix) and **Principal Component Analysis (PCA)** for dimensionality reduction. Use the language toggle above to switch between R and Python.
 topics: Dendrograms · Linkage Methods · PCA · Scree Plots · Loadings
 slides: materials/chapter4/chapter4_lecture_slides.pdf
