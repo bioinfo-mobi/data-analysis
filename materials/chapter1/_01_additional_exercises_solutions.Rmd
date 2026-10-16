@@ -1,0 +1,600 @@
+---
+title: "Additional_Exercises_First_Steps_in_R_SOLUTIONS"
+author: "Prof. Dr. Carl Herrmann"
+output: html_document
+date: "2026-10-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Additional exercises: First steps in R
+
+These short exercises complement the two sheets **_01_basic_data_structure.Rmd** and **_01_basic_data_manipulation_dplyr.Rmd**. Each exercise is small (5-10 minutes) and trains one idea. Do them in order: the later ones reuse what you learned in the earlier ones.
+
+How to work with this sheet:
+
+-   Write your code in the empty chunk below each exercise (the chunk called "Solution").
+-   Run your code **line by line** (`Ctrl/Cmd + Enter`) and look at the output. Do not only knit at the end!
+-   Always try to **predict the result before you run the code**.
+-   Stuck? Use `?function_name` (for example `?seq`), or have a look at the cheat sheets in the chapter folder.
+-   Exercises marked with *(expert)* are optional and a bit harder.
+
+------------------------------------------------------------------------
+
+### Exercise 1: R as a calculator - predict the output
+
+Before you run anything, **write down** (on paper or as a comment) what you expect R to print for each line. Then run the lines and compare. Where were you wrong, and why?
+
+```{r ex1-predict, eval = FALSE}
+2 + 3 * 4
+(2 + 3) * 4
+2^3
+10 %/% 3
+10 %% 3
+c(1, 2, 3) * 2
+c(1, 2, 3) + c(10, 20, 30)
+c(1, 2, 3, 4) + c(10, 20)
+sum(c(TRUE, TRUE, FALSE, TRUE))
+"a" == "A"
+```
+
+```{r ex1-solution}
+# 2 + 3 * 4                      -> 14   (multiplication before addition)
+# (2 + 3) * 4                    -> 20
+# 2^3                            -> 8
+# 10 %/% 3                       -> 3    (integer division)
+# 10 %% 3                        -> 1    (remainder)
+# c(1, 2, 3) * 2                 -> 2 4 6   (operation applied to every element)
+# c(1, 2, 3) + c(10, 20, 30)     -> 11 22 33   (element by element)
+# c(1, 2, 3, 4) + c(10, 20)      -> 11 22 13 24   (the shorter vector is "recycled")
+# sum(c(TRUE, TRUE, FALSE, TRUE))-> 3    (TRUE counts as 1, FALSE as 0)
+# "a" == "A"                     -> FALSE  (R is case sensitive)
+
+# Check:
+2 + 3 * 4
+(2 + 3) * 4
+2^3
+10 %/% 3
+10 %% 3
+c(1, 2, 3) * 2
+c(1, 2, 3) + c(10, 20, 30)
+c(1, 2, 3, 4) + c(10, 20)
+sum(c(TRUE, TRUE, FALSE, TRUE))
+"a" == "A"
+```
+
+------------------------------------------------------------------------
+
+### Exercise 2: Variables
+
+1.  Create a variable `my_name` containing your first name and a variable `birth_year` containing your year of birth. Compute your age in 2026 and store it in `age`.
+
+2.  Use `paste()` to print a sentence like `"My name is Rosalind and I am 21 years old."` using your three variables. *Hint*: `paste("a", 5, "b")` joins its arguments with spaces.
+
+3.  A gene coding sequence has a length of 1500 bases. Store this in `gene_length`. How many complete codons (3 bases each) does it contain? Use `%/%`. Is the length a multiple of 3? Use `%%` to find out. Repeat for a length of 2000.
+
+4.  What is the value of `x` after these three lines? Think first, then check!
+
+```{r ex2-predict, eval = FALSE}
+x <- 5
+x <- x + 1
+x <- x * 2
+```
+
+5.  Create the variables `a`, `b` and `z` (any values). Use `ls()` to list your variables, remove `b` with `rm()`, and list again. Look at the **Environment** panel while you do this.
+
+```{r ex2-solution}
+# 1.
+my_name <- "Rosalind"
+birth_year <- 2005
+age <- 2026 - birth_year
+
+# 2.
+print(paste("My name is", my_name, "and I am", age, "years old."))
+
+# 3.
+gene_length <- 1500
+gene_length %/% 3          # 500 complete codons
+gene_length %% 3           # remainder 0
+gene_length %% 3 == 0      # TRUE -> multiple of 3
+
+gene_length <- 2000
+gene_length %/% 3          # 666 complete codons
+gene_length %% 3           # remainder 2
+gene_length %% 3 == 0      # FALSE -> not a multiple of 3
+
+# 4.
+x <- 5
+x <- x + 1                 # x is now 6
+x <- x * 2                 # x is now 12
+x
+
+# 5.
+a <- 1; b <- 2; z <- 3
+ls()
+rm(b)
+ls()
+```
+
+------------------------------------------------------------------------
+
+### Exercise 3: Vectors - gene expression in 8 samples
+
+The following vector contains the expression of one gene in 8 samples:
+
+```{r ex3-data}
+expr <- c(5.2, 7.8, 6.1, 9.4, 3.3, 8.0, 7.1, 4.6)
+```
+
+1.  How many samples are there? Compute the mean, median, minimum, maximum, range and standard deviation of `expr` (`length()`, `mean()`, `median()`, `min()`, `max()`, `range()`, `sd()`). Round the mean to 2 decimals with `round()`.
+
+2.  Create a vector `samples` containing the names "S1", "S2", ..., "S8" without typing them one by one. *Hint*: `paste0("S", 1:3)`. Then give these names to the vector with `names(expr) <- samples`. Look at `expr` again.
+
+3.  Select the value of sample "S4", and the values of "S1" and "S5" **by name**.
+
+4.  Which sample has the highest expression? Use `which.max()` together with `names()`. Which sample has the lowest?
+
+5.  Center the data by subtracting the mean from every value, and store the result in `expr_centered`. What is the mean of `expr_centered`? Then compute the `log2` of all values in one line.
+
+6.  Which samples have an expression greater than 7? How many are there? What percentage of the samples is this? *Hint*: the mean of a logical vector is the fraction of `TRUE`.
+
+7.  The first 4 samples are controls, the last 4 are treated samples. Create a vector `group` with `rep()` containing "ctrl" four times, followed by "treated" four times. Compute the mean expression in each group by selecting with `group == "ctrl"` and `group == "treated"`.
+
+8.  Compare `rep(c("ctrl", "treated"), each = 4)` with `rep(c("ctrl", "treated"), times = 4)`. What is the difference?
+
+9.  Sort the values from the smallest to the largest with `sort()`, then from the largest to the smallest. Show the names of the 3 samples with the highest expression. *Hint*: `order()` returns the positions that would sort a vector.
+
+10. *(expert)* Use `seq()` to create (a) 0, 10, 20, ..., 100, (b) five equally spaced numbers between 0 and 1 (look at the argument `length.out`). How would you compute the sum of all integers from 1 to 100 in one line?
+
+```{r ex3-solution}
+# 1.
+length(expr); mean(expr); median(expr); min(expr); max(expr); range(expr); sd(expr)
+round(mean(expr), 2)
+
+# 2.
+samples <- paste0("S", 1:8)
+names(expr) <- samples
+expr
+
+# 3.
+expr["S4"]
+expr[c("S1", "S5")]
+
+# 4.
+names(expr)[which.max(expr)]     # S4
+names(expr)[which.min(expr)]     # S5
+
+# 5.
+expr_centered <- expr - mean(expr)
+mean(expr_centered)              # (almost) 0
+log2(expr)
+
+# 6.
+expr > 7
+names(expr)[expr > 7]            # S2 S4 S6 S7
+sum(expr > 7)                    # 4
+mean(expr > 7) * 100             # 50 %
+
+# 7.
+group <- rep(c("ctrl", "treated"), each = 4)
+mean(expr[group == "ctrl"])      # 7.125
+mean(expr[group == "treated"])   # 5.75
+
+# 8.
+rep(c("ctrl", "treated"), each = 4)    # ctrl ctrl ctrl ctrl treated treated treated treated
+rep(c("ctrl", "treated"), times = 4)   # ctrl treated ctrl treated ... (whole vector repeated)
+
+# 9.
+sort(expr)
+sort(expr, decreasing = TRUE)
+names(expr)[order(expr, decreasing = TRUE)][1:3]    # S4 S6 S2
+
+# 10.
+seq(0, 100, by = 10)
+seq(0, 1, length.out = 5)
+sum(1:100)                                          # 5050
+```
+
+------------------------------------------------------------------------
+
+### Exercise 4: Missing values and data types
+
+1.  Run `v <- c(2, 4, NA, 8)` and then `mean(v)`. Why is the result `NA`? Look at `?mean` and find the argument that solves the problem. How many missing values are in `v`? *Hint*: `is.na()` and `sum()`. How do you select only the values that are **not** missing? *Hint*: `!` negates a logical vector.
+
+2.  Use `class()` to find the type of each of these values: `42`, `42L`, `"42"`, `TRUE`, `NA`. Which of them look identical when printed, but are different?
+
+3.  Predict the result, then check with `str()`:
+
+    -   `c(1, "a", TRUE)`
+    -   `c(1, TRUE, FALSE)`
+
+4.  Convert with `as.numeric()`: the string `"3.14"`, the string `"abc"`, and the logical vector `c(TRUE, FALSE, TRUE)`. What does R say about `"abc"`?
+
+5.  Here is a short DNA sequence stored as a vector of characters:
+
+```{r ex4-dna}
+dna <- c("A", "T", "G", "C", "G", "G", "A", "T")
+```
+
+Use `table()` to count each nucleotide. Then compute the **GC content** (the fraction of G and C). *Hint*: `dna %in% c("G", "C")` gives a logical vector.
+
+6.  *(expert)* A sequence is often stored as one single string. Use `strsplit("ATGCGCGATATTAGCGGC", split = "")[[1]]` to split it into single letters, and compute its GC content in percent. What does `[[1]]` do here (see the section about lists)?
+
+```{r ex4-solution}
+# 1.
+v <- c(2, 4, NA, 8)
+mean(v)                      # NA: if one value is unknown, the mean is unknown
+mean(v, na.rm = TRUE)        # 4.666667: remove the NAs before computing
+is.na(v)
+sum(is.na(v))                # 1
+v[!is.na(v)]                 # 2 4 8
+
+# 2.
+class(42)      # "numeric"
+class(42L)     # "integer"  (the L makes it an integer)
+class("42")    # "character" (looks like a number, but is text!)
+class(TRUE)    # "logical"
+class(NA)      # "logical"
+
+# 3.
+str(c(1, "a", TRUE))         # chr: "1" "a" "TRUE"  -> everything becomes text
+str(c(1, TRUE, FALSE))       # num: 1 1 0          -> logicals become numbers
+
+# 4.
+as.numeric("3.14")           # 3.14
+as.numeric("abc")            # NA, with a warning: NAs introduced by coercion
+as.numeric(c(TRUE, FALSE, TRUE))   # 1 0 1
+
+# 5.
+table(dna)                   # A: 2, C: 1, G: 3, T: 2
+is_gc <- dna %in% c("G", "C")
+sum(is_gc)                   # 4
+mean(is_gc)                  # 0.5 -> GC content of 50 %
+
+# 6.
+letters_dna <- strsplit("ATGCGCGATATTAGCGGC", split = "")[[1]]
+mean(letters_dna %in% c("G", "C")) * 100     # 55.55556 %
+# strsplit() returns a list with one element per input string;
+# [[1]] extracts the first (and here only) element, i.e. the vector of letters.
+```
+
+------------------------------------------------------------------------
+
+### Exercise 5: Matrices - a small expression table
+
+We create a matrix with the expression of 5 genes (rows) in 4 samples (columns). The numbers are random, but `set.seed()` makes sure that everybody gets the same ones.
+
+```{r ex5-data}
+set.seed(42)
+expr_mat <- matrix(round(runif(20, min = 0, max = 100)), nrow = 5, ncol = 4)
+expr_mat
+```
+
+1.  Give the rows the names "Gene1", ..., "Gene5" and the columns the names "Sample1", ..., "Sample4" (`rownames()`, `colnames()`, `paste0()`).
+
+2.  Select (a) the value of Gene3 in Sample2, (b) all values of Sample1, (c) all values of Gene2 and Gene4. Try the selection by **position** and by **name**.
+
+3.  Compute the mean expression of each gene with `rowMeans()` and the sum of each sample with `colSums()`. Which gene has the highest mean expression? *Hint*: `which.max()`.
+
+4.  Which genes have an expression above 20 in **all** samples? *Hint*: `expr_mat > 20` is a logical matrix; `rowSums()` of a logical matrix counts the `TRUE` per row.
+
+5.  Add a new column "Sample5" with the values 10, 20, 30, 40, 50 using `cbind()`, and then a new row "Gene6" with 5 values of your choice using `rbind()`. Check the dimensions with `dim()`.
+
+6.  Create `M <- matrix(1:12, nrow = 3, byrow = TRUE)`, look at it, and transpose it with `t()`. How do the dimensions change? Select all elements of `M` larger than 6, and all even elements. *Hint*: `x %% 2 == 0` is `TRUE` for even numbers.
+
+7.  *(expert)* Normalize each sample (column) of `expr_mat` such that its values sum to 100. Check with `colSums()`. *Hint*: `apply(..., 2, function(x) ...)`.
+
+```{r ex5-solution}
+# 1.
+rownames(expr_mat) <- paste0("Gene", 1:5)
+colnames(expr_mat) <- paste0("Sample", 1:4)
+expr_mat
+
+# 2.
+expr_mat[3, 2]
+expr_mat["Gene3", "Sample2"]
+expr_mat[, 1]
+expr_mat[, "Sample1"]
+expr_mat[c(2, 4), ]
+expr_mat[c("Gene2", "Gene4"), ]
+
+# 3.
+rowMeans(expr_mat)
+colSums(expr_mat)
+names(which.max(rowMeans(expr_mat)))
+
+# 4.
+expr_mat > 20
+rowSums(expr_mat > 20) == ncol(expr_mat)                       # TRUE for genes above 20 everywhere
+rownames(expr_mat)[rowSums(expr_mat > 20) == ncol(expr_mat)]   # their names
+
+# 5.
+expr_mat <- cbind(expr_mat, Sample5 = c(10, 20, 30, 40, 50))
+expr_mat <- rbind(expr_mat, Gene6 = c(5, 15, 25, 35, 45))
+dim(expr_mat)        # 6 5
+
+# 6.
+M <- matrix(1:12, nrow = 3, byrow = TRUE)
+M
+t(M)                 # dimensions change from 3 x 4 to 4 x 3
+dim(t(M))
+M[M > 6]
+M[M %% 2 == 0]
+
+# 7.
+expr_norm <- apply(expr_mat, 2, function(x) 100 * x / sum(x))
+colSums(expr_norm)   # 100 for every sample
+```
+
+------------------------------------------------------------------------
+
+### Exercise 6: Lists - patient records
+
+A list is the natural way to store information of different types about one object.
+
+```{r ex6-data}
+patient <- list(id = "P001", age = 54, genes_mutated = c("TP53", "KRAS"), treated = TRUE)
+```
+
+1.  Look at the structure of `patient` with `str()`. Access the `age` in two different ways (using `$` and using `[[ ]]`). How many genes are mutated in this patient?
+
+2.  Is the gene "TP53" mutated in this patient? And "BRCA1"? *Hint*: `%in%`.
+
+3.  Change the age to 55, add a third mutated gene "PIK3CA" to `genes_mutated`, and add a new element `stage` with the value "II". Remove the element `treated` by assigning `NULL` to it.
+
+4.  Create a second patient `patient2` (id "P002", age 61, one mutated gene "BRCA1", treated = FALSE), and put both patients in a list `cohort` with the names "P001" and "P002". Access the age of the second patient from `cohort` in a single expression.
+
+5.  *(expert)* Use `sapply()` to get the ages of all patients in `cohort` as one vector. *Hint*: `sapply(cohort, function(p) p$age)`.
+
+```{r ex6-solution}
+# 1.
+str(patient)
+patient$age
+patient[["age"]]
+length(patient$genes_mutated)     # 2
+
+# 2.
+"TP53" %in% patient$genes_mutated     # TRUE
+"BRCA1" %in% patient$genes_mutated    # FALSE
+
+# 3.
+patient$age <- 55
+patient$genes_mutated <- c(patient$genes_mutated, "PIK3CA")
+patient$stage <- "II"
+patient$treated <- NULL
+str(patient)
+
+# 4.
+patient2 <- list(id = "P002", age = 61, genes_mutated = c("BRCA1"), treated = FALSE)
+cohort <- list(P001 = patient, P002 = patient2)
+cohort$P002$age
+cohort[["P002"]][["age"]]
+
+# 5.
+sapply(cohort, function(p) p$age)     # named vector: P001 55, P002 61
+```
+
+------------------------------------------------------------------------
+
+### Exercise 7: Data frames
+
+**Part A: a built-in data set.** R comes with many small data sets. `ToothGrowth` contains the tooth length (`len`) of 60 guinea pigs that received vitamin C in different doses (`dose`) either as orange juice (`OJ`) or as ascorbic acid (`VC`) (`supp`). We make a copy to work with:
+
+```{r ex7-data}
+tg <- ToothGrowth
+```
+
+1.  Explore the data frame: `head()`, `dim()`, `str()`, `summary()`, `colnames()`. How many rows and columns are there? What type is each column?
+
+2.  What is the mean tooth length (`mean()`)? How many animals received each supplement type, and each dose? *Hint*: `table()`.
+
+3.  Select (a) all rows with supplement "VC", (b) all rows with `len` above 25 and `dose` equal to 2, (c) the 5 animals with the shortest teeth (`order()`, `head()`).
+
+4.  Compute the mean tooth length separately for "OJ" and "VC". Which one is larger?
+
+5.  Add a new column `long` that is `TRUE` if `len` is larger than 20. Then use `table(tg$supp, tg$long)` to count how many "long" teeth there are for each supplement.
+
+6.  *(expert)* Compute the mean tooth length for each combination of supplement and dose. First with `tapply(tg$len, list(tg$supp, tg$dose), mean)`, then with `group_by()` and `summarise()` from **dplyr** (see the other sheet).
+
+**Part B: build your own data frame.**
+
+```{r ex7-genes}
+genes <- data.frame(
+  gene = c("TP53", "BRCA1", "MYC", "EGFR", "KRAS", "GAPDH"),
+  chromosome = c("17", "17", "8", "7", "12", "12"),
+  expression = c(12.4, 8.1, 15.9, 6.3, 9.7, 20.2)
+)
+```
+
+7.  Sort the data frame by decreasing expression. *Hint*: `genes[order(genes$expression, decreasing = TRUE), ]`. What is the name of the most highly expressed gene?
+
+8.  Select the genes located on chromosome 17. What is their mean expression?
+
+9.  Add a column `log2_expr` with the log2 of the expression, and a column `high` which is `TRUE` for genes with an expression above 10. How many genes are `high`?
+
+10. Here is a second table with annotations. Merge both tables with `merge()` (a) keeping only genes present in both, (b) keeping all genes of both tables (`all = TRUE`), (c) keeping all genes of `genes` (`all.x = TRUE`). How many rows do you get each time? Which genes of `genes` have no annotation? *Hint*: combine `!` and `%in%`.
+
+```{r ex7-annotation}
+annotation <- data.frame(
+  gene = c("TP53", "MYC", "EGFR", "PTEN"),
+  type = c("tumor suppressor", "oncogene", "oncogene", "tumor suppressor")
+)
+```
+
+```{r ex7-solution}
+# 1.
+head(tg); dim(tg); str(tg); summary(tg); colnames(tg)
+# 60 rows, 3 columns: len (numeric), supp (factor with levels OJ and VC), dose (numeric)
+
+# 2.
+mean(tg$len)
+table(tg$supp)       # 30 animals for each supplement
+table(tg$dose)       # 20 animals for each dose
+
+# 3.
+tg[tg$supp == "VC", ]
+tg[tg$len > 25 & tg$dose == 2, ]
+head(tg[order(tg$len), ], 5)
+
+# 4.
+mean(tg$len[tg$supp == "OJ"])      # about 20.7
+mean(tg$len[tg$supp == "VC"])      # about 17.0 -> OJ is larger
+
+# 5.
+tg$long <- tg$len > 20
+table(tg$supp, tg$long)
+
+# 6.
+tapply(tg$len, list(tg$supp, tg$dose), mean)
+library(dplyr)
+summarise(group_by(tg, supp, dose), mean_len = mean(len), .groups = "drop")
+
+# 7.
+genes[order(genes$expression, decreasing = TRUE), ]
+genes$gene[which.max(genes$expression)]      # GAPDH
+
+# 8.
+chr17 <- genes[genes$chromosome == "17", ]
+chr17
+mean(chr17$expression)                       # 10.25
+
+# 9.
+genes$log2_expr <- log2(genes$expression)
+genes$high <- genes$expression > 10
+sum(genes$high)                              # 3 (TP53, MYC, GAPDH)
+
+# 10.
+merge(genes, annotation)                     # 3 rows (TP53, MYC, EGFR)
+merge(genes, annotation, all = TRUE)         # 7 rows (PTEN is added, with NA for chromosome and expression)
+merge(genes, annotation, all.x = TRUE)       # 6 rows (NA in "type" for genes without annotation)
+genes$gene[!genes$gene %in% annotation$gene] # BRCA1 KRAS GAPDH
+```
+
+------------------------------------------------------------------------
+
+### Exercise 8: Find the error
+
+Error messages are normal - every programmer sees them all the time! Learning to read them is a key skill. Each of the following lines contains a mistake. **Copy one line at a time into the console**, read the message, explain what is wrong and fix it. (The chunk is set to `eval = FALSE`, so that knitting works.)
+
+```{r ex8-errors, eval = FALSE}
+x <- c(1, 2, 3
+Mean(x)
+my variable <- 5
+df <- data.frame(a = 1:3, b = 1:2)
+v <- c(1, 2, 3); v[[5]]
+"5" + 3
+mat <- matrix(1:6, nrow = 2); mat[3, 1]
+library(dplir)
+```
+
+```{r ex8-solution}
+# 1. x <- c(1, 2, 3          -> missing closing parenthesis (R waits for more input: "+")
+x <- c(1, 2, 3)
+
+# 2. Mean(x)                 -> could not find function "Mean": R is case sensitive
+mean(x)
+
+# 3. my variable <- 5        -> unexpected symbol: names cannot contain spaces
+my_variable <- 5
+
+# 4. data.frame(a = 1:3, b = 1:2)  -> arguments imply differing number of rows: 3, 2
+df <- data.frame(a = 1:3, b = c(1, 2, NA))
+
+# 5. v[[5]]                  -> subscript out of bounds (note that v[5] would just return NA)
+v <- c(1, 2, 3)
+v[3]
+
+# 6. "5" + 3                 -> non-numeric argument to binary operator ("5" is text)
+as.numeric("5") + 3
+
+# 7. mat[3, 1]               -> subscript out of bounds: mat has only 2 rows
+mat <- matrix(1:6, nrow = 2)
+mat[2, 1]
+
+# 8. library(dplir)          -> there is no package called 'dplir' (typo)
+library(dplyr)
+```
+
+------------------------------------------------------------------------
+
+### Exercise 9: Putting it all together - air quality in New York
+
+The built-in data set `airquality` contains daily air quality measurements in New York from May to September 1973 (ozone in ppb, solar radiation, wind speed in mph, temperature in degrees Fahrenheit). We use some functions from the dplyr sheet as well:
+
+```{r ex9-libs, message = FALSE}
+library(dplyr)
+library(ggplot2)
+aq <- airquality
+```
+
+1.  How many rows and columns does `aq` have? Look at the first rows and at `summary(aq)`.
+
+2.  Which columns contain missing values, and how many? *Hint*: `colSums(is.na(aq))`.
+
+3.  What is the mean ozone value? Do not forget the missing values!
+
+4.  Find the row of the hottest day. *Hint*: `which.max()`. In which month did it happen?
+
+5.  Add a column `Temp_C` with the temperature in degrees Celsius: $(F - 32) \cdot 5/9$.
+
+6.  Remove the rows without an ozone measurement with `filter()` and `is.na()` and store the result in `aq_complete`. How many rows remain? Then compute the mean ozone **per month** with `group_by()` and `summarise()`.
+
+7.  Make a scatter plot of the ozone value (y-axis) against the temperature in Celsius (x-axis). Describe the relationship in one sentence.
+
+8.  Convert `Month` into a factor with the names of the months, then make a boxplot of the ozone for each month. *Hint*: `factor(aq$Month, levels = 5:9, labels = month.abb[5:9])`. What does R tell you about the missing values?
+
+```{r ex9-solution}
+# 1.
+dim(aq)                                  # 153 rows, 6 columns
+head(aq)
+summary(aq)
+
+# 2.
+colSums(is.na(aq))                       # Ozone: 37, Solar.R: 7
+
+# 3.
+mean(aq$Ozone, na.rm = TRUE)             # about 42.1
+
+# 4.
+aq[which.max(aq$Temp), ]                 # the Month and Day columns give the date
+aq$Month[which.max(aq$Temp)]
+
+# 5.
+aq$Temp_C <- (aq$Temp - 32) * 5 / 9
+
+# 6.
+aq_complete <- filter(aq, !is.na(Ozone))
+nrow(aq_complete)                        # 116
+aq_by_month <- group_by(aq_complete, Month)
+summarise(aq_by_month, mean_ozone = mean(Ozone), n = n())
+
+# 7.
+ggplot(aq, aes(x = Temp_C, y = Ozone)) +
+  geom_point() +
+  labs(x = "Temperature (degrees C)", y = "Ozone (ppb)")
+# The warmer the day, the higher the ozone concentration.
+
+# 8.
+aq$Month <- factor(aq$Month, levels = 5:9, labels = month.abb[5:9])
+ggplot(aq, aes(x = Month, y = Ozone)) +
+  geom_boxplot() +
+  labs(y = "Ozone (ppb)")
+# R warns that rows containing non-finite values (the NAs) were removed.
+```
+
+------------------------------------------------------------------------
+
+## Summary: useful functions from this sheet
+
+| Task | Functions |
+|------------------------------------|------------------------------------|
+| Create vectors | `c()`, `seq()`, `rep()`, `paste0()`, `1:10` |
+| Describe a vector | `length()`, `mean()`, `median()`, `sd()`, `min()`, `max()`, `range()`, `table()` |
+| Sort and find | `sort()`, `order()`, `which()`, `which.max()`, `which.min()`, `%in%` |
+| Missing values and types | `is.na()`, `na.rm = TRUE`, `class()`, `str()`, `as.numeric()` |
+| Matrices | `matrix()`, `dim()`, `t()`, `cbind()`, `rbind()`, `rowMeans()`, `colSums()` |
+| Lists | `list()`, `$`, `[[ ]]`, `names()`, `sapply()` |
+| Data frames | `data.frame()`, `head()`, `summary()`, `merge()`, `df[rows, columns]`, `df$column` |
+| Getting help | `?function_name`, `help()`, error messages! |
