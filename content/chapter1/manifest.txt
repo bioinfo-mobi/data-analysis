@@ -15,7 +15,7 @@ url: https://youtu.be/DVOlDfgY9gU
 
 markdown_r: materials/chapter1/_01_basic_data_structure.Rmd | Chapter 1 – Basic Data Structures (R Markdown) | vectors · matrices · lists · dataframes
 markdown_r: materials/chapter1/_01_basic_data_manipulation_dplyr.Rmd | Chapter 1 – Data Manipulation (R Markdown) | apply · sapply · for loops · if statements
-markdown_r: materials/chapter1/_01_additional_exercises.Rmd | Chapter 1 – Additional exercises for practice (R Markdown) | 
+markdown_r: materials/chapter1/_01_additional_exercises.Rmd | Chapter 1 – Additional exercises for practice (R Markdown) | all concepts
 
 
 markdown_python: materials/chapter1/_01_basic_data_structure_python.ipynb | Chapter 1 – Basic Data Structures (Python Notebook) | lists · numpy arrays · dicts · dataframes
@@ -25,4 +25,4 @@ markdown_python_note: **Required packages:** `numpy`, `pandas`  ·  Install: `pi
 reference: materials/chapter1/base-r.pdf | R Base – Cheat Sheet
 reference: materials/chapter1/rmarkdown-reference.pdf | Markdown Reference
 reference: materials/chapter1/data-transformation.pdf | dplyr Cheat Sheet
-reference: materials/chapter1/data-Visualization.pdf | ggplot Cheat Sheet
+reference: materials/chapter1/data-visualization.pdf | ggplot Cheat Sheet
