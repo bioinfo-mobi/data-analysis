@@ -13,7 +13,7 @@ video: Describing data 1
 url: https://youtu.be/DU3IEnVr2kA
 video: Describing data 2
 url: https://youtu.be/jFt72U7xiHk
-markdown_r: materials/chapter2/_02_ggplot_intro.Rmd | Chapter 2 – Intro gig-lot (R Markdown)
+markdown_r: materials/chapter2/_02_ggplot_intro.Rmd | Chapter 2 – Intro gg-plot (R Markdown)
 markdown_r: materials/chapter2/_02_data_cleanup_dplyr.Rmd | Chapter 2 – Data Cleanup (R Markdown)
 dataset_note: **Course dataset:** Load the diabetes data in RStudio with:
 dataset_code_r:
