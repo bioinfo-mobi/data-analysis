@@ -1,0 +1,204 @@
+---
+title: "A very short introduction to ggplot"
+author: "Carl Herrmann"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 3.5, fig.width = 5)
+```
+
+## The basic idea
+
+`ggplot2` builds a plot in **layers**, which we add with `+`. Every plot needs three things:
+
+1. **data**: a data frame (a table)
+2. **aesthetics** `aes()`: which column goes on the x axis, which on the y axis, which gives the colour...
+3. **geom**: the type of plot (points, boxes, lines, ...)
+
+```{r}
+library(ggplot2)
+```
+
+
+## Our toy data
+
+We create a small table with 40 patients: half of them are in the "control" group, half in the "treated" group.
+
+```{r}
+set.seed(1)   # makes the random numbers reproducible
+
+patients <- data.frame(
+  group    = rep(c("control", "treated"), each = 20),
+  age      = round(runif(40, min = 20, max = 70)),
+  weight   = round(rnorm(40, mean = 70, sd = 10))
+)
+
+# the cholesterol depends on the age (+ some noise); treated patients have a lower value
+patients$cholesterol <- 120 + 1.5 * patients$age + rnorm(40, sd = 15)
+patients$cholesterol[patients$group == "treated"] <- patients$cholesterol[patients$group == "treated"] - 25
+
+head(patients)
+```
+
+Each **row** is a patient, each **column** is a variable.
+
+## 1. Scatter plot: `geom_point()`
+
+A scatter plot shows the relation between **two numerical variables**. Each dot is one patient.
+
+```{r}
+ggplot(data = patients, aes(x = age, y = cholesterol)) +
+  geom_point()
+```
+
+We can use the **colour** to show a third variable (here: the group):
+
+```{r}
+ggplot(patients, aes(x = age, y = cholesterol, colour = group)) +
+  geom_point()
+```
+
+We can also change the look of the points (this is *not* inside `aes()`, because it is the same for all points):
+
+```{r}
+ggplot(patients, aes(x = age, y = cholesterol)) +
+  geom_point(colour = "blue", size = 3)
+```
+
+Add a straight line which fits the data with `geom_smooth()`:
+
+```{r}
+ggplot(patients, aes(x = age, y = cholesterol)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+## 2. Boxplot: `geom_boxplot()`
+
+A boxplot compares a **numerical variable** between **categories**. The x axis is the category, the y axis is the number.
+
+```{r}
+ggplot(patients, aes(x = group, y = cholesterol)) +
+  geom_boxplot()
+```
+
+The box shows the 25%, 50% (median) and 75% quantiles. We can add the individual points on top, to also see how many patients there are:
+
+```{r}
+ggplot(patients, aes(x = group, y = cholesterol)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1)
+```
+
+(`geom_jitter()` is like `geom_point()`, but moves the points slightly to the side so that they do not hide each other.)
+
+## 3. Violin plot: `geom_violin()`
+
+Same use as a boxplot, but the shape of the violin shows the **distribution** of the data: wide = many values.
+
+```{r}
+ggplot(patients, aes(x = group, y = cholesterol)) +
+  geom_violin()
+```
+
+Violin and boxplot can be combined:
+
+```{r}
+ggplot(patients, aes(x = group, y = cholesterol)) +
+  geom_violin(fill = "lightblue") +
+  geom_boxplot(width = 0.1)
+```
+
+## 4. Histogram: `geom_histogram()`
+
+A histogram shows the distribution of **one numerical variable**: we count how many values fall into each interval ("bin"). Only the x variable is needed, the y axis (the count) is computed automatically.
+
+```{r}
+ggplot(patients, aes(x = cholesterol)) +
+  geom_histogram()
+```
+
+The number of bins changes the look of the plot a lot!
+
+```{r}
+ggplot(patients, aes(x = cholesterol)) +
+  geom_histogram(bins = 5)
+```
+
+```{r}
+ggplot(patients, aes(x = cholesterol)) +
+  geom_histogram(bins = 20)
+```
+
+We can compare the groups by splitting the plot into **panels** with `facet_wrap()`:
+
+```{r}
+ggplot(patients, aes(x = cholesterol)) +
+  geom_histogram(bins = 10) +
+  facet_wrap(~ group)
+```
+
+## 5. Line plot: `geom_line()`
+
+A line plot is used when the x axis is ordered, for example **time**. Here is a second toy table: the tumour size of two mice, measured over 5 weeks.
+
+```{r}
+mice <- data.frame(
+  week  = rep(1:5, times = 2),
+  mouse = rep(c("mouse A", "mouse B"), each = 5),
+  size  = c(10, 14, 20, 29, 41,     # mouse A
+            10, 11, 12, 12, 13)     # mouse B
+)
+
+mice
+```
+
+```{r}
+ggplot(mice, aes(x = week, y = size, colour = mouse)) +
+  geom_line()
+```
+
+Often we also add points to show where the measurements are:
+
+```{r}
+ggplot(mice, aes(x = week, y = size, colour = mouse)) +
+  geom_line() +
+  geom_point()
+```
+
+## Making the plot nicer: titles and labels
+
+Use `labs()` to set the title and the axis labels, and a `theme` to change the overall look:
+
+```{r}
+ggplot(patients, aes(x = group, y = cholesterol, fill = group)) +
+  geom_boxplot() +
+  labs(title = "Cholesterol in the two groups",
+       x = "Group",
+       y = "Cholesterol (mg/dl)") +
+  theme_bw()
+```
+
+## Summary
+
+| We want to show... | geom |
+|---|---|
+| relation between 2 numerical variables | `geom_point()` |
+| a numerical variable in several categories | `geom_boxplot()`, `geom_violin()` |
+| distribution of 1 numerical variable | `geom_histogram()` |
+| evolution over time (ordered x axis) | `geom_line()` |
+
+The general recipe is always the same:
+
+```{r, eval=FALSE}
+ggplot(data, aes(x = ..., y = ..., colour = ...)) +
+  geom_...()
+```
+
+## Exercises
+
+1. In the scatter plot, use `weight` instead of `age` on the x axis. Is there a relation with cholesterol?
+2. Colour the points by `group` *and* add a `geom_smooth(method = "lm")`. What do you see?
+3. Make a boxplot of `weight` for the two groups.
+4. Make a histogram of `age` with 5, 10 and 30 bins. Which one do you find most useful?
