@@ -257,14 +257,23 @@ Let's use this new dataset as an opportunity to apply the skills we learned in t
 
 #### Going further...
 
-You have used a dataset with a reduced number of genes (= rows). They have been pre-selected, according to certain criteria. Here is a larger dataset, with more genes for the same samples
+You have used a dataset with a reduced number of genes (= rows). They have been pre-selected, according to certain criteria. Here is a larger dataset, with more genes for the same samples. We log-transform the expression values for more useful distributions.
 
 ```{r}
-brca.large = readRDS(url('https://www.dropbox.com/s/m6nfxul95borupz/brca.exp_large.rds?dl=1'))
+brca.large <- readRDS(url('https://www.dropbox.com/s/m6nfxul95borupz/brca.exp_large.rds?dl=1'))
+
+# The distribution of the original values is too skewed
+brca.large_medians <- apply(brca.large, MARGIN = 1, median)
+print(hist(brca.large_medians, 30))
+
+# We use the log1p function to transform each value according to log(x+1)
+brca.large.log <- log1p(brca.large)
+brca.large.log_medians <- apply(brca.large.log, MARGIN = 1, median)
+print(hist(brca.large.log_medians, 30))
 ```
 
 Follow the next steps:
 
-1.  use the `apply` function on all rows to compute the standard deviation of the genes using the `sd()` function
-2.  use the `order(...,decreasing=TRUE)` function to determine the row index of the top 200 most variant genes
-3.  redo the heatmap with these genes
+1.  Use the `apply` function on all rows to compute the standard deviation of the genes using the `sd()` function
+2.  Use the `order(...,decreasing=TRUE)` function to determine the row index of the top 200 most variant genes
+3.  Create a heatmap with these genes using the `heatmap` function. *Use the function's parameters to scale the data per gene.*

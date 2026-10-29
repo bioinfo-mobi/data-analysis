@@ -6,3 +6,4 @@ _freeze/
 # Generated site (built by the GitHub Action, never committed)
 docs/
 .DS_Store
+.Rproj.user
