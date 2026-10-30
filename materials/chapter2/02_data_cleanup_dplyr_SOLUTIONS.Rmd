@@ -1,0 +1,194 @@
+---
+title: "Data Analysis - Exercise Sheet 1 - Solutions"
+author: "Carl Herrmann, Maïwen Caudron-Herger"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+options(max.print=200)
+opts_chunk$set(echo=TRUE, comment=NA, message=FALSE, warning=FALSE)
+```
+
+# Preparation: load and clean the data
+
+This is exactly the cleaning from the exercise sheet. Run it first, so that `dat` is ready for the exercises.
+
+```{r}
+dat <- read.delim('https://www.dropbox.com/scl/fi/zqjdoi7naolmruyxrraxq/diabetes_2025.tsv?rlkey=txnps3ccr0vj47yvjmpecbeom&dl=1')
+
+dat <- select(dat, -bp.2s, -bp.2d, -time.ppn)
+dat <- select(dat, gender, location, frame, age, height, weight, waist, hip,
+              stab.glu, glyhb, chol, hdl, ratio, bp.1s, bp.1d)
+dat <- drop_na(dat)
+```
+
+# Exercise 1: Data Exploration and Summary Statistics
+
+### 1.1 Mean and standard deviation of hdl
+
+```{r}
+mean(dat$hdl)
+sd(dat$hdl)
+```
+
+### 1.2 Body Mass Index
+
+`mutate()` adds a new column. Inside `mutate()` we can use the column names directly.
+
+```{r}
+dat <- mutate(dat, bmi = weight / height^2 * 703)
+head(dat$bmi)
+```
+
+### 1.3 Patients per location
+
+```{r}
+table(dat$location)
+```
+
+The location with the most patients is the one with the largest number in the table. R can also tell us its name:
+
+```{r}
+names(which.max(table(dat$location)))
+```
+
+### 1.4 Median age of men and women
+
+```{r}
+men   <- filter(dat, gender == "male")
+women <- filter(dat, gender == "female")
+
+median(men$age)
+median(women$age)
+```
+
+Compare the two numbers: if they differ by only a few years, the two groups are similar in age.
+
+# Exercise 2: Visualizing Relationships Between Variables
+
+### 2.1 Scatter plot weight vs height
+
+```{r}
+ggplot(dat, aes(x = height, y = weight)) +
+  geom_point(size = 3)
+```
+
+Taller people tend to be heavier: the points go from bottom left to top right, so there is a (positive) relationship. It is not perfect, because people of the same height can have very different weights.
+
+### 2.2 Color by gender
+
+```{r}
+ggplot(dat, aes(x = height, y = weight, color = gender)) +
+  geom_point(size = 3)
+```
+
+Check whether one gender is shifted to the upper right (typically men are taller and heavier than women), and whether the relationship itself (taller = heavier) looks similar in both groups.
+
+### 2.3 Correlation
+
+```{r}
+cor(dat$weight, dat$height)
+```
+
+The correlation coefficient is between -1 and 1. A value close to 0 means no linear relationship, a value close to 1 means a strong positive relationship. Read off the value above to judge how strong the relationship is.
+
+### 2.4 Boxplots of cholesterol by gender
+
+```{r}
+ggplot(dat, aes(x = gender, y = chol)) +
+  geom_boxplot()
+```
+
+Compare the thick middle lines (medians) and the heights of the boxes. Other variables work in the same way, you only change `y`:
+
+```{r}
+ggplot(dat, aes(x = gender, y = hdl)) +
+  geom_boxplot()
+
+ggplot(dat, aes(x = gender, y = weight)) +
+  geom_boxplot()
+```
+
+# Going further: Advanced Data Manipulation
+
+### 1. Age groups
+
+`cut()` splits numbers into intervals. With `right = FALSE`, each interval includes its left border: 40 belongs to "middle", and 60 belongs to "senior".
+
+```{r}
+dat <- mutate(dat, age_group = cut(age,
+                                   breaks = c(-Inf, 40, 60, Inf),
+                                   labels = c("young", "middle", "senior"),
+                                   right = FALSE))
+table(dat$age_group)
+```
+
+### 2. Mean cholesterol per gender and age group
+
+The symbol `%>%` ("pipe") means "take the result on the left and give it to the function on the right".
+
+```{r}
+chol.means <- dat %>%
+  group_by(gender, age_group) %>%
+  summarise(mean_chol = mean(chol))
+
+chol.means
+```
+
+### 3. Standardize function
+
+```{r}
+standardize <- function(x) {
+  (x - mean(x)) / sd(x)
+}
+
+# Test: the result should have mean 0 and standard deviation 1
+mean(standardize(dat$age))
+sd(standardize(dat$age))
+```
+
+Now we apply it only to the numeric columns. First we find which columns are numeric:
+
+```{r}
+is.num <- sapply(dat, is.numeric)
+is.num
+```
+
+```{r}
+dat.scaled <- dat
+dat.scaled[, is.num] <- apply(dat[, is.num], MARGIN = 2, FUN = standardize)
+
+head(dat.scaled)
+```
+
+The text columns (`gender`, `location`, `frame`) and `age_group` are not changed.
+
+### 4. Most extreme BMI
+
+A value far away from 0 is extreme. We use `abs()` so that both very high and very low values count, and `which.max()` to get the row number.
+
+```{r}
+row.extreme <- which.max(abs(dat.scaled$bmi))
+row.extreme
+
+# standardized BMI of this patient
+dat.scaled$bmi[row.extreme]
+
+# all clinical information (original values)
+dat[row.extreme, ]
+```
+
+To see what is unusual, compare the values of this patient with the typical values in the dataset (`summary(dat)`): the BMI is many standard deviations away from the mean. Look at `weight` and `height` of this patient: BMI is high when the weight is large compared to the height (or low when it is very small).
+
+```{r}
+summary(dat$bmi)
+```
