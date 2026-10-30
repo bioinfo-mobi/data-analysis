@@ -15,7 +15,7 @@ video: 4.2 K-means clustering
 url: https://youtu.be/FHaIoNhHcKY
 
 markdown_r: materials/chapter3/_03_correlation_clustering_dplyr.Rmd | Chapter 3 – Correlation & Clustering (R Markdown)
-markdown_r: materials/chapter3/_03_correlation_clustering_dplyr_solution.Rmd | Chapter 3 – Correlation & Clustering (R Markdown)
+markdown_r: materials/chapter3/_03_correlation_clustering_dplyr_solution.Rmd | Chapter 3 – Correlation & Clustering - Solutions (R Markdown)
 markdown_python: materials/chapter3/_03_correlation_clustering_python.ipynb | Chapter 3 – Correlation & Clustering (Python Notebook)
 
 dataset_note: **Datasets:** This sheet reuses the cleaned diabetes dataset from Chapter 2, and introduces a new gene expression dataset (TCGA breast cancer, 200 samples × 300 genes) for the clustering part. Both are loaded directly inside the R Markdown file — no separate download needed.
