@@ -66,14 +66,6 @@ We are going to look at them more deeply in the following.
 
 ```{r echo=TRUE}
 
-# Distribution 1: Mean = 2, Standard Deviation = 1
-pnorm(1:4,mean=2,sd=1)
-#
-# Distribution 2: Mean = 2, Standard Deviation = 2
-pnorm(1:4,mean=2,sd=2)
-#
-# Distribution 2: Mean = 4, Standard Deviation = 1
-pnorm(1:4,mean=4,sd=1)
 ```
 
 > Do you understand why the cumulative distribution functions change the way they do? 
@@ -81,14 +73,7 @@ pnorm(1:4,mean=4,sd=1)
 Now, on the same distributions, we calculate the **inverse cdf** (inverse cumulative distribution function) for the cumulative probabilities of 25%, 50 % and 75%. We use the `qnorm()` function for this (**q- like quantile**): 
 
 ```{r}
-# Distribution 1: Mean = 2, Standard Deviation = 1
-qnorm(c(0.25,0.5,0.75),mean=2,sd=1)
 
-# Distribution 2: Mean = 2, Standard Deviation = 2
-qnorm(c(0.25,0.5,0.75),mean=2,sd=2)
-
-# Distribution 3: Mean = 4, Standard Deviation = 1
-qnorm(c(0.25,0.5,0.75),mean=4,sd=1)
 ```
 
 > Try with 100% on any of the distributions. Can you explain this result? Do you expect the result to be different in the other ones?
@@ -96,15 +81,7 @@ qnorm(c(0.25,0.5,0.75),mean=4,sd=1)
 2.  Now that you know the output of the p- and q- functions, let's look at **d- like density probability** functions. For any continuous distribution, the value of the function at any specific value is 0. This is why this probability function is used in discrete distribution such as the binomial distribution (function **dbinom()**). We first calculate the probability of getting 5 events out of 5 in a binomial distribution with a probability of 0.5. Then, we calculate the odds of **not** getting 5 out of 5.
 
 ```{r}
-# probability of 5 out of 5
-dbinom(5, size=5, prob=0.5) 
-# size = number of trials; prob = probability of success on each trial
 
-# probability of NOT getting 5 out of 5
-1-dbinom(5, size=5, prob=0.5)
-# or
-pbinom(4, size=5, prob=0.5)
-# Remember, pbinom() returns the "cumulative probability" of ...
 ```
 
 > What is the probability of getting 5 out of 10? And NOT getting 5 out of 10? 
@@ -113,16 +90,7 @@ pbinom(4, size=5, prob=0.5)
 What is the probability that someone is smaller than 1.6 m?
 
 ```{r}
-## taller than 1.9
-pnorm(1.9, mean=1.75, sd=0.15, lower.tail=FALSE)
-# or
-1-pnorm(1.9, mean=1.75, sd=0.15)
 
-## smaller than 1.6
-pnorm(1.6, mean=1.75, sd=0.15, lower.tail=TRUE)
-# equivalent to 
-pnorm(1.6, mean=1.75, sd=0.15)
-# because: per defaults, lower.tail is set to TRUE (you can check the help page for further information using `?pnorm`)
 ```
 
 Let's have a look at this distribution using the **dnorm()** function:
@@ -250,13 +218,7 @@ Using a normal distribution with $\mu = 1380.822$ (m.tp53) and $\sigma = 719.593
 -- **(Q2)** What is the probability of observing the expression of TP53 to be **greater** than 1000?
 
 ```{r}
-# Q1
-pnorm(q=1000, mean =m.tp53, sd = s.tp53) # returns the cumulative probability
-# Q2
-1 - pnorm(q=1000, mean =m.tp53, sd = s.tp53) 
-# is same as
-pnorm(q=1000, mean =m.tp53, sd = s.tp53, lower.tail = FALSE)
-# or pnorm(q=1000, mean =m.tp53, sd = s.tp53, lower.tail = F). FALSE or F is equivalent
+
 ```
 
 #### 3.2.4 Evaluating the quality of the predictions
@@ -273,36 +235,19 @@ sum(tp53.exp$TP53_expression > 1000)/nrow(tp53.exp)
 > I would say those predictions are pretty good !! Now, let's try to break this model. Re-execute the code above with different $q$ values `q=100, q=500, q=4000, q=4500` etc. At what values do you think the model would not perform well. HINT: Look at the tails of the distribution!
 
 ```{r}
-# What is the probability of observing the expression of TP53 to be less than q?
-q = c(100,500,1000,4000,4500)
 
-# The function sapply() is used to calculate and store the predicted (a) and real (b) values
-model_mat =sapply(q,function(x) {
-   a = pnorm(q=x, mean =m.tp53, sd = s.tp53) 
-   b = sum(tp53.exp$TP53_expression < x)/nrow(tp53.exp)
-   return(c(a,b))
-})
-# Change into a dataframe and give row names
-model_mat <- as.data.frame(model_mat,row.names = c("Predicted","Measured"))
-# Set column names
-colnames(model_mat) <- c("q=100", "q=500", "q=1000", "q=4000", "q=4500")
-# Display the table (dataframe)
-model_mat
 ```
 
 Again, using a normal distribution with $\mu = 1380.822$ and $\sigma = 719.5934$, what if we ask these kinds of questions:
 
 ```{r}
-# Q1: What is the value of TP53 expression at the 10% quantile?
-qnorm(p = 0.1, mean = m.tp53, sd = s.tp53)
-# Q2: What is the value of TP53 expression at the 90% quantile?
-qnorm(p = 0.9, mean = m.tp53, sd = s.tp53)
+
 ```
 
 Let's check how good these predictions are compared to our real data.
 
 ```{r}
-quantile(tp53.exp$TP53_expression, probs = c(0.1, 0.9))
+
 ```
 
 Again the predictions are pretty good!
@@ -343,19 +288,7 @@ p.model +
 Now, let's plot the sample quantiles against theoretical quantiles to check the similarity between the two. This is called a quantile - quantile plot or a Q-Q plot, which you are familiar with (see Exercises Sheet 1).
 
 ```{r}
-q = seq(0,1,0.01) # Creating a vector of quantiles
 
-# Find values corresponding to these quantiles in the real data
-q.observed = quantile(tp53.exp$TP53_expression, probs = q)
-
-# Find values corresponding to these quantiles in the theoretical normal distribution
-q.theoretical = qnorm(p = q, mean = m.tp53, sd = s.tp53)
-
-# Correlate the above two values
-q.table = data.frame(q.theoretical, q.observed)
-ggplot(q.table, aes(x = q.theoretical, y = q.observed)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1, color = "red", linewidth = 1)
 ```
 
 ------------------------------------------------------------------------
@@ -421,29 +354,18 @@ Let's perform the following calculation:
 Now, what if we ask the question, what is the probability of observing **10 or less** mutations after one generation using a Poisson distribution model build with the parameters $\lambda$ calculated above.
 
 ```{r}
-ppois(q = 10, lambda = 30)
 ```
 
 We can plot the probabilities for $q=0:60$ and see how the probabilities change:
 
 ```{r}
-cum.table = data.frame(x = 0:60, p = ppois(q = 0:60, lambda = 30))
-ggplot(cum.table, aes(x = x, y = p)) +
-  geom_line() +
-  geom_point() +
-  geom_vline(xintercept = 30) +
-  labs(x = "Average Mutations", y = "Probability")
+
 ```
 
 A different way of visualizing the data which is more intuitive and clear is by plotting the densities of probabilities. We do the same as before using the Poisson distribution.
 
 ```{r fig.width=10}
-p.pred = dpois(x = 0:60, lambda = 30)
-pois.table = data.frame(x = 0:60, p.pred)
-ggplot(pois.table, aes(x = x, y = p.pred)) +
-  geom_col() +
-  scale_x_continuous(breaks = seq(0, 60, by = 5)) +
-  labs(x = "Mutations", y = "Probability")
+
 ```
 
 We clearly see that it is much likely to get 30 mutations than others.
@@ -453,13 +375,7 @@ We clearly see that it is much likely to get 30 mutations than others.
 > Can you make the above prediction using the normal distribution instead? *Hint*: $\lambda = mean = variance$ see above equation. Derive the standard deviation from the variance. What difference do you see ? What is your interpretation ?
 
 ```{r}
-pd = ppois(q = 0:60, lambda = 30)
-nd = pnorm(q = 0:60, mean = 30, sd = sqrt(30)) # since var = sd^2
-cdf.table = data.frame(x = 0:60, pd, nd)
-ggplot(cdf.table, aes(x = x)) +
-  geom_line(aes(y = pd), color = "red") +
-  geom_line(aes(y = nd), color = "grey") +
-  labs(x = "Average Mutations", y = "Probability")
+
 ```
 
 ------------------------------------------------------------------------
