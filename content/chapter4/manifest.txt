@@ -16,3 +16,7 @@ markdown_r: materials/chapter4/_04_unsupervised_learning_dplyr.Rmd | Chapter 4 �
 markdown_r: materials/chapter4/_04_unsupervised_learning_sol_dplyr.Rmd | Chapter 4 – Hierarchical Clustering & PCA - Solutions(R Markdown)
 markdown_python: materials/chapter4/_04_unsupervised_learning_python.ipynb | Chapter 4 – Hierarchical Clustering & PCA (Python Notebook)
 dataset_note: **Datasets:** This sheet uses a leukemia gene expression dataset (ALL vs. AML) for hierarchical clustering, and the Breast Cancer Wisconsin dataset for PCA. Both are loaded directly inside the R Markdown file — no separate download needed.
+
+bonus_note: **Bonus reference:** a companion html with a PCA demo, and a plenum recap.
+bonus: materials/chapter4/pca_rotation_3d.html | PCA demo (HTML)
+bonus: materials/chapter4/2026-11-05_Plenum4_HC.Rmd | Plenum Recap (R Markdown)

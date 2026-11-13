@@ -19,3 +19,6 @@ bonus_note: **Bonus reference:** a companion script with more distribution examp
 bonus: materials/chapter5/_05_distributions.Rmd | Distributions Companion (R Markdown)
 bonus: materials/chapter5/_05_plenum.Rmd | Plenum Recap (R Markdown)
 bonus: materials/chapter5/_05_folien_plenum.pdf | Plenum Slides (PDF)
+bonus: materials/chapter5/2_distribution_choice_exercises.html | Plenum text exercises (HTML)
+bonus: materials/chapter5/3_distribution_playground.html | Plenum Distributions Relations (HTML)
+bonus: materials/chapter5/4_r_verteilungsfunktionen.html | Plenum Distributions R Runctions (HTML)

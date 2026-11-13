@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welche Verteilung passt?</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eef3f6; color: #193448; font: 18px/1.55 system-ui, sans-serif; }
+  main { max-width: 900px; margin: auto; padding: 30px 20px; }
+  h1 { font-size: clamp(29px, 5vw, 42px); line-height: 1.15; }
+  h2 { font-size: 23px; margin: 0 0 8px; }
+  .exercise { padding: 22px; margin: 16px 0; border-radius: 12px; background: white; }
+  button, summary { font: inherit; cursor: pointer; }
+  button { background: white; color: inherit; border: 1px solid #9eb6c7; border-radius: 8px; padding: 8px 14px; }
+  summary { color: #175574; font-weight: 650; }
+  .exercise-number { font-size: 20px; }
+  .exercise-content { padding-top: 14px; }
+  .solution { border-left: 3px solid #4788a8; padding-left: 14px; }
+  .calculation { padding: 14px; background: #edf5f9; border-radius: 8px; font-size: 15px; overflow-x: auto; }
+  @media print { body { background: white; } button { display: none; } .exercise { break-inside: avoid; border: 1px solid #ccd9e2; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Welche Verteilung passt?</h1>
+  <p>Definieren Sie für jede Aufgabe die Zufallsvariable und bestimmen Sie, welche Größen fest vorgegeben sind. Begründen Sie Ihre Wahl der Verteilung. Berechnen Sie anschließend die Wahrscheinlichkeit und vergleichen Sie Ihr Ergebnis mit der Lösung.</p>
+  <p><button id="shuffle" type="button" hidden>Aufgaben mischen</button> <button id="close" type="button" hidden>Alles einklappen</button></p>
+  <div id="exercises">
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 1</summary>
+    <div class="exercise-content">
+  <h2>Messfehler eines Sensors</h2>
+  <p>Der Messfehler eines Sensors hat einen Mittelwert von 0 und eine Standardabweichung von 1 Einheit. Wie groß ist die Wahrscheinlichkeit, dass der Messfehler zwischen −1 und +1 Einheit liegt?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Standardnormalverteilung</strong></p>
+      <p>Z ist der Messfehler in den angegebenen Einheiten. Für die Rechnung nehmen wir eine Normalverteilung an. Mittelwert und Standardabweichung allein bestimmen die Verteilung nicht. Bei einem Mittelwert von 0 und einer Standardabweichung von 1 ergibt sich direkt die Standardnormalverteilung.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>mu &lt;- 0
+sigma &lt;- 1
+untergrenze &lt;- -1
+obergrenze &lt;- 1
+
+ergebnis &lt;- pnorm(obergrenze, mean = mu, sd = sigma) -
+  pnorm(untergrenze, mean = mu, sd = sigma)
+round(ergebnis, digits = 6)
+# [1] 0.682689</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 2</summary>
+    <div class="exercise-content">
+  <h2>Zwölf Würfe</h2>
+  <p>Ein fairer Würfel wird zwölfmal geworfen. Wie groß ist die Wahrscheinlichkeit, genau drei Sechsen zu würfeln?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Binomialverteilung</strong></p>
+      <p>X ist die Anzahl der Sechsen. Die Zahl der Würfe ist auf zwölf festgelegt. Die Würfe sind unabhängig, und bei jedem Wurf beträgt die Wahrscheinlichkeit einer Sechs 1/6.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>n &lt;- 12
+p &lt;- 1/6
+k &lt;- 3
+
+ergebnis &lt;- dbinom(k, size = n, prob = p)
+round(ergebnis, digits = 6)
+# [1] 0.197396</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 3</summary>
+    <div class="exercise-content">
+  <h2>Elfmeter</h2>
+  <p>Eine Spielerin schießt 20 Elfmeter. Bei jedem Schuss beträgt die Trefferwahrscheinlichkeit 90 %. Wie groß ist die Wahrscheinlichkeit, genau 18 Tore zu erzielen?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Binomialverteilung</strong></p>
+      <p>X ist die Anzahl der Tore. Die Zahl der Versuche ist auf 20 festgelegt. Die Trefferwahrscheinlichkeit beträgt bei jedem Versuch 0,90. Wir gehen davon aus, dass die Schüsse unabhängig sind.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>n &lt;- 20
+p &lt;- 0.90
+k &lt;- 18
+
+ergebnis &lt;- dbinom(k, size = n, prob = p)
+round(ergebnis, digits = 6)
+# [1] 0.28518</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 4</summary>
+    <div class="exercise-content">
+  <h2>Ereignisse am Detektor</h2>
+  <p>Ein Detektor registriert Ereignisse, die unabhängig voneinander und mit einer konstanten mittleren Rate von zwei pro Minute auftreten. Wie groß ist die Wahrscheinlichkeit, in der nächsten Minute genau drei Ereignisse zu registrieren?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Poisson-Verteilung</strong></p>
+      <p>X ist die Anzahl der Ereignisse in einer festgelegten Minute. Die mittlere Anzahl beträgt λ = 2.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>lambda &lt;- 2
+k &lt;- 3
+
+ergebnis &lt;- dpois(k, lambda = lambda)
+round(ergebnis, digits = 6)
+# [1] 0.180447</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 5</summary>
+    <div class="exercise-content">
+  <h2>Brenndauer einer Kerze</h2>
+  <p>Die Brenndauer von Kerzen hat einen Mittelwert von 40 Stunden und eine Standardabweichung von 7 Stunden. Wie groß ist die Wahrscheinlichkeit, dass eine Kerze zwischen 33 und 47 Stunden brennt?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Normalverteilung</strong></p>
+      <p>X ist die Brenndauer einer Kerze. Für die Rechnung nehmen wir eine Normalverteilung an. Mittelwert und Standardabweichung allein bestimmen die Verteilung nicht. Die Grenzen liegen jeweils eine Standardabweichung unter bzw. über dem Mittelwert.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>mu &lt;- 40
+sigma &lt;- 7
+untergrenze &lt;- 33
+obergrenze &lt;- 47
+
+ergebnis &lt;- pnorm(obergrenze, mean = mu, sd = sigma) -
+  pnorm(untergrenze, mean = mu, sd = sigma)
+round(ergebnis, digits = 6)
+# [1] 0.682689</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 6</summary>
+    <div class="exercise-content">
+  <h2>Qualitätskontrolle</h2>
+  <p>Ein Labor prüft zehn Proben. Jede Probe fällt mit einer Wahrscheinlichkeit von 5 % bei der Qualitätskontrolle durch. Wie groß ist die Wahrscheinlichkeit, dass alle Proben die Prüfung bestehen?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Binomialverteilung</strong></p>
+      <p>X ist die Anzahl der Proben, die unter den zehn geprüften Proben durchfallen. Wir gehen davon aus, dass die Ergebnisse unabhängig sind und jede Probe mit derselben Wahrscheinlichkeit durchfällt.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>n &lt;- 10
+p &lt;- 0.05
+k &lt;- 0
+
+ergebnis &lt;- dbinom(k, size = n, prob = p)
+round(ergebnis, digits = 6)
+# [1] 0.598737</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 7</summary>
+    <div class="exercise-content">
+  <h2>Die dritte Sechs</h2>
+  <p>Ein Kind wirft einen fairen Würfel so lange, bis es dreimal eine Sechs gewürfelt hat. Wie groß ist die Wahrscheinlichkeit, dass die dritte Sechs beim 20. Wurf fällt?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Negative Binomialverteilung</strong></p>
+      <p>X ist die Anzahl der Würfe bis zur dritten Sechs. Die Zielzahl der Sechsen ist festgelegt, die Anzahl der Würfe ist zufällig. Bei unabhängigen Würfen müssen unter den ersten 19 Würfen genau zwei Sechsen sein, und beim 20. Wurf muss eine Sechs fallen.</p>
+      <p><strong>Parameter:</strong> <code>L = 20</code> Versuche insgesamt im gefragten Ereignis, <code>k = 3</code> Erfolge als festes Ziel und <code>p = 1/6</code> als Erfolgswahrscheinlichkeit pro Versuch. Der letzte Versuch ist der <code>k</code>-te Erfolg. Bis dahin gab es <code>L − k = 17</code> Misserfolge. In R ist <code>size = k</code>.</p><p>Der Wert <code>L</code> bezeichnet die Versuchszahl, für die wir die Wahrscheinlichkeit berechnen. Die Versuche laufen bis zum Erreichen der Zielzahl.</p><pre class="calculation" aria-label="R-Code und Ergebnis"><code>L &lt;- 20  # Gesamtzahl der Versuche im gefragten Ereignis
+k &lt;- 3   # Zielzahl der Erfolge
+p &lt;- 1/6  # Erfolgswahrscheinlichkeit pro Versuch
+misserfolge &lt;- L - k
+
+ergebnis &lt;- dnbinom(misserfolge, size = k, prob = p)
+round(ergebnis, digits = 6)
+# [1] 0.035683</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 8</summary>
+    <div class="exercise-content">
+  <h2>Reagenzgläser befüllen</h2>
+  <p>Ein Dosiergerät befüllt eine große Anzahl von Reagenzgläsern. Die Füllmenge hat einen Mittelwert von 100 µL und eine Standardabweichung von 2 µL. Wie groß ist die Wahrscheinlichkeit, dass ein Reagenzglas weniger als 96 µL enthält?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Normalverteilung</strong></p>
+      <p>X ist die Füllmenge eines Reagenzglases. Für die Rechnung nehmen wir eine Normalverteilung an. Mittelwert und Standardabweichung allein bestimmen die Verteilung nicht. 96 µL liegen zwei Standardabweichungen unter dem Mittelwert, denn (96 − 100)/2 = −2.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>mu &lt;- 100
+sigma &lt;- 2
+grenze &lt;- 96
+
+ergebnis &lt;- pnorm(grenze, mean = mu, sd = sigma)
+round(ergebnis, digits = 6)
+# [1] 0.02275</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 9</summary>
+    <div class="exercise-content">
+  <h2>Kundschaft im Geschäft</h2>
+  <p>In einer ruhigen Phase betreten im Mittel sechs Personen pro Minute ein Geschäft. Gehen Sie davon aus, dass die Personen unabhängig voneinander und mit konstanter Rate eintreffen. Wie groß ist die Wahrscheinlichkeit, dass in der nächsten Minute höchstens neun Personen das Geschäft betreten?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Poisson-Verteilung</strong></p>
+      <p>X ist die Anzahl der eintreffenden Personen in einer festgelegten Minute. Der Mittelwert für diese Minute ist λ = 6. Höchstens neun umfasst alle Anzahlen von null bis neun.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>lambda &lt;- 6
+k &lt;- 9
+
+ergebnis &lt;- ppois(k, lambda = lambda)
+round(ergebnis, digits = 6)
+# [1] 0.916076</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 10</summary>
+    <div class="exercise-content">
+  <h2>Fünf bestandene Proben</h2>
+  <p>Ein Labor prüft so lange Proben, bis fünf die Qualitätskontrolle bestanden haben. Jede Probe besteht mit einer Wahrscheinlichkeit von 80 %. Wie groß ist die Wahrscheinlichkeit, dass die fünfte bestandene Probe die achte geprüfte Probe ist?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Negative Binomialverteilung</strong></p>
+      <p>X ist die Anzahl der geprüften Proben bis zur fünften bestandenen Probe. Bei unabhängigen Ergebnissen müssen genau vier der ersten sieben Proben bestehen. Die achte Probe muss ebenfalls bestehen.</p>
+      <p><strong>Parameter:</strong> <code>L = 8</code> Versuche insgesamt im gefragten Ereignis, <code>k = 5</code> Erfolge als festes Ziel und <code>p = 0,80</code> als Erfolgswahrscheinlichkeit pro Versuch. Der letzte Versuch ist der <code>k</code>-te Erfolg. Bis dahin gab es <code>L − k = 3</code> Misserfolge. In R ist <code>size = k</code>.</p><p>Der Wert <code>L</code> bezeichnet die Versuchszahl, für die wir die Wahrscheinlichkeit berechnen. Die Versuche laufen bis zum Erreichen der Zielzahl.</p><pre class="calculation" aria-label="R-Code und Ergebnis"><code>L &lt;- 8  # Gesamtzahl der Versuche im gefragten Ereignis
+k &lt;- 5   # Zielzahl der Erfolge
+p &lt;- 0.80  # Erfolgswahrscheinlichkeit pro Versuch
+misserfolge &lt;- L - k
+
+ergebnis &lt;- dnbinom(misserfolge, size = k, prob = p)
+round(ergebnis, digits = 6)
+# [1] 0.09175</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 11</summary>
+    <div class="exercise-content">
+  <h2>Zellen unter dem Mikroskop</h2>
+  <p>Zellen sind unabhängig voneinander und gleichmäßig auf einem Objektträger verteilt. Im Mittel befinden sich vier Zellen pro Sichtfeld. Wie groß ist die Wahrscheinlichkeit, dass ein zufällig ausgewähltes Sichtfeld leer ist?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Poisson-Verteilung</strong></p>
+      <p>X ist die Anzahl der Zellen in einem Sichtfeld fester Größe. Bei unabhängigen Zellpositionen und konstanter mittlerer Zelldichte eignet sich eine Poisson-Verteilung mit λ = 4.</p>
+      <pre class="calculation" aria-label="R-Code und Ergebnis"><code>lambda &lt;- 4
+k &lt;- 0
+
+ergebnis &lt;- dpois(k, lambda = lambda)
+round(ergebnis, digits = 6)
+# [1] 0.018316</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+<section class="exercise">
+  <details class="exercise-panel">
+    <summary class="exercise-number">Aufgabe 12</summary>
+    <div class="exercise-content">
+  <h2>Telefoninterviews</h2>
+  <p>Eine Person ruft so lange an, bis drei Personen einem Interview zustimmen. Bei jedem Anruf beträgt die Wahrscheinlichkeit einer Zusage 9 %. Wie groß ist die Wahrscheinlichkeit, dass die dritte Zusage beim zehnten Anruf erfolgt?</p>
+  <details class="answer">
+    <summary>Lösung anzeigen</summary>
+    <div class="solution">
+      <p><strong>Negative Binomialverteilung</strong></p>
+      <p>X ist die Anzahl der Anrufe bis zur dritten Zusage. Bei unabhängigen Anrufen müssen genau zwei der ersten neun Anrufe zu einer Zusage führen. Beim zehnten Anruf muss die dritte Zusage erfolgen.</p>
+      <p><strong>Parameter:</strong> <code>L = 10</code> Versuche insgesamt im gefragten Ereignis, <code>k = 3</code> Erfolge als festes Ziel und <code>p = 0,09</code> als Erfolgswahrscheinlichkeit pro Versuch. Der letzte Versuch ist der <code>k</code>-te Erfolg. Bis dahin gab es <code>L − k = 7</code> Misserfolge. In R ist <code>size = k</code>.</p><p>Der Wert <code>L</code> bezeichnet die Versuchszahl, für die wir die Wahrscheinlichkeit berechnen. Die Versuche laufen bis zum Erreichen der Zielzahl.</p><pre class="calculation" aria-label="R-Code und Ergebnis"><code>L &lt;- 10  # Gesamtzahl der Versuche im gefragten Ereignis
+k &lt;- 3   # Zielzahl der Erfolge
+p &lt;- 0.09  # Erfolgswahrscheinlichkeit pro Versuch
+misserfolge &lt;- L - k
+
+ergebnis &lt;- dnbinom(misserfolge, size = k, prob = p)
+round(ergebnis, digits = 6)
+# [1] 0.013562</code></pre>
+    </div>
+  </details>
+
+    </div>
+  </details>
+</section>
+  </div>
+</main>
+<script>
+const exercises = document.getElementById('exercises');
+const shuffleButton = document.getElementById('shuffle');
+const closeButton = document.getElementById('close');
+
+function collapseAll() {
+  for (const solution of exercises.querySelectorAll('details')) {
+    solution.open = false;
+  }
+}
+
+function shuffleExercises() {
+  collapseAll();
+  const cards = Array.from(exercises.children);
+  for (let index = cards.length - 1; index > 0; index--) {
+    const other = Math.floor(Math.random() * (index + 1));
+    [cards[index], cards[other]] = [cards[other], cards[index]];
+  }
+  cards.forEach((card, index) => {
+    card.querySelector('.exercise-number').textContent = 'Aufgabe ' + (index + 1);
+  });
+  exercises.append(...cards);
+}
+
+for (const solution of exercises.querySelectorAll('.answer')) {
+  solution.addEventListener('toggle', () => {
+    solution.querySelector('summary').textContent = solution.open ? 'Lösung ausblenden' : 'Lösung anzeigen';
+  });
+}
+shuffleButton.addEventListener('click', shuffleExercises);
+closeButton.addEventListener('click', collapseAll);
+shuffleExercises();
+shuffleButton.hidden = false;
+closeButton.hidden = false;
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vier R-Funktionen für Verteilungen</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef3f6;color:#193448;font:17px/1.55 system-ui,sans-serif}
+main{max-width:1040px;margin:auto;padding:24px}h1{font-size:clamp(27px,5vw,38px);line-height:1.15}
+nav,.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+button,input{font:inherit}button{background:white;color:inherit;border:1px solid #a8bdcb;border-radius:8px;padding:8px 13px;cursor:pointer}
+button[aria-pressed=true]{background:#195675;color:white}section{background:white;padding:22px;border-radius:14px}
+[hidden]{display:none!important}label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}h2{margin-top:0}
+svg{width:100%;height:auto;display:block}pre{background:#152f41;color:white;padding:14px;border-radius:8px;overflow-x:auto}
+#result{background:#edf5f9;padding:12px;border-radius:8px}details{margin:20px 0}summary{cursor:pointer;font-weight:650}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;margin-top:10px}th,td{padding:7px;text-align:left;border-bottom:1px solid #cfdee7}
+.quantile-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.quantile-pair figure{margin:0;min-width:0}
+.quantile-pair figcaption{font-size:15px;font-weight:650;margin-bottom:6px}
+@media(max-width:760px){.quantile-pair{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<h1>Vier R-Funktionen für Verteilungen</h1>
+<p>In einem Kaufhaus kommen im Mittel sechs Personen pro Minute an. Wir modellieren die Anzahl X der Ankünfte in einer Minute mit einer Poisson-Verteilung und nehmen eine konstante Rate und unabhängige Ankünfte an.</p>
+<nav aria-label="R-Funktion auswählen">
+<button data-mode="d">dpois · Genau k</button><button data-mode="p">ppois · Höchstens k</button>
+<button data-mode="q">qpois · Quantil</button><button data-mode="r">rpois · Simulieren</button>
+</nav>
+<section>
+<h2 id="question"></h2>
+<div class="controls">
+<label id="count-control">Anzahl k <input id="count" type="range" min="0" max="18" value="9"><output id="count-value">9</output></label>
+<label id="prob-control" hidden>Zielwahrscheinlichkeit <input id="prob" type="range" min="1" max="99" value="95"><output id="prob-value">95 %</output></label>
+<label id="sample-control" hidden>Simulierte Minuten <input id="sample" type="range" min="5" max="100" value="20"><output id="sample-value">20</output></label>
+<button id="simulate" hidden>Neu simulieren</button>
+</div>
+<div id="plot"></div>
+<p id="result" aria-live="polite"></p>
+<p id="sample-values" hidden></p>
+<pre><code id="code"></code></pre>
+</section>
+<details>
+<summary>Die gleichen vier Präfixe bei anderen Verteilungen</summary>
+<div class="table-wrap"><table><thead><tr><th>Verteilung</th><th>d: Masse oder Dichte</th><th>p: Kumulative Wahrscheinlichkeit</th><th>q: Quantil</th><th>r: Zufallswerte</th></tr></thead>
+<tbody>
+<tr><th>Binomial</th><td><code>dbinom</code></td><td><code>pbinom</code></td><td><code>qbinom</code></td><td><code>rbinom</code></td></tr>
+<tr><th>Poisson</th><td><code>dpois</code></td><td><code>ppois</code></td><td><code>qpois</code></td><td><code>rpois</code></td></tr>
+<tr><th>Negativ binomial</th><td><code>dnbinom</code></td><td><code>pnbinom</code></td><td><code>qnbinom</code></td><td><code>rnbinom</code></td></tr>
+<tr><th>Normal</th><td><code>dnorm</code></td><td><code>pnorm</code></td><td><code>qnorm</code></td><td><code>rnorm</code></td></tr>
+<tr><th>t</th><td><code>dt</code></td><td><code>pt</code></td><td><code>qt</code></td><td><code>rt</code></td></tr>
+</tbody></table></div>
+<p>Bei stetigen Verteilungen liefert <code>d</code> eine Dichte. Eine Wahrscheinlichkeit für ein Intervall berechnet man mit der Differenz zweier kumulierter Wahrscheinlichkeiten.</p>
+</details>
+<noscript>Für die interaktiven Diagramme muss JavaScript aktiviert sein.</noscript>
+</main>
+<script>
+const byId = id => document.getElementById(id);
+const lambda = 6;
+const maxCount = 20;
+const masses = [Math.exp(-lambda)];
+for (let k = 1; k <= maxCount; k++) masses.push(masses[k - 1] * lambda / k);
+let running = 0;
+const cumulative = masses.map(mass => running += mass);
+const percent = value => (100 * value).toFixed(2).replace('.', ',') + ' %';
+let mode = 'd';
+let sample = [];
+
+function simulate() {
+  const n = Number(byId('sample').value);
+  const limit = Math.exp(-lambda);
+  sample = Array.from({length: n}, () => {
+    let product = 1, steps = 0;
+    do {
+      product *= Math.random();
+      steps++;
+    } while (product > limit);
+    return steps - 1;
+  });
+  render();
+}
+
+function plot(highlight, observed = null) {
+  const width = 850, left = 56, base = 245, gap = 36, top = 25;
+  const max = observed ? Math.max(.2, ...observed) : .2;
+  const y = value => base - value / max * (base - top);
+  let svg = '<svg viewBox="0 0 850 292" role="img" aria-label="Wahrscheinlichkeiten oder relative Häufigkeiten nach Anzahl der Ankünfte">';
+  for (let i = 0; i <= 4; i++) {
+    const value = max * i / 4;
+    svg += `<path d="M${left-12},${y(value)}H${width-20}" stroke="#dfe8ee"/><text x="3" y="${y(value)+4}" font-size="12">${value.toFixed(2).replace('.',',')}</text>`;
+  }
+  masses.forEach((mass, k) => {
+    const x = left + k * gap;
+    const value = observed ? observed[k] : mass;
+    svg += `<rect x="${x-11}" y="${y(value)}" width="22" height="${base-y(value)}" fill="${highlight(k) ? '#2177a5' : '#bbcbd6'}"/><text x="${x}" y="264" text-anchor="middle" font-size="12">${k}</text>`;
+    if (observed) svg += `<circle cx="${x}" cy="${y(mass)}" r="3" fill="#a64f18"/>`;
+  });
+  byId('plot').innerHTML = svg + '<text x="425" y="286" text-anchor="middle" font-size="14">Ankünfte pro Minute</text></svg>';
+}
+
+function plotMarkedMass(quantile, showThreshold) {
+  const left = 48, right = 435, top = 22, bottom = 236;
+  const countLimit = 18;
+  const step = (right - left) / (countLimit + 1);
+  const x = k => left + k * step;
+  const y = probability => bottom - probability / .2 * (bottom - top);
+  let svg = '<svg viewBox="0 0 450 295" role="img" aria-label="Poisson-Balken mit markierter Wahrscheinlichkeit von null bis k">';
+  for (let tick = 0; tick <= 4; tick++) {
+    const probability = tick * .05;
+    svg += `<path d="M${left},${y(probability)}H${right}" stroke="#dfe8ee"/><text x="3" y="${y(probability)+4}" font-size="12">${tick * 5} %</text>`;
+  }
+  for (let k = 0; k <= countLimit; k++) {
+    const color = k <= quantile ? '#2177a5' : '#bbcbd6';
+    svg += `<rect x="${x(k)}" y="${y(masses[k])}" width="${step}" height="${bottom-y(masses[k])}" fill="${color}" stroke="white" stroke-width=".7"/>`;
+    svg += `<text x="${x(k)+step/2}" y="256" text-anchor="middle" font-size="12">${k}</text>`;
+  }
+  if (showThreshold) {
+    const boundary = x(quantile + 1);
+    svg += `<path d="M${boundary},${top}V${bottom}" stroke="#a64f18" stroke-width="2" stroke-dasharray="6 4"/>`;
+    svg += `<text x="${Math.min(boundary - 5, right - 5)}" y="16" text-anchor="end" font-size="13" fill="#a64f18">k = ${quantile}</text>`;
+  }
+  return svg + `<text x="240" y="277" text-anchor="middle" font-size="13">Ankünfte pro Minute</text><text x="48" y="291" font-size="13" fill="#2177a5">Blaue Fläche: P(X ≤ ${quantile}) = ${percent(cumulative[quantile])}</text></svg>`;
+}
+
+function plotCumulativePair(quantile, target = null) {
+  const left = 48, right = 435, top = 22, bottom = 236;
+  const countLimit = 18;
+  const x = k => left + (k + .5) * (right - left) / (countLimit + 1);
+  const y = probability => bottom - probability * (bottom - top);
+  let svg = '<svg viewBox="0 0 450 316" role="img" aria-label="Kumulative Wahrscheinlichkeit und Gegenwahrscheinlichkeit">';
+  for (let percent = 0; percent <= 100; percent += 25) {
+    svg += `<path d="M${left},${y(percent/100)}H${right}" stroke="#dfe8ee"/><text x="4" y="${y(percent/100)+4}" font-size="13">${percent} %</text>`;
+  }
+  const path = cumulative.slice(0, countLimit + 1).map((value, k) => k === 0 ? `M${x(k)},${y(value)}` : `H${x(k)}V${y(value)}`).join(' ');
+  svg += `<path d="${path}" fill="none" stroke="#2177a5" stroke-width="3"/>`;
+  const complementPath = cumulative.slice(0, countLimit + 1).map((value, k) =>
+    k === 0 ? `M${x(k)},${y(1 - value)}` : `H${x(k)}V${y(1 - value)}`
+  ).join(' ');
+  svg += `<path d="${complementPath}" fill="none" stroke="#bbcbd6" stroke-width="3"/>`;
+  svg += `<circle cx="${x(quantile)}" cy="${y(1 - cumulative[quantile])}" r="5" fill="#bbcbd6" stroke="#597487" stroke-width="1"/>`;
+  if (target !== null) svg += `<path d="M${left},${y(target)}H${right}" stroke="#a64f18" stroke-width="2" stroke-dasharray="6 4"/>`;
+  svg += `<path d="M${x(quantile)},${y(cumulative[quantile])}V${bottom}" stroke="#2177a5" stroke-dasharray="4 4"/>`;
+  for (let k = 0; k <= countLimit; k++) {
+    svg += `<text x="${x(k)}" y="256" text-anchor="middle" font-size="13">${k}</text>`;
+  }
+  for (const k of target === null ? [quantile] : [quantile - 1, quantile]) {
+    if (k >= 0) svg += `<circle cx="${x(k)}" cy="${y(cumulative[k])}" r="5" fill="#2177a5" stroke="white" stroke-width="1.5"/>`;
+  }
+  svg += '<text x="240" y="277" text-anchor="middle" font-size="13">Ankünfte pro Minute (k)</text>';
+  svg += '<path d="M48,290h16" stroke="#2177a5" stroke-width="3"/><text x="69" y="294" font-size="13">P(X ≤ k)</text><path d="M155,290h16" stroke="#bbcbd6" stroke-width="3"/><text x="176" y="294" font-size="13">P(X &gt; k)</text>';
+  if (target !== null) svg += '<text x="48" y="311" font-size="13" fill="#a64f18">Gestrichelt: gewählte Zielwahrscheinlichkeit</text>';
+  svg += '</svg>';
+  byId('plot').innerHTML = `<div class="quantile-pair">
+    <figure><figcaption>Kumulierte Wahrscheinlichkeit P(X ≤ k)</figcaption>${svg}</figure>
+    <figure><figcaption>Wahrscheinlichkeiten P(X = k)</figcaption>${plotMarkedMass(quantile, target === null)}</figure>
+  </div>`;
+}
+
+function render() {
+  const k = Number(byId('count').value);
+  const target = Number(byId('prob').value) / 100;
+  byId('count-value').value = k;
+  byId('prob-value').value = Math.round(100 * target) + ' %';
+  byId('sample-value').value = byId('sample').value;
+  byId('count-control').hidden = mode !== 'd' && mode !== 'p';
+  byId('prob-control').hidden = mode !== 'q';
+  byId('sample-control').hidden = mode !== 'r';
+  byId('simulate').hidden = mode !== 'r';
+  byId('sample-values').hidden = mode !== 'r';
+  document.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', button.dataset.mode === mode));
+
+  let question, result, code;
+  if (mode === 'd') {
+    question = 'Wie wahrscheinlich sind genau ' + k + ' Ankünfte?';
+    result = `P(X = ${k}) = ${percent(masses[k])}. Der blaue Balken zeigt die Wahrscheinlichkeit für genau diese Anzahl.`;
+    code = `lambda <- 6\nk <- ${k}\ndpois(k, lambda = lambda)\n# [1] ${masses[k].toFixed(6)}`;
+    plot(j => j === k);
+  } else if (mode === 'p') {
+    question = 'Wie wahrscheinlich sind höchstens ' + k + ' Ankünfte?';
+    result = `P(X ≤ ${k}) = ${percent(cumulative[k])}. Die Höhe der Treppe links bei k = ${k} entspricht der Summe der blauen Balken von 0 bis ${k} rechts.`;
+    code = `lambda <- 6\nk <- ${k}\nppois(k, lambda = lambda)\n# [1] ${cumulative[k].toFixed(6)}`;
+    plotCumulativePair(k);
+  } else if (mode === 'q') {
+    const q = cumulative.findIndex(value => value >= target);
+    const targetPercent = Math.round(100 * target);
+    question = `Welche Zahl k müssen wir wählen, damit in einer zufällig ausgewählten Minute mit mindestens ${targetPercent} % Wahrscheinlichkeit höchstens k Personen ankommen?`;
+    result = `Bei k = ${q-1} beträgt die Wahrscheinlichkeit ${percent(cumulative[q-1])}. Bei k = ${q} beträgt sie ${percent(cumulative[q])}. Daher ist ${q} die kleinste Zahl, die das Ziel von ${targetPercent} % erreicht. Die blaue Fläche rechts addiert die Wahrscheinlichkeiten von 0 bis ${q}. Diese Summe ist die Höhe der Treppe links bei k = ${q}.`;
+    code = `lambda <- 6\np <- ${target.toFixed(2)}\nk <- qpois(p, lambda = lambda)\nk\n# [1] ${q}\n\n# Mit ppois prüfen: erst unter dem Ziel, dann am oder über dem Ziel\nppois(k - 1, lambda = lambda)\n# [1] ${cumulative[q-1].toFixed(6)}\nppois(k, lambda = lambda)\n# [1] ${cumulative[q].toFixed(6)}`;
+    plotCumulativePair(q, target);
+  } else {
+    question = 'Wie sehen simulierte Ankunftszahlen aus?';
+    const observed = masses.map((_, k) => sample.filter(value => value === k).length / sample.length);
+    plot(() => true, observed);
+    const outside = sample.filter(value => value > maxCount).length;
+    result = `Blau: relative Häufigkeiten aus ${sample.length} simulierten Minuten. Orange Punkte: theoretische Poisson-Wahrscheinlichkeiten.` + (outside ? ` Werte über ${maxCount} außerhalb des Ausschnitts: ${outside}.` : '');
+    byId('sample-values').textContent = 'Simulierte Anzahlen: ' + sample.join(', ');
+    code = `lambda <- 6\nn <- ${sample.length}\nrpois(n, lambda = lambda)\n# Bei jedem Aufruf entstehen neue Zufallswerte.`;
+  }
+  byId('question').textContent = question;
+  if (mode === 'p' || mode === 'q') {
+    const threshold = mode === 'q' ? cumulative.findIndex(value => value >= target) : k;
+    result += ` Die hellblaue Treppe zeigt P(X > ${threshold}) = ${percent(1 - cumulative[threshold])}.`;
+  }
+  byId('result').textContent = result;
+  byId('code').textContent = code;
+}
+
+document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
+  mode = button.dataset.mode;
+  if (mode === 'r' && sample.length === 0) simulate();
+  else render();
+}));
+byId('count').addEventListener('input', render);
+byId('prob').addEventListener('input', render);
+byId('sample').addEventListener('input', simulate);
+byId('simulate').addEventListener('click', simulate);
+render();
+</script>
+</body></html>

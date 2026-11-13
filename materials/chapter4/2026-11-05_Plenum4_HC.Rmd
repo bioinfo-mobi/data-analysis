@@ -1,0 +1,276 @@
+---
+title: "Plenum 4  - hierarchichal clustering"
+author: "Carl Herrmann - Maiwen Caudron-Herger"
+date: "05/11/2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Clustering
+
+### Generating a simulated dataset
+
+Let us generate a small dataset, of 15 samples (columns) and 20 "genes" (rows):
+We will generate this dataset such that there are 3 groups:
+
+```{r}
+set.seed(123)
+
+## this are 3 seed "patients"
+p1 = c(rnorm(10),rnorm(10,mean=1))
+p2 = c(rnorm(10,mean=2),rnorm(10))
+p3 = c(rnorm(10,mean=-1),rnorm(10))
+
+plot(p1,type='b',col='green',main='Seed patients',ylim=c(-3,5))
+lines(p2,type='b',col='red')
+lines(p3,type='b',col='blue')
+
+```
+
+
+
+```{r}
+## now we add fluctuations around the values of this patient
+## to create the first group of 5 patients
+
+s = 1
+
+X1 = sapply(1:5,function(i) {
+  x = rnorm(20,sd=s)
+  p = p1 + x
+  return(p)
+})
+
+## now we add fluctuations around the values of this patient
+## to create the second group of 5 patients
+X2 = sapply(1:5,function(i) {
+  x = rnorm(20,sd=s) ## we add fluctuations with a mean of 0
+  p = p2 + x
+  return(p)
+})
+
+X3 = sapply(1:5,function(i) {
+  x = rnorm(20,sd=s) ## we add fluctuations with a mean of 0
+  p = p3 + x
+  return(p)
+})
+
+X = cbind(X1,X2,X3)
+colnames(X) = paste0('Pat.',1:ncol(X))
+rownames(X) = paste0('Gene_',1:nrow(X))
+
+
+##
+boxplot(X)
+```
+
+
+### Displaying the dataset as a heatmap
+
+```{r}
+#library(pheatmap)
+pheatmap::pheatmap(X,
+         cluster_cols = TRUE,
+         cluster_rows = FALSE, 
+         clustering_distance_cols = 'euclidean',
+         clustering_method = 'complete')
+
+
+pheatmap::pheatmap(X,
+         cluster_cols = TRUE,
+         cluster_rows = FALSE, 
+         clustering_distance_cols = 'euclidean',
+         clustering_method = 'single')
+```
+
+We see the three groups appearing clearly!
+
+Kmeans:
+
+```{r}
+## beware that we need to transpose X if we want to cluster the patients!!
+km = kmeans(t(X),centers=3)
+clust = data.frame(Cluster = as.factor(km$cluster))
+clust
+```
+
+
+We can cut the tree
+
+```{r}
+hm = pheatmap::pheatmap(X,
+         cluster_cols = TRUE,
+         cluster_rows = TRUE, 
+         clustering_distance_cols = 'minkowski',
+         clustering_method = 'ward.D2',
+         annotation_col = clust)
+```
+
+Optimal number of clusters?
+
+```{r}
+# Silhouette and WSS plot
+library(factoextra)
+fviz_nbclust(t(X), kmeans, method = "silhouette")
+fviz_nbclust(t(X), kmeans, method = "wss")
+```
+
+
+```{r}
+height = 10
+hcol = as.dendrogram(hm$tree_col)
+plot(hcol);abline(h=height,lty=3,col='red',lwd=2)
+```
+
+```{r}
+cutree(hm$tree_col,h=10)
+```
+
+
+
+## Look at the distance matrix
+
+```{r}
+dd = dist(t(X))
+h = hclust(dd)
+dd
+h
+```
+
+
+
+
+## Principal Component Analysis
+
+```{r}
+pca = prcomp(t(X))
+```
+
+```{r}
+variance = (pca$sdev)^2
+barplot(variance)
+```
+
+```{r}
+prop.var = variance/sum(variance)
+barplot(prop.var,names.arg = paste0('PC',1:length(variance)))
+```
+
+
+
+```{r}
+pca$x
+```
+
+
+
+
+```{r}
+rot = pca$rotation
+par(las=2,cex=0.8,mar=c(2,5,2,2),mfrow=c(1,2))
+barplot(rot[,1],horiz=TRUE,main='PC1')
+barplot(rot[,2],horiz=TRUE,main='PC2')
+
+```
+
+
+```{r}
+new.coordinates = pca$x
+color = c(rep('green',5),rep('red',5),rep('blue',5))
+
+plot(new.coordinates[,1],new.coordinates[,2],pch=19,
+     xlab='PC1',ylab='PC2',col=color)
+
+#plot(X[1,],X[2,],pch=19,
+#     xlab='Gene_1',ylab='Gene_2',col=color)
+
+```
+
+
+Other dataset: decathlon
+
+```{r}
+library(factoextra)
+data(decathlon2)
+decathlon2.active = decathlon2[, 1:10]
+```
+
+
+How are the variables distributed?
+
+
+```{r}
+par(mar=c(5,4,4,4))
+boxplot(decathlon2.active,las=2)
+```
+Scales are very different! They need to be scaled before running the PCA:
+
+
+```{r}
+deca.scaled = scale(decathlon2.active)
+par(mar=c(5,4,4,4))
+boxplot(deca.scaled,las=2)
+```
+
+
+```{r}
+decathlon2.active = decathlon2[,1:10]
+res.pca.nosc = prcomp(decathlon2.active, scale = FALSE)
+res.pca.sc = prcomp(decathlon2.active, scale = TRUE)
+```
+
+```{r}
+variance = res.pca.sc$sdev^2
+prop.var = variance/sum(variance)
+m.var = mean(prop.var)
+names(prop.var) = paste0('PC',1:length(prop.var))
+barplot(cumsum(prop.var),cex.names = 0.7);abline(h=0.7,lwd=2,lty=3)
+```
+
+
+```{r}
+barplot(prop.var,cex.names = 0.6);abline(h=m.var,lwd=2,lty=3)
+```
+
+
+```{r}
+library(factoextra)
+fviz_pca_ind(res.pca.sc,axes = c(1,2))
+```
+```{r}
+rot = res.pca.sc$rotation
+par(las=2,cex=0.8,mar=c(4,5,2,2),mfrow=c(1,2))
+barplot(rot[,1],horiz=TRUE,main='PC1')
+barplot(rot[,2],horiz=TRUE,main='PC2')
+```
+
+```{r}
+fviz_pca_biplot(res.pca.sc)
+```
+
+We can add additional information from external variables; for example, at which competition was this performance achieved?
+
+```{r}
+competition = as.factor(decathlon2$Competition)
+```
+
+```{r}
+fviz_pca_ind(res.pca.sc,col.ind = competition)
+```
+
+
+What happens if we transpose the matrix??
+
+```{r}
+Y = scale(decathlon2.active)
+Y = t(Y)
+res.pca2 = prcomp(Y, scale = TRUE)
+```
+
+```{r}
+fviz_pca_ind(res.pca2,axes = c(1,2))
+```
+
