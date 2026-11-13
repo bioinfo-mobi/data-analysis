@@ -65,6 +65,9 @@ We are going to look at them more deeply in the following.
 1.  Let's get a grasp of what these functions actually do. You should be familiar with the cumulative distribution function, let's take a look at that and its inverse first. We will work with a Normal distribution. We calculate the **cumulative probability** for the values 1,2,3,4 in three different distributions, using one of the functions described previously. Short hint: **p** like **cumulative P-robability**. Which function are you going to use?
 
 ```{r echo=TRUE}
+# Distribution 1: Mean = 2, Standard Deviation = 1
+# Distribution 2: Mean = 2, Standard Deviation = 2
+# Distribution 3: Mean = 4, Standard Deviation = 1
 
 ```
 
@@ -73,7 +76,9 @@ We are going to look at them more deeply in the following.
 Now, on the same distributions, we calculate the **inverse cdf** (inverse cumulative distribution function) for the cumulative probabilities of 25%, 50 % and 75%. We use the `qnorm()` function for this (**q- like quantile**): 
 
 ```{r}
-
+# Distribution 1: Mean = 2, Standard Deviation = 1
+# Distribution 2: Mean = 2, Standard Deviation = 2
+# Distribution 3: Mean = 4, Standard Deviation = 1
 ```
 
 > Try with 100% on any of the distributions. Can you explain this result? Do you expect the result to be different in the other ones?
@@ -241,6 +246,8 @@ sum(tp53.exp$TP53_expression > 1000)/nrow(tp53.exp)
 Again, using a normal distribution with $\mu = 1380.822$ and $\sigma = 719.5934$, what if we ask these kinds of questions:
 
 ```{r}
+# Q1: What is the value of TP53 expression at the 10% quantile?
+# Q2: What is the value of TP53 expression at the 90% quantile?
 
 ```
 
