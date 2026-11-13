@@ -13,6 +13,7 @@ video: 5.2 Distributions – RStudio demo
 url: https://www.youtube.com/watch?v=TajZYWmhxuQ
 
 markdown_r: materials/chapter5/_05_probability_distributions_dplyr.Rmd | Chapter 5 – Probability Distributions (R Markdown)
+markdown_r: materials/chapter5/_05_probability_distributions_sol_dplyr.Rmd | Chapter 5 – Probability Distributions - Solutions (R Markdown)
 markdown_python: materials/chapter5/_05_probability_distributions_python.ipynb | Chapter 5 – Probability Distributions (Python Notebook)
 dataset_note: **Dataset:** This sheet uses a table of TP53 gene expression measurements in 586 lung cancer patients, loaded directly inside the R Markdown file — no separate download needed.
 bonus_note: **Bonus reference:** a companion script with more distribution examples, and a plenum recap (relationships between distributions, Q-Q plots). Quiz 3 & 5 below draw on this material.
