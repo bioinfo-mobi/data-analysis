@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Analysis – Week 5: Inference, CLT, Confidence Intervals</title>
+<style>
+  :root{--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--bg:#f8fafc;--card:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45}
+  header{background:linear-gradient(135deg,#C61826 0%,#590D08 100%);color:#fff;padding:18px 24px}
+  header h1{margin:0;font-size:1.35rem;font-weight:650}
+  header p{margin:4px 0 0;color:#F4F1EA;font-size:.92rem}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  nav button{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:8px;font-size:.93rem;cursor:pointer;color:var(--ink)}
+  nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .panel{display:none}.panel.active{display:block}
+  .intro{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:.94rem}
+  .intro ul{margin:6px 0 0 18px;padding:0}
+  .grid{display:grid;grid-template-columns:310px 1fr;gap:16px;align-items:start}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .ctl{margin-bottom:14px}
+  .ctl label{display:flex;justify-content:space-between;font-size:.9rem;font-weight:600;margin-bottom:3px}
+  .ctl label span.v{font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%}
+  select{width:100%;padding:6px;border-radius:6px;border:1px solid var(--line);font-size:.92rem}
+  button.act{background:var(--blue);color:#fff;border:0;border-radius:7px;padding:8px 12px;font-size:.9rem;cursor:pointer;margin-right:6px}
+  button.sec{background:#e5e7eb;color:var(--ink)}
+  .chk{font-size:.9rem;display:flex;align-items:center;gap:6px;margin:6px 0}
+  canvas{width:100%;display:block}
+  .stats{font-size:.9rem;margin-top:10px}
+  .stats table{border-collapse:collapse;width:100%}
+  .stats td,.stats th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+  .stats th{color:var(--mute);font-weight:600;font-size:.82rem}
+  .stats tr.hl td{background:#eff6ff;font-weight:650}
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;background:#f1f5f9;border-radius:6px;padding:6px 8px;font-size:.88rem;margin:6px 0}
+  .note{color:var(--mute);font-size:.84rem;margin-top:6px}
+  .ok{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}
+  h3{margin:2px 0 8px;font-size:1rem}
+  footer{color:var(--mute);font-size:.8rem;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Week 5 · Statistical inference, Central Limit Theorem &amp; Confidence Intervals</h1>
+  <p>Interactive companion – Data Analysis (Molecular Biotechnology). Move the sliders and watch what changes.</p>
+</header>
+<div class="wrap">
+<nav id="nav">
+  <button data-tab="t1" class="active">1 · Central Limit Theorem</button>
+  <button data-tab="t2">2 · Confidence intervals: coverage</button>
+  <button data-tab="t3">3 · Anatomy of a CI &amp; test</button>
+  <button data-tab="t4">4 · Sample size &amp; precision</button>
+</nav>
+
+<!-- ================= TAB 1 ================= -->
+<section id="t1" class="panel active">
+  <div class="intro"><b>Idea.</b> Draw many samples of size <i>n</i> from a population, compute the mean of each, and look at the histogram of those means (the <i>sampling distribution</i> of x̄). The CLT says: it approaches N(μ, σ/√n), whatever the population.
+    <ul><li>Pick the <b>exponential</b> or <b>lognormal</b> population and increase <i>n</i> from 1 to 5, 30, 200: when does the bell shape appear?</li>
+    <li>Watch the observed SD of x̄ against σ/√n (the <i>standard error</i>) and the skewness shrinking like 1/√n.</li>
+    <li>Try the <b>binary</b> population (a "yes/no" variable, e.g. mutated vs. wild-type): x̄ is then a proportion.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Population</label>
+        <select id="t1pop">
+          <option value="normal">Normal (μ=0, σ=1)</option>
+          <option value="uniform">Uniform on [0,1]</option>
+          <option value="exp" selected>Exponential (rate 1) – skewed</option>
+          <option value="lognormal">Lognormal (σ=1) – very skewed</option>
+          <option value="bimodal">Bimodal mixture</option>
+          <option value="bern">Binary (p = 0.15)</option>
+        </select></div>
+      <div class="ctl"><label>Sample size n <span class="v" id="t1nV"></span></label><input type="range" id="t1n" min="1" max="300" step="1" value="5"></div>
+      <div class="ctl"><label>Number of samples (repetitions) <span class="v" id="t1MV"></span></label><input type="range" id="t1M" min="100" max="20000" step="100" value="3000"></div>
+      <label class="chk"><input type="checkbox" id="t1norm" checked> Overlay N(μ, σ/√n)</label>
+      <label class="chk"><input type="checkbox" id="t1rug" checked> Show one sample (dots) &amp; its mean</label>
+      <div style="margin-top:8px"><button class="act" id="t1new">Draw new samples</button></div>
+      <div class="stats" id="t1stats"></div>
+    </div>
+    <div class="card">
+      <h3>Population distribution</h3>
+      <canvas id="t1pc" style="height:190px"></canvas>
+      <h3 style="margin-top:12px">Distribution of the sample mean x̄ (<span id="t1hdr"></span>)</h3>
+      <canvas id="t1hc" style="height:300px"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section id="t2" class="panel">
+  <div class="intro"><b>Idea.</b> A 95% CI is a <i>procedure</i>: if we repeat the experiment many times, ~95% of the intervals contain the true μ. Each horizontal line below is one experiment.
+    <ul><li>Increase the <b>confidence level</b>: intervals get wider, more of them cover μ. Decrease <i>n</i>: intervals get wider as well.</li>
+    <li>Choose <b>"z with s plugged in"</b> at n = 3–5: coverage falls <i>below</i> the nominal level – this is why we need the t-distribution.</li>
+    <li>Choose the lognormal population with small n: even the t-interval under-covers. Increase n and watch it recover (CLT).</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Population</label>
+        <select id="t2pop">
+          <option value="normal" selected>Normal (μ=0, σ=1)</option>
+          <option value="uniform">Uniform on [0,1]</option>
+          <option value="exp">Exponential (rate 1)</option>
+          <option value="lognormal">Lognormal (σ=1)</option>
+          <option value="bimodal">Bimodal mixture</option>
+          <option value="bern">Binary (p = 0.15)</option>
+        </select></div>
+      <div class="ctl"><label>Sample size n <span class="v" id="t2nV"></span></label><input type="range" id="t2n" min="2" max="200" step="1" value="10"></div>
+      <div class="ctl"><label>Confidence level 1−α <span class="v" id="t2lV"></span></label><input type="range" id="t2l" min="50" max="99.9" step="0.1" value="95">
+        <div style="margin-top:4px"><button class="act sec" data-lev="90">90%</button><button class="act sec" data-lev="95">95%</button><button class="act sec" data-lev="99">99%</button></div></div>
+      <div class="ctl"><label>Interval method</label>
+        <select id="t2m">
+          <option value="z">z-interval, σ known: x̄ ± z·σ/√n</option>
+          <option value="t" selected>t-interval, σ estimated: x̄ ± t·s/√n</option>
+          <option value="zs">z with s plugged in: x̄ ± z·s/√n</option>
+        </select></div>
+      <div class="ctl"><label>Intervals shown (experiments) <span class="v" id="t2KV"></span></label><input type="range" id="t2K" min="10" max="150" step="5" value="50"></div>
+      <button class="act" id="t2new">New experiments</button>
+      <div class="stats" id="t2stats"></div>
+    </div>
+    <div class="card">
+      <h3 id="t2hdr"></h3>
+      <canvas id="t2c" style="height:520px"></canvas>
+      <div class="note">Blue: interval contains μ · Red: interval misses μ · dot = sample mean x̄ · small triangles mark intervals extending beyond the plotted range. <b>The x-axis is fixed</b> (μ ± 2.2σ), so you can see intervals shrink as n or the confidence level change.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section id="t3" class="panel">
+  <div class="intro"><b>Idea.</b> For one observed sample (n, x̄, s), the CI uses the quantile t<sub>1−α/2, n−1</sub> of the t-distribution. A test of H₀: μ = μ₀ uses the same ingredients – the two always agree.
+    <ul><li>Slide the <b>confidence level</b>: the red tail areas (total α) and the quantile move.</li>
+    <li>Slide <b>n</b> down to 2–3 and compare the t-distribution (blue) with the normal (grey dashed): heavy tails ⇒ larger quantile ⇒ wider CI.</li>
+    <li>Move μ₀ in and out of the CI: the p-value crosses α exactly when μ₀ leaves the interval.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Sample size n <span class="v" id="t3nV"></span></label><input type="range" id="t3n" min="2" max="200" step="1" value="15"></div>
+      <div class="ctl"><label>Sample mean x̄ <span class="v" id="t3xV"></span></label><input type="range" id="t3x" min="2" max="18" step="0.1" value="10.8"></div>
+      <div class="ctl"><label>Sample SD s <span class="v" id="t3sV"></span></label><input type="range" id="t3s" min="0.5" max="10" step="0.1" value="3"></div>
+      <div class="ctl"><label>Confidence level 1−α <span class="v" id="t3lV"></span></label><input type="range" id="t3l" min="50" max="99.9" step="0.1" value="95"></div>
+      <div class="ctl"><label>Null value μ₀ <span class="v" id="t3mV"></span></label><input type="range" id="t3m" min="2" max="18" step="0.1" value="10"></div>
+      <label class="chk"><input type="checkbox" id="t3norm" checked> Compare with N(0,1)</label>
+      <div class="stats" id="t3stats"></div>
+    </div>
+    <div class="card">
+      <h3>Sampling distribution of the t-statistic under H₀ (df = n−1)</h3>
+      <div class="note" style="margin:0 0 4px"><span style="color:#2563eb">■ central area = confidence level 1−α</span> &nbsp; <span style="color:#dc2626">■ two tails, α/2 each (beyond ±t<sub>crit</sub>)</span> &nbsp; <span style="color:#7c3aed">| observed t</span></div>
+      <canvas id="t3c" style="height:300px"></canvas>
+      <h3 style="margin-top:12px">Confidence interval on the original scale</h3>
+      <canvas id="t3d" style="height:110px"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section id="t4" class="panel">
+  <div class="intro"><b>Idea.</b> The half-width of a CI is t·s/√n. Precision improves only with √n: to halve the interval you need 4× the samples.
+    <ul><li>Set the <b>target margin</b> and see how many samples you need – useful when planning an experiment.</li>
+    <li>Compare the curves for 90 / 95 / 99%: higher confidence costs samples.</li>
+    <li>Double <i>s</i> (more noise) and see how the required n grows.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Standard deviation s <span class="v" id="t4sV"></span></label><input type="range" id="t4s" min="0.5" max="20" step="0.1" value="10"></div>
+      <div class="ctl"><label>Confidence level 1−α <span class="v" id="t4lV"></span></label><input type="range" id="t4l" min="50" max="99.9" step="0.1" value="95"></div>
+      <div class="ctl"><label>Current sample size n <span class="v" id="t4nV"></span></label><input type="range" id="t4n" min="2" max="500" step="1" value="20"></div>
+      <div class="ctl"><label>Target half-width (margin of error) d <span class="v" id="t4dV"></span></label><input type="range" id="t4d" min="0.2" max="10" step="0.1" value="2"></div>
+      <div class="stats" id="t4stats"></div>
+    </div>
+    <div class="card">
+      <h3>Half-width of the CI as a function of n</h3>
+      <canvas id="t4c" style="height:430px"></canvas>
+    </div>
+  </div>
+</section>
+</div>
+<footer>Everything runs locally in your browser – no internet connection needed.</footer>
+
+<script>
+"use strict";
+/* ---------- numerics ---------- */
+const SQ2PI=Math.sqrt(2*Math.PI);
+function erfc(x){const z=Math.abs(x),t=1/(1+0.5*z);const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));return x>=0?r:2-r;}
+const normCdf=x=>0.5*erfc(-x/Math.SQRT2);
+const normPdf=x=>Math.exp(-x*x/2)/SQ2PI;
+function normInv(p){const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00],b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01],c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00],d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];const pl=0.02425,ph=1-pl;let q,r;if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}if(p>ph){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let y=x,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;for(let j=0;j<6;j++)ser+=c[j]/++y;return -tmp+Math.log(2.5066282746310005*ser/x);}
+function betacf(a,b,x){const FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return h;}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tCdf(t,v){if(v>1000)return normCdf(t*(1-1/(4*v))/Math.sqrt(1+t*t/(2*v)));const ib=betai(v/2,0.5,v/(v+t*t));return t>=0?1-0.5*ib:0.5*ib;}
+function tPdf(t,v){return Math.exp(lgamma((v+1)/2)-lgamma(v/2))/Math.sqrt(v*Math.PI)*Math.pow(1+t*t/v,-(v+1)/2);}
+function tInv(p,v){if(p<0.5)return -tInv(1-p,v);if(v>1000){const z=normInv(p);return z+(z**3+z)/(4*v)+(5*z**5+16*z**3+3*z)/(96*v*v);}let lo=0,hi=1;while(tCdf(hi,v)<p&&hi<1e7)hi*=2;for(let i=0;i<70;i++){const mid=(lo+hi)/2;if(tCdf(mid,v)<p)lo=mid;else hi=mid;}return (lo+hi)/2;}
+
+/* ---------- random numbers ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeGen(seed){const u=mulberry32(seed);let spare=null;const z=()=>{if(spare!==null){const s=spare;spare=null;return s;}let a=0;while(a===0)a=u();const b=u(),r=Math.sqrt(-2*Math.log(a));spare=r*Math.sin(2*Math.PI*b);return r*Math.cos(2*Math.PI*b);};return {u,z};}
+const newSeed=()=>Math.floor(Math.random()*2**31);
+
+/* ---------- populations ---------- */
+const E=Math.E;
+const pops={
+  normal:{mean:0,sd:1,skew:0,range:[-4,4],sample:g=>g.z(),pdf:x=>normPdf(x)},
+  uniform:{mean:.5,sd:Math.sqrt(1/12),skew:0,range:[-.2,1.2],sample:g=>g.u(),pdf:x=>(x>=0&&x<=1)?1:0},
+  exp:{mean:1,sd:1,skew:2,range:[-.3,8],sample:g=>-Math.log(1-g.u()),pdf:x=>x>=0?Math.exp(-x):0},
+  lognormal:{mean:Math.exp(.5),sd:Math.sqrt((E-1)*E),skew:(E+2)*Math.sqrt(E-1),range:[-.3,10],sample:g=>Math.exp(g.z()),pdf:x=>x>0?Math.exp(-Math.pow(Math.log(x),2)/2)/(x*SQ2PI):0},
+  bimodal:{mean:0,sd:Math.sqrt(4+.49),skew:0,range:[-5,5],sample:g=>(g.u()<.5?-2:2)+.7*g.z(),pdf:x=>.5*(normPdf((x+2)/.7)+normPdf((x-2)/.7))/.7},
+  bern:{mean:.15,sd:Math.sqrt(.15*.85),skew:(1-.3)/Math.sqrt(.15*.85),range:[-.5,1.5],sample:g=>g.u()<.15?1:0,discrete:[[0,.85],[1,.15]]}
+};
+
+/* ---------- canvas helpers ---------- */
+const COL={ink:'#1f2937',mute:'#6b7280',grid:'#e5e7eb',blue:'#2563eb',red:'#dc2626',green:'#059669',amber:'#d97706',purple:'#7c3aed'};
+function setup(c){const dpr=window.devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';return{ctx,w,h};}
+function frame(w,h,m,x0,x1,y0,y1,logx){const L=m.l,R=w-m.r,T=m.t,B=h-m.b;const fx=logx?(x=>Math.log(x)):(x=>x);const a=fx(x0),b=fx(x1);return{L,R,T,B,sx:x=>L+(fx(x)-a)/(b-a)*(R-L),sy:y=>B-(y-y0)/(y1-y0)*(B-T)};}
+function niceTicks(min,max,n){const span=max-min,raw=span/(n||6),mag=Math.pow(10,Math.floor(Math.log10(raw))),r=raw/mag,step=(r<1.5?1:r<3?2:r<7?5:10)*mag,out=[];for(let v=Math.ceil(min/step-1e-9)*step;v<=max+1e-9;v+=step)out.push(+v.toFixed(10));return out;}
+const fmt=v=>Math.abs(v)<1e-9?'0':(+v.toPrecision(3)).toString();
+function axisX(ctx,f,ticks,label){ctx.strokeStyle=COL.mute;ctx.fillStyle=COL.mute;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(f.L,f.B);ctx.lineTo(f.R,f.B);ctx.stroke();ctx.textAlign='center';ctx.textBaseline='top';for(const t of ticks){const x=f.sx(t);ctx.beginPath();ctx.moveTo(x,f.B);ctx.lineTo(x,f.B+4);ctx.stroke();ctx.fillText(fmt(t),x,f.B+6);}if(label){ctx.fillText(label,(f.L+f.R)/2,f.B+22);}}
+function axisY(ctx,f,ticks,label){ctx.strokeStyle=COL.mute;ctx.fillStyle=COL.mute;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(f.L,f.T);ctx.lineTo(f.L,f.B);ctx.stroke();ctx.textAlign='right';ctx.textBaseline='middle';for(const t of ticks){const y=f.sy(t);ctx.beginPath();ctx.moveTo(f.L-4,y);ctx.lineTo(f.L,y);ctx.stroke();ctx.fillText(fmt(t),f.L-7,y);}if(label){ctx.save();ctx.translate(12,(f.T+f.B)/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(label,0,0);ctx.restore();}}
+function clipTo(ctx,f){ctx.save();ctx.beginPath();ctx.rect(f.L,f.T-2,f.R-f.L,f.B-f.T+4);ctx.clip();}
+function $(id){return document.getElementById(id);}
+
+/* =============================================================
+   TAB 1 – CLT
+   ============================================================= */
+let seed1=newSeed(),D1=null;
+function t1run(){
+  const p=pops[$('t1pop').value],n=+$('t1n').value,M=+$('t1M').value,g=makeGen(seed1);
+  const means=new Float64Array(M);let first=new Float64Array(n);
+  for(let i=0;i<M;i++){let s=0;for(let j=0;j<n;j++){const x=p.sample(g);s+=x;if(i===0)first[j]=x;}means[i]=s/n;}
+  let m1=0;for(const v of means)m1+=v;m1/=M;let m2=0,m3=0;for(const v of means){const d=v-m1;m2+=d*d;m3+=d*d*d;}m2/=M;m3/=M;
+  const sd=Math.sqrt(m2),sk=sd>0?m3/(sd**3):0;
+  D1={p,n,M,means,first,m1,sd,sk};
+}
+function t1draw(){
+  if(!D1)return;const {p,n,M,means,first,m1,sd,sk}=D1;const se=p.sd/Math.sqrt(n);
+  $('t1hdr').textContent='n = '+n+', '+M+' samples';
+  $('t1stats').innerHTML='<table><tr><th></th><th>observed</th><th>theory</th></tr>'+
+    '<tr><td>mean of x̄</td><td>'+m1.toFixed(3)+'</td><td>μ = '+p.mean.toFixed(3)+'</td></tr>'+
+    '<tr><td>SD of x̄</td><td>'+sd.toFixed(3)+'</td><td>σ/√n = '+se.toFixed(3)+'</td></tr>'+
+    '<tr><td>skewness of x̄</td><td>'+sk.toFixed(2)+'</td><td>γ/√n = '+(p.skew/Math.sqrt(n)).toFixed(2)+'</td></tr></table>'+
+    '<div class="note">Population: μ = '+p.mean.toFixed(3)+', σ = '+p.sd.toFixed(3)+', skewness γ = '+p.skew.toFixed(2)+'. Normal ⇒ skewness 0.</div>';
+  /* population plot */
+  {const {ctx,w,h}=setup($('t1pc'));const [x0,x1]=p.range;const m={l:44,r:14,t:10,b:34};
+   let ymax=0;const N=400;
+   if(p.discrete){ymax=Math.max(...p.discrete.map(d=>d[1]))*1.15;}else{for(let i=0;i<=N;i++){ymax=Math.max(ymax,p.pdf(x0+(x1-x0)*i/N));}ymax*=1.12;}
+   const f=frame(w,h,m,x0,x1,0,ymax);
+   ctx.fillStyle='rgba(37,99,235,.15)';ctx.strokeStyle=COL.blue;ctx.lineWidth=2;
+   if(p.discrete){for(const [x,pr] of p.discrete){const bw=(f.sx(x0+.15*(x1-x0))-f.sx(x0));ctx.fillRect(f.sx(x)-bw/2,f.sy(pr),bw,f.B-f.sy(pr));ctx.strokeRect(f.sx(x)-bw/2,f.sy(pr),bw,f.B-f.sy(pr));}}
+   else{ctx.beginPath();for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N,y=p.pdf(x);i?ctx.lineTo(f.sx(x),f.sy(y)):ctx.moveTo(f.sx(x),f.sy(y));}ctx.stroke();ctx.lineTo(f.sx(x1),f.B);ctx.lineTo(f.sx(x0),f.B);ctx.closePath();ctx.fill();}
+   axisX(ctx,f,niceTicks(x0,x1,8),'');axisY(ctx,f,niceTicks(0,ymax,4),p.discrete?'probability':'density');
+   ctx.setLineDash([5,4]);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(f.sx(p.mean),f.T);ctx.lineTo(f.sx(p.mean),f.B);ctx.stroke();ctx.setLineDash([]);
+   ctx.fillStyle=COL.ink;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('μ',f.sx(p.mean)+4,f.T);
+   if($('t1rug').checked){clipTo(ctx,f);ctx.fillStyle='rgba(220,38,38,.35)';for(let j=0;j<first.length;j++){ctx.beginPath();ctx.arc(f.sx(first[j]),f.B-6-((j*37)%11),3,0,6.3);ctx.fill();}
+     let sm=0;for(const v of first)sm+=v;sm/=first.length;ctx.fillStyle=COL.red;ctx.beginPath();const xx=f.sx(sm);ctx.moveTo(xx,f.B-1);ctx.lineTo(xx-6,f.B+9);ctx.lineTo(xx+6,f.B+9);ctx.closePath();ctx.fill();ctx.restore();
+     ctx.fillStyle=COL.red;ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText('dots: one sample of size '+n+'; ▲ its mean x̄ = '+sm.toFixed(2),f.R,f.T);}
+  }
+  /* histogram of means */
+  {const {ctx,w,h}=setup($('t1hc'));const m={l:50,r:14,t:10,b:40};
+   const sorted=Float64Array.from(means).sort();const q=pp=>sorted[Math.min(M-1,Math.max(0,Math.floor(pp*M)))];
+   let lo=Math.min(q(.001),p.mean-3.8*se),hi=Math.max(q(.999),p.mean+3.8*se);const pad=(hi-lo)*.04;lo-=pad;hi+=pad;
+   const B=n===1&&p.discrete?2:50;const bins=new Array(B).fill(0);
+   let a=lo,b=hi;if(n===1&&p.discrete){a=-.5;b=1.5;}
+   const bw=(b-a)/B;for(const v of means){let k=Math.floor((v-a)/bw);if(k>=0&&k<B)bins[k]++;}
+   const dens=bins.map(c=>c/(M*bw));let ymax=Math.max(...dens);const showN=$('t1norm').checked;if(showN)ymax=Math.max(ymax,1/(se*SQ2PI));ymax*=1.1;
+   const f=frame(w,h,m,a,b,0,ymax);
+   ctx.fillStyle='rgba(37,99,235,.35)';ctx.strokeStyle='rgba(37,99,235,.9)';ctx.lineWidth=1;
+   for(let k=0;k<B;k++){if(!bins[k])continue;const x1=f.sx(a+k*bw),x2=f.sx(a+(k+1)*bw),y=f.sy(dens[k]);ctx.fillRect(x1,y,x2-x1,f.B-y);ctx.strokeRect(x1,y,x2-x1,f.B-y);}
+   if(showN){ctx.strokeStyle=COL.red;ctx.lineWidth=2.2;ctx.beginPath();for(let i=0;i<=300;i++){const x=a+(b-a)*i/300,y=normPdf((x-p.mean)/se)/se;i?ctx.lineTo(f.sx(x),f.sy(y)):ctx.moveTo(f.sx(x),f.sy(y));}ctx.stroke();}
+   ctx.setLineDash([5,4]);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(f.sx(p.mean),f.T);ctx.lineTo(f.sx(p.mean),f.B);ctx.stroke();ctx.setLineDash([]);
+   axisX(ctx,f,niceTicks(a,b,8),'sample mean x̄');axisY(ctx,f,niceTicks(0,ymax,4),'density');
+   ctx.fillStyle=COL.red;ctx.textAlign='right';ctx.textBaseline='top';if(showN)ctx.fillText('N(μ, σ/√n) with σ/√n = '+se.toFixed(3),f.R,f.T);
+  }
+}
+['t1pop','t1n','t1M'].forEach(id=>$(id).addEventListener('input',()=>{updT1labels();t1run();t1draw();}));
+['t1norm','t1rug'].forEach(id=>$(id).addEventListener('input',t1draw));
+$('t1new').onclick=()=>{seed1=newSeed();t1run();t1draw();};
+function updT1labels(){$('t1nV').textContent=$('t1n').value;$('t1MV').textContent=$('t1M').value;}
+
+/* =============================================================
+   TAB 2 – coverage
+   ============================================================= */
+let seed2=newSeed(),D2=null;
+function t2run(){
+  const p=pops[$('t2pop').value],n=+$('t2n').value,K=+$('t2K').value,lev=+$('t2l').value,alpha=1-lev/100;
+  const z=normInv(1-alpha/2),tq=tInv(1-alpha/2,n-1),sig=p.sd,mu=p.mean;
+  const g=makeGen(seed2),ints=[];
+  const stat=g=>{let s=0,ss=0;for(let j=0;j<n;j++){const x=p.sample(g);s+=x;ss+=x*x;}const xb=s/n;const v=Math.max(0,(ss-n*xb*xb)/(n-1));return[xb,Math.sqrt(v)];};
+  for(let k=0;k<K;k++){const [xb,s]=stat(g);ints.push({xb,s,hz:z*sig/Math.sqrt(n),ht:tq*s/Math.sqrt(n),hzs:z*s/Math.sqrt(n)});}
+  const R=3000,g2=makeGen(seed2+999),c={z:0,t:0,zs:0},wd={z:0,t:0,zs:0};
+  for(let r=0;r<R;r++){const [xb,s]=stat(g2);const hz=z*sig/Math.sqrt(n),ht=tq*s/Math.sqrt(n),hzs=z*s/Math.sqrt(n),d=Math.abs(xb-mu);if(d<=hz)c.z++;if(d<=ht)c.t++;if(d<=hzs)c.zs++;wd.z+=2*hz;wd.t+=2*ht;wd.zs+=2*hzs;}
+  D2={p,n,K,lev,alpha,z,tq,ints,c,wd,R,sig,mu};
+}
+function t2draw(){
+  if(!D2)return;const {p,n,K,lev,alpha,z,tq,ints,c,wd,R,sig,mu}=D2;const meth=$('t2m').value;
+  const key=meth==='z'?'hz':meth==='t'?'ht':'hzs';
+  $('t2hdr').textContent=K+' experiments, n = '+n+', '+lev.toFixed(1)+'% confidence';
+  let cov=0;ints.forEach(i=>{i.half=i[key];i.cover=Math.abs(i.xb-mu)<=i.half;if(i.cover)cov++;});
+  const pc=k=>(100*c[k]/R).toFixed(1)+'%';const awd=k=>fmt(wd[k]/R);
+  const row=(k,name)=>'<tr'+(meth===k?' class="hl"':'')+'><td>'+name+'</td><td>'+pc(k)+'</td><td>'+awd(k)+'</td></tr>';
+  const df=n-1,pq=(1-alpha/2).toFixed(4).replace(/0+$/,'');
+  $('t2stats').innerHTML='<div class="formula">z<sub>'+pq+'</sub> = '+z.toFixed(3)+'<br>t<sub>'+pq+', df='+df+'</sub> = '+tq.toFixed(3)+'</div>'+
+   '<div>Shown: <b class="'+(cov/K>=lev/100-0.03?'ok':'bad')+'">'+cov+' / '+K+'</b> intervals contain μ ('+(100*cov/K).toFixed(0)+'%).</div>'+
+   '<div class="note" style="margin-top:8px">Long-run coverage, simulated with '+R+' further experiments (nominal '+lev.toFixed(1)+'%):</div>'+
+   '<table><tr><th>method</th><th>coverage</th><th>mean width</th></tr>'+row('z','z, σ known')+row('t','t, s estimated')+row('zs','z, s plugged in')+'</table>';
+  const {ctx,w,h}=setup($('t2c'));const m={l:30,r:14,t:10,b:40};
+  const span=2.2*sig;const x0=mu-span,x1=mu+span; /* fixed axis: independent of n and confidence level */
+  const f=frame(w,h,m,x0,x1,0,1);
+  const rowH=(f.B-f.T)/K;
+  ctx.fillStyle='#f8fafc';ctx.fillRect(f.L,f.T,f.R-f.L,f.B-f.T);
+  clipTo(ctx,f);
+  ints.forEach((it,k)=>{const y=f.T+(k+.5)*rowH;ctx.strokeStyle=it.cover?'rgba(37,99,235,.75)':COL.red;ctx.fillStyle=ctx.strokeStyle;ctx.lineWidth=Math.max(1.2,Math.min(3,rowH*.45));
+    ctx.beginPath();ctx.moveTo(f.sx(it.xb-it.half),y);ctx.lineTo(f.sx(it.xb+it.half),y);ctx.stroke();
+    const r=Math.max(1.5,Math.min(3.2,rowH*.35));ctx.beginPath();ctx.arc(f.sx(it.xb),y,r,0,6.3);ctx.fill();
+    const ar=Math.max(3,Math.min(5,rowH*.5));ctx.beginPath();
+    if(it.xb-it.half<x0){ctx.moveTo(f.L+1,y);ctx.lineTo(f.L+1+ar*1.6,y-ar);ctx.lineTo(f.L+1+ar*1.6,y+ar);ctx.closePath();}
+    if(it.xb+it.half>x1){ctx.moveTo(f.R-1,y);ctx.lineTo(f.R-1-ar*1.6,y-ar);ctx.lineTo(f.R-1-ar*1.6,y+ar);ctx.closePath();}
+    ctx.fill();});
+  ctx.setLineDash([6,4]);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(f.sx(mu),f.T);ctx.lineTo(f.sx(mu),f.B);ctx.stroke();ctx.setLineDash([]);
+  ctx.restore();
+  axisX(ctx,f,niceTicks(x0,x1,8),'');
+  ctx.fillStyle=COL.ink;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('true mean μ = '+fmt(mu)+' (dashed)',f.sx(mu),f.B+22);
+}
+['t2pop','t2n','t2l','t2K'].forEach(id=>$(id).addEventListener('input',()=>{updT2labels();t2run();t2draw();}));
+$('t2m').addEventListener('input',t2draw);
+$('t2new').onclick=()=>{seed2=newSeed();t2run();t2draw();};
+document.querySelectorAll('[data-lev]').forEach(b=>b.onclick=()=>{$('t2l').value=b.dataset.lev;updT2labels();t2run();t2draw();});
+function updT2labels(){$('t2nV').textContent=$('t2n').value;$('t2lV').textContent=(+$('t2l').value).toFixed(1)+'%';$('t2KV').textContent=$('t2K').value;}
+
+/* =============================================================
+   TAB 3 – anatomy
+   ============================================================= */
+function t3draw(){
+  const n=+$('t3n').value,xb=+$('t3x').value,s=+$('t3s').value,lev=+$('t3l').value,mu0=+$('t3m').value,alpha=1-lev/100,df=n-1;
+  $('t3nV').textContent=n;$('t3xV').textContent=xb.toFixed(1);$('t3sV').textContent=s.toFixed(1);$('t3lV').textContent=lev.toFixed(1)+'%';$('t3mV').textContent=mu0.toFixed(1);
+  const se=s/Math.sqrt(n),tc=tInv(1-alpha/2,df),zc=normInv(1-alpha/2),half=tc*se,lo=xb-half,hi=xb+half,tobs=(xb-mu0)/se,pval=2*tCdf(-Math.abs(tobs),df);
+  const inside=mu0>=lo&&mu0<=hi,reject=pval<alpha;
+  $('t3stats').innerHTML='<div class="formula">SE = s/√n = '+se.toFixed(3)+'<br>t<sub>crit</sub> = '+tc.toFixed(3)+' &nbsp;(z<sub>crit</sub> = '+zc.toFixed(3)+')<br>margin = t·SE = '+half.toFixed(3)+'</div>'+
+   '<table><tr><td>'+lev.toFixed(1)+'% CI</td><td><b>['+lo.toFixed(2)+', '+hi.toFixed(2)+']</b></td></tr>'+
+   '<tr><td>t-statistic</td><td>(x̄−μ₀)/SE = '+tobs.toFixed(2)+'</td></tr>'+
+   '<tr><td>p-value (two-sided)</td><td>'+(pval<0.0001?'< 0.0001':pval.toFixed(4))+'</td></tr>'+
+   '<tr><td>μ₀ inside CI?</td><td class="'+(inside?'ok':'bad')+'">'+(inside?'yes':'no')+'</td></tr>'+
+   '<tr><td>Reject H₀ at α = '+alpha.toFixed(3)+'?</td><td class="'+(reject?'bad':'ok')+'">'+(reject?'yes (p < α)':'no (p ≥ α)')+'</td></tr></table>'+
+   '<div class="note">Same decision both ways: "μ₀ outside the CI" ⇔ "p < α".</div>';
+  /* density */
+  {const {ctx,w,h}=setup($('t3c'));const m={l:50,r:14,t:14,b:40};
+   const xr=Math.min(8,Math.max(4.5,Math.abs(tobs)+.8,tc+.8));const f=frame(w,h,m,-xr,xr,0,.52);
+   const N=500;const pt=(i)=>-xr+2*xr*i/N;
+   const fillRange=(a,b,col)=>{ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(f.sx(a),f.B);for(let i=0;i<=100;i++){const x=a+(b-a)*i/100;ctx.lineTo(f.sx(x),f.sy(tPdf(x,df)));}ctx.lineTo(f.sx(b),f.B);ctx.closePath();ctx.fill();};
+   const a=Math.min(tc,xr);fillRange(-a,a,'rgba(37,99,235,.10)');
+   if(tc<xr){fillRange(-xr,-tc,'rgba(220,38,38,.35)');fillRange(tc,xr,'rgba(220,38,38,.35)');}
+   if($('t3norm').checked){ctx.setLineDash([5,4]);ctx.strokeStyle=COL.mute;ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<=N;i++){const x=pt(i);i?ctx.lineTo(f.sx(x),f.sy(normPdf(x))):ctx.moveTo(f.sx(x),f.sy(normPdf(x)));}ctx.stroke();ctx.setLineDash([]);}
+   ctx.strokeStyle=COL.blue;ctx.lineWidth=2.4;ctx.beginPath();for(let i=0;i<=N;i++){const x=pt(i);i?ctx.lineTo(f.sx(x),f.sy(tPdf(x,df))):ctx.moveTo(f.sx(x),f.sy(tPdf(x,df)));}ctx.stroke();
+   axisX(ctx,f,niceTicks(-xr,xr,8),'t');axisY(ctx,f,[0,.1,.2,.3,.4],'density');
+   ctx.strokeStyle=COL.red;ctx.lineWidth=1.3;ctx.setLineDash([4,3]);for(const sg of[-1,1]){if(tc<xr){ctx.beginPath();ctx.moveTo(f.sx(sg*tc),f.sy(0));ctx.lineTo(f.sx(sg*tc),f.sy(.39));ctx.stroke();}}ctx.setLineDash([]);
+   ctx.fillStyle=COL.red;ctx.textAlign='center';ctx.textBaseline='bottom';if(tc<xr){ctx.fillText('−'+tc.toFixed(2),f.sx(-tc),f.sy(.39)-2);ctx.fillText('+'+tc.toFixed(2),f.sx(tc),f.sy(.39)-2);}
+   const to=Math.max(-xr+.15,Math.min(xr-.15,tobs));ctx.strokeStyle=COL.purple;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(f.sx(to),f.B);ctx.lineTo(f.sx(to),f.sy(.46));ctx.stroke();
+   ctx.fillStyle=COL.purple;ctx.textAlign=(to>0?'right':'left');ctx.textBaseline='bottom';ctx.fillText('observed t = '+tobs.toFixed(2)+(Math.abs(tobs)>xr-.15?' (off scale)':''),f.sx(to)+(to>0?4:-4),f.sy(.46)-1);
+  }
+  /* number line */
+  {const {ctx,w,h}=setup($('t3d'));const m={l:30,r:20,t:14,b:36};const x0=0,x1=20;const f=frame(w,h,m,x0,x1,0,1);
+   const y=(f.T+f.B)/2;clipTo(ctx,f);
+   ctx.strokeStyle=inside?COL.blue:COL.amber;ctx.lineWidth=7;ctx.lineCap='butt';ctx.beginPath();ctx.moveTo(f.sx(lo),y);ctx.lineTo(f.sx(hi),y);ctx.stroke();
+   ctx.fillStyle=COL.ink;ctx.beginPath();ctx.arc(f.sx(xb),y,6,0,6.3);ctx.fill();
+   ctx.setLineDash([5,4]);ctx.strokeStyle=COL.purple;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(f.sx(mu0),f.T);ctx.lineTo(f.sx(mu0),f.B);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+   axisX(ctx,f,niceTicks(x0,x1,10),'');
+   ctx.lineJoin='round';ctx.lineWidth=4;ctx.strokeStyle='#fff';ctx.textBaseline='bottom';ctx.textAlign='center';const mx=Math.max(f.L+30,Math.min(f.R-30,f.sx(mu0)));ctx.strokeText('μ₀ = '+mu0.toFixed(1),mx,f.T+1);ctx.fillStyle=COL.purple;ctx.fillText('μ₀ = '+mu0.toFixed(1),mx,f.T+1);
+   ctx.textAlign='center';ctx.textBaseline='top';const lt='x̄ = '+xb.toFixed(1)+' (dot), CI = bar';ctx.strokeText(lt,f.sx(xb),y+10);ctx.fillStyle=COL.ink;ctx.fillText(lt,f.sx(xb),y+10);
+  }
+}
+['t3n','t3x','t3s','t3l','t3m','t3norm'].forEach(id=>$(id).addEventListener('input',t3draw));
+
+/* =============================================================
+   TAB 4 – sample size
+   ============================================================= */
+function t4draw(){
+  const s=+$('t4s').value,lev=+$('t4l').value,n=+$('t4n').value,d=+$('t4d').value,alpha=1-lev/100;
+  $('t4sV').textContent=s.toFixed(1);$('t4lV').textContent=lev.toFixed(1)+'%';$('t4nV').textContent=n;$('t4dV').textContent=d.toFixed(1);
+  const hw=(nn,l)=>tInv(1-(1-l/100)/2,nn-1)*s/Math.sqrt(nn);
+  const reqN=dd=>{let lo=2,hi=1e8;while(lo<hi){const mid=Math.floor((lo+hi)/2);if(hw(mid,lev)<=dd)hi=mid;else lo=mid+1;}return lo;};
+  const cur=hw(n,lev),req=reqN(d),req2=reqN(d/2);const zreq=Math.ceil((normInv(1-alpha/2)*s/d)**2);
+  $('t4stats').innerHTML='<div class="formula">half-width = t<sub>1−α/2, n−1</sub> · s/√n</div>'+
+   '<table><tr><td>Half-width at n = '+n+'</td><td><b>±'+cur.toFixed(2)+'</b></td></tr>'+
+   '<tr><td>CI at n = '+n+'</td><td>x̄ ± '+cur.toFixed(2)+' (width '+(2*cur).toFixed(2)+')</td></tr>'+
+   '<tr><td>n needed for d = '+d.toFixed(1)+'</td><td><b>'+req.toLocaleString()+'</b></td></tr>'+
+   '<tr><td>(normal approximation)</td><td>'+zreq.toLocaleString()+'</td></tr>'+
+   '<tr><td>n needed for d/2</td><td>≈ '+req2.toLocaleString()+' (≈ 4×)</td></tr></table>'+
+   '<div class="note">The margin only depends on s, n and the confidence level – not on the population size.</div>';
+  const {ctx,w,h}=setup($('t4c'));const m={l:56,r:16,t:12,b:42};
+  const ymax=hw(5,lev)*1.05;const f=frame(w,h,m,2,1000,0,ymax,true);
+  const ns=[];for(let i=0;i<=140;i++)ns.push(Math.round(2*Math.pow(500,i/140)));const uns=[...new Set(ns)];
+  clipTo(ctx,f);
+  for(const l of [90,95,99]){ctx.strokeStyle='#9ca3af';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);ctx.beginPath();uns.forEach((nn,i)=>{const y=f.sy(hw(nn,l));i?ctx.lineTo(f.sx(nn),y):ctx.moveTo(f.sx(nn),y);});ctx.stroke();ctx.setLineDash([]);}
+  ctx.strokeStyle=COL.blue;ctx.lineWidth=2.8;ctx.beginPath();uns.forEach((nn,i)=>{const y=f.sy(hw(nn,lev));i?ctx.lineTo(f.sx(nn),y):ctx.moveTo(f.sx(nn),y);});ctx.stroke();
+  ctx.strokeStyle=COL.green;ctx.lineWidth=1.6;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(f.L,f.sy(d));ctx.lineTo(f.R,f.sy(d));ctx.stroke();
+  if(req<=1000){ctx.beginPath();ctx.moveTo(f.sx(req),f.sy(d));ctx.lineTo(f.sx(req),f.B);ctx.stroke();}ctx.setLineDash([]);
+  if(req<=1000){ctx.fillStyle=COL.green;ctx.beginPath();ctx.arc(f.sx(req),f.sy(d),5,0,6.3);ctx.fill();}
+  ctx.fillStyle=COL.red;ctx.beginPath();ctx.arc(f.sx(n),f.sy(cur),6,0,6.3);ctx.fill();
+  ctx.restore();
+  axisX(ctx,f,[2,5,10,20,50,100,200,500,1000],'sample size n (log scale)');axisY(ctx,f,niceTicks(0,ymax,5),'CI half-width');
+  ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=COL.blue;ctx.fillText('solid blue: selected level '+lev.toFixed(1)+'%',f.R-8,f.T+16);
+  ctx.fillStyle=COL.mute;ctx.fillText('dashed grey: 90 / 95 / 99 %',f.R-8,f.T+32);ctx.textAlign='left';
+  ctx.fillStyle=COL.green;ctx.fillText('target d (green)',f.L+8,f.sy(d)-4);
+  ctx.fillStyle=COL.red;ctx.fillText('current n',Math.min(f.R-60,f.sx(n)+9),f.sy(cur)-8);
+}
+['t4s','t4l','t4n','t4d'].forEach(id=>$(id).addEventListener('input',t4draw));
+
+/* =============================================================
+   tabs
+   ============================================================= */
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  redraw(id);
+}
+function redraw(id){
+  if(id==='t1'){updT1labels();if(!D1)t1run();t1draw();}
+  if(id==='t2'){updT2labels();if(!D2)t2run();t2draw();}
+  if(id==='t3')t3draw();
+  if(id==='t4')t4draw();
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+window.addEventListener('resize',()=>{const a=document.querySelector('.panel.active');if(a)redraw(a.id);});
+showTab('t1');
+</script>
+</body>
+</html>
