@@ -8,9 +8,9 @@
   :root{--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--bg:#f8fafc;--card:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45}
-  header{background:linear-gradient(135deg,#C61826 0%,#590D08 100%);color:#fff;padding:18px 24px}
+  header{background:#0f172a;color:#fff;padding:18px 24px}
   header h1{margin:0;font-size:1.35rem;font-weight:650}
-  header p{margin:4px 0 0;color:#F4F1EA;font-size:.92rem}
+  header p{margin:4px 0 0;color:#cbd5e1;font-size:.92rem}
   .wrap{max-width:1180px;margin:0 auto;padding:16px}
   nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
   nav button{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:8px;font-size:.93rem;cursor:pointer;color:var(--ink)}
@@ -75,6 +75,7 @@
       <div class="ctl"><label>Sample size n <span class="v" id="t1nV"></span></label><input type="range" id="t1n" min="1" max="300" step="1" value="5"></div>
       <div class="ctl"><label>Number of samples (repetitions) <span class="v" id="t1MV"></span></label><input type="range" id="t1M" min="100" max="20000" step="100" value="3000"></div>
       <label class="chk"><input type="checkbox" id="t1norm" checked> Overlay N(μ, σ/√n)</label>
+      <label class="chk"><input type="checkbox" id="t1fix"> Fix x-axis of the x̄ histogram (same range for every n)</label>
       <label class="chk"><input type="checkbox" id="t1rug" checked> Show one sample (dots) &amp; its mean</label>
       <div style="margin-top:8px"><button class="act" id="t1new">Draw new samples</button></div>
       <div class="stats" id="t1stats"></div>
@@ -256,7 +257,8 @@ function t1draw(){
   {const {ctx,w,h}=setup($('t1hc'));const m={l:50,r:14,t:10,b:40};
    const sorted=Float64Array.from(means).sort();const q=pp=>sorted[Math.min(M-1,Math.max(0,Math.floor(pp*M)))];
    let lo=Math.min(q(.001),p.mean-3.8*se),hi=Math.max(q(.999),p.mean+3.8*se);const pad=(hi-lo)*.04;lo-=pad;hi+=pad;
-   const B=n===1&&p.discrete?2:50;const bins=new Array(B).fill(0);
+   const fixAx=$('t1fix').checked;if(fixAx){lo=p.range[0];hi=p.range[1];}
+   const B=n===1&&p.discrete?2:(fixAx?100:50);const bins=new Array(B).fill(0);
    let a=lo,b=hi;if(n===1&&p.discrete){a=-.5;b=1.5;}
    const bw=(b-a)/B;for(const v of means){let k=Math.floor((v-a)/bw);if(k>=0&&k<B)bins[k]++;}
    const dens=bins.map(c=>c/(M*bw));let ymax=Math.max(...dens);const showN=$('t1norm').checked;if(showN)ymax=Math.max(ymax,1/(se*SQ2PI));ymax*=1.1;
@@ -270,7 +272,7 @@ function t1draw(){
   }
 }
 ['t1pop','t1n','t1M'].forEach(id=>$(id).addEventListener('input',()=>{updT1labels();t1run();t1draw();}));
-['t1norm','t1rug'].forEach(id=>$(id).addEventListener('input',t1draw));
+['t1norm','t1rug','t1fix'].forEach(id=>$(id).addEventListener('input',t1draw));
 $('t1new').onclick=()=>{seed1=newSeed();t1run();t1draw();};
 function updT1labels(){$('t1nV').textContent=$('t1n').value;$('t1MV').textContent=$('t1M').value;}
 
