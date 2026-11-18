@@ -18,4 +18,3 @@ bonus: materials/chapter6/_06_confidence_intervals.Rmd | CI Comparison (R Markdo
 bonus: materials/chapter6/_06_plenum_augensumme.Rmd | Plenum: Dice Sum (R Markdown)
 bonus: materials/chapter6/_06_plenum_zentraler_grenzwertsatz.Rmd | Plenum: CLT Demo (R Markdown)
 bonus: materials/chapter6/_06_Verständnisfragen.Rmd | Comprehension Questions (R Markdown) | | _05_Verstaendnisfragen.Rmd
-bonus: materials/chapter6/_06_folien_plenum.pdf | Plenum Slides (PDF)
