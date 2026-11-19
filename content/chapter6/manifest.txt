@@ -12,9 +12,6 @@ url: https://www.youtube.com/watch?v=3kKXZRjjLIE
 
 markdown_r: materials/chapter6/_06_Distributions_CLT_dplyr.Rmd | Chapter 6 – Distributions, CLT & Confidence Intervals (R Markdown)
 markdown_python: materials/chapter6/_06_Distributions_CLT_python.ipynb | Chapter 6 – Distributions, CLT & Confidence Intervals (Python Notebook)
-bonus_note: **Bonus reference:** a companion script comparing 90%/95% confidence intervals, plenum recaps (dice-sum & chocolate-weight simulations of the CLT), and comprehension questions with worked solutions. Quizzes 3 & 4 below draw on this material.
+bonus_note: **Bonus material** an interactive html file on CLT and confidence intervals
 bonus: materials/chapter6/_06_interactive_CLT_CI.html | Interactive: CLT & Confidence Intervals (HTML)
-bonus: materials/chapter6/_06_confidence_intervals.Rmd | CI Comparison (R Markdown)
-bonus: materials/chapter6/_06_plenum_augensumme.Rmd | Plenum: Dice Sum (R Markdown)
-bonus: materials/chapter6/_06_plenum_zentraler_grenzwertsatz.Rmd | Plenum: CLT Demo (R Markdown)
 bonus: materials/chapter6/_06_Verständnisfragen.Rmd | Comprehension Questions (R Markdown) | | _05_Verstaendnisfragen.Rmd

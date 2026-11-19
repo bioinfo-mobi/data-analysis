@@ -52,7 +52,6 @@
   <button data-tab="t1" class="active">1 · Central Limit Theorem</button>
   <button data-tab="t2">2 · Confidence intervals: coverage</button>
   <button data-tab="t3">3 · Anatomy of a CI &amp; test</button>
-  <button data-tab="t4">4 · Sample size &amp; precision</button>
 </nav>
 
 <!-- ================= TAB 1 ================= -->
@@ -153,26 +152,6 @@
   </div>
 </section>
 
-<!-- ================= TAB 4 ================= -->
-<section id="t4" class="panel">
-  <div class="intro"><b>Idea.</b> The half-width of a CI is t·s/√n. Precision improves only with √n: to halve the interval you need 4× the samples.
-    <ul><li>Set the <b>target margin</b> and see how many samples you need – useful when planning an experiment.</li>
-    <li>Compare the curves for 90 / 95 / 99%: higher confidence costs samples.</li>
-    <li>Double <i>s</i> (more noise) and see how the required n grows.</li></ul></div>
-  <div class="grid">
-    <div class="card">
-      <div class="ctl"><label>Standard deviation s <span class="v" id="t4sV"></span></label><input type="range" id="t4s" min="0.5" max="20" step="0.1" value="10"></div>
-      <div class="ctl"><label>Confidence level 1−α <span class="v" id="t4lV"></span></label><input type="range" id="t4l" min="50" max="99.9" step="0.1" value="95"></div>
-      <div class="ctl"><label>Current sample size n <span class="v" id="t4nV"></span></label><input type="range" id="t4n" min="2" max="500" step="1" value="20"></div>
-      <div class="ctl"><label>Target half-width (margin of error) d <span class="v" id="t4dV"></span></label><input type="range" id="t4d" min="0.2" max="10" step="0.1" value="2"></div>
-      <div class="stats" id="t4stats"></div>
-    </div>
-    <div class="card">
-      <h3>Half-width of the CI as a function of n</h3>
-      <canvas id="t4c" style="height:430px"></canvas>
-    </div>
-  </div>
-</section>
 </div>
 <footer>Everything runs locally in your browser – no internet connection needed.</footer>
 
@@ -370,41 +349,6 @@ function t3draw(){
 ['t3n','t3x','t3s','t3l','t3m','t3norm'].forEach(id=>$(id).addEventListener('input',t3draw));
 
 /* =============================================================
-   TAB 4 – sample size
-   ============================================================= */
-function t4draw(){
-  const s=+$('t4s').value,lev=+$('t4l').value,n=+$('t4n').value,d=+$('t4d').value,alpha=1-lev/100;
-  $('t4sV').textContent=s.toFixed(1);$('t4lV').textContent=lev.toFixed(1)+'%';$('t4nV').textContent=n;$('t4dV').textContent=d.toFixed(1);
-  const hw=(nn,l)=>tInv(1-(1-l/100)/2,nn-1)*s/Math.sqrt(nn);
-  const reqN=dd=>{let lo=2,hi=1e8;while(lo<hi){const mid=Math.floor((lo+hi)/2);if(hw(mid,lev)<=dd)hi=mid;else lo=mid+1;}return lo;};
-  const cur=hw(n,lev),req=reqN(d),req2=reqN(d/2);const zreq=Math.ceil((normInv(1-alpha/2)*s/d)**2);
-  $('t4stats').innerHTML='<div class="formula">half-width = t<sub>1−α/2, n−1</sub> · s/√n</div>'+
-   '<table><tr><td>Half-width at n = '+n+'</td><td><b>±'+cur.toFixed(2)+'</b></td></tr>'+
-   '<tr><td>CI at n = '+n+'</td><td>x̄ ± '+cur.toFixed(2)+' (width '+(2*cur).toFixed(2)+')</td></tr>'+
-   '<tr><td>n needed for d = '+d.toFixed(1)+'</td><td><b>'+req.toLocaleString()+'</b></td></tr>'+
-   '<tr><td>(normal approximation)</td><td>'+zreq.toLocaleString()+'</td></tr>'+
-   '<tr><td>n needed for d/2</td><td>≈ '+req2.toLocaleString()+' (≈ 4×)</td></tr></table>'+
-   '<div class="note">The margin only depends on s, n and the confidence level – not on the population size.</div>';
-  const {ctx,w,h}=setup($('t4c'));const m={l:56,r:16,t:12,b:42};
-  const ymax=hw(5,lev)*1.05;const f=frame(w,h,m,2,1000,0,ymax,true);
-  const ns=[];for(let i=0;i<=140;i++)ns.push(Math.round(2*Math.pow(500,i/140)));const uns=[...new Set(ns)];
-  clipTo(ctx,f);
-  for(const l of [90,95,99]){ctx.strokeStyle='#9ca3af';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);ctx.beginPath();uns.forEach((nn,i)=>{const y=f.sy(hw(nn,l));i?ctx.lineTo(f.sx(nn),y):ctx.moveTo(f.sx(nn),y);});ctx.stroke();ctx.setLineDash([]);}
-  ctx.strokeStyle=COL.blue;ctx.lineWidth=2.8;ctx.beginPath();uns.forEach((nn,i)=>{const y=f.sy(hw(nn,lev));i?ctx.lineTo(f.sx(nn),y):ctx.moveTo(f.sx(nn),y);});ctx.stroke();
-  ctx.strokeStyle=COL.green;ctx.lineWidth=1.6;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(f.L,f.sy(d));ctx.lineTo(f.R,f.sy(d));ctx.stroke();
-  if(req<=1000){ctx.beginPath();ctx.moveTo(f.sx(req),f.sy(d));ctx.lineTo(f.sx(req),f.B);ctx.stroke();}ctx.setLineDash([]);
-  if(req<=1000){ctx.fillStyle=COL.green;ctx.beginPath();ctx.arc(f.sx(req),f.sy(d),5,0,6.3);ctx.fill();}
-  ctx.fillStyle=COL.red;ctx.beginPath();ctx.arc(f.sx(n),f.sy(cur),6,0,6.3);ctx.fill();
-  ctx.restore();
-  axisX(ctx,f,[2,5,10,20,50,100,200,500,1000],'sample size n (log scale)');axisY(ctx,f,niceTicks(0,ymax,5),'CI half-width');
-  ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=COL.blue;ctx.fillText('solid blue: selected level '+lev.toFixed(1)+'%',f.R-8,f.T+16);
-  ctx.fillStyle=COL.mute;ctx.fillText('dashed grey: 90 / 95 / 99 %',f.R-8,f.T+32);ctx.textAlign='left';
-  ctx.fillStyle=COL.green;ctx.fillText('target d (green)',f.L+8,f.sy(d)-4);
-  ctx.fillStyle=COL.red;ctx.fillText('current n',Math.min(f.R-60,f.sx(n)+9),f.sy(cur)-8);
-}
-['t4s','t4l','t4n','t4d'].forEach(id=>$(id).addEventListener('input',t4draw));
-
-/* =============================================================
    tabs
    ============================================================= */
 function showTab(id){
@@ -416,7 +360,6 @@ function redraw(id){
   if(id==='t1'){updT1labels();if(!D1)t1run();t1draw();}
   if(id==='t2'){updT2labels();if(!D2)t2run();t2draw();}
   if(id==='t3')t3draw();
-  if(id==='t4')t4draw();
 }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 window.addEventListener('resize',()=>{const a=document.querySelector('.panel.active');if(a)redraw(a.id);});
