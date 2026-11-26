@@ -1,0 +1,13 @@
+---
+title: "Chapter 10: Regression Analysis"
+format:
+  html:
+    include-in-header:
+      - engine/language-switch.html
+    include-after-body:
+      - engine/week-loader.html
+---
+
+<!-- Content for this page is loaded at runtime from content/chapter10/manifest.txt and
+     content/chapter10/quiz.md by week-loader.html — edit those files, not this one. -->
+<div id="week-app" data-week="10">Loading…</div>

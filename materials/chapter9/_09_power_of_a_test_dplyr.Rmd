@@ -1,0 +1,521 @@
+---
+title: "Exercise Sheet 9: Test errors, power & multiple testing"
+author: "Maiwen Caudron-Herger ; Carl Herrmann"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+# 0. Introduction and Objectives
+
+In the previous Exercise Sheets you have learned how to run statistical tests (t-test, Wilcoxon test, Fisher / chi-square tests) and how to decide, using a significance level $\alpha$, whether to reject $H_0$ or not.
+
+But a test decision can be **wrong**! In this Exercise Sheet you will learn:
+
+-   what **true/false positives** and **true/false negatives** are, and how to summarise them in a **confusion matrix**;
+-   why $\alpha$ is the **false-positive rate** — and when this is no longer true;
+-   what the **power** of a test is, and which parameters influence it;
+-   why running **many tests** (e.g. one per gene) creates a large number of false positives, and how to **correct for multiple testing** (Bonferroni, Benjamini-Hochberg).
+
+You should be familiar with these notions from the lecture.
+
+# 1. The four possible outcomes of a test
+
+For every test, there is a **truth** (is $H_0$ actually true or false?) and a **decision** (do we reject $H_0$ or not?). This gives four possible outcomes:
+
+|                        | $H_0$ is true (no effect) | $H_0$ is false (real effect) |
+|------------------------|---------------------------|------------------------------|
+| **$H_0$ rejected** (test positive)     | False positive (FP) — *type I error* | True positive (TP) |
+| **$H_0$ not rejected** (test negative) | True negative (TN)        | False negative (FN) — *type II error* |
+
+From these counts we define several rates:
+
+-   **False-positive rate** $FPR = \frac{FP}{FP + TN}$ : fraction of true-negatives cases that we wrongly call positive. This is controlled by $\alpha$!
+-   **False-negative rate** $FNR = \beta = \frac{FN}{FN + TP}$ : fraction of true-positive cases that we miss.
+-   **Power** or **sensitivity** $= 1 - \beta = \frac{TP}{TP + FN}$ : fraction of true-positive cases that we detect.
+-   **Specificity** $= 1 - FPR = \frac{TN}{TN + FP}$
+-   **False-discovery rate** $FDR = \frac{FP}{FP + TP}$ : fraction of false positives **among all test positives**.
+
+> Make sure you understand the difference between the FPR and the FDR: they have **different denominators**!
+
+In real life, we never know the truth. But with **simulations**, we decide what the truth is, and can therefore count how often the test is right or wrong. This is what we will do in this sheet.
+
+# 2. When H0 is true: false positives
+
+## $\alpha$ is the false-positive rate
+
+Let us suppose that the $H_0$ hypothesis "The expectation values of two distributions are equal" holds. We generate 2 random samples drawn from the **same** normal distribution, and perform a t-test. Since $H_0$ holds, every rejection is a **false positive**. What would the p-values look like? Let's repeat this 10000 times:
+
+```{r}
+set.seed(123)
+alpha = 0.05
+p = sapply(1:10000, function(i) {
+  x = rnorm(10); y = rnorm(10)
+  t.test(x, y)$p.value
+})
+ggplot(data.frame(p), aes(x = p)) +
+  geom_histogram(bins = 20, boundary = 0) +
+  geom_vline(xintercept = alpha, color = "red", linewidth = 1.5) +
+  labs(x = "p-value", title = "Distribution of p-values when H0 is true")
+```
+
+Under $H_0$, the p-values follow a **uniform distribution**! Approximately 5% of these p-values are smaller than $\alpha$ (left of the red line):
+
+```{r}
+sum(p < alpha) / length(p)
+```
+
+These are the **false positives**. So here, we indeed have $\alpha$ = false-positive rate!
+
+This also holds true for different values of $\alpha$:
+
+```{r}
+alphas = c(0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1, 0.2)
+fpr = sapply(alphas, function(alpha) {
+  sum(p < alpha) / length(p)
+})
+fpr.table = data.frame(alphas, fpr)
+ggplot(fpr.table, aes(x = alphas, y = fpr)) +
+  geom_abline(intercept = 0, slope = 1, linewidth = 1, linetype = "dashed", color = "lightgrey") +
+  geom_point(color = "red", size = 3) +
+  labs(x = "alpha", y = "false-positive rate")
+```
+
+> What does it mean to choose $\alpha = 0.01$ instead of $\alpha = 0.05$? What is the price to pay? (We will come back to this in Section 3!)
+
+## When the test assumptions are violated
+
+In the last chapter we said that we **cannot trust the t-test** when the data is not normally distributed. What does that mean concretely? Let's sample x and y from the **same** t-distribution with 1 degree of freedom (a distribution with very heavy tails) — so $H_0$ still holds:
+
+```{r}
+alpha = 0.05
+p.t = sapply(1:10000, function(i) {
+  x = rt(10, df = 1); y = rt(10, df = 1)
+  t.test(x, y)$p.value
+})
+ggplot(data.frame(p = p.t), aes(x = p)) +
+  geom_histogram(bins = 20, boundary = 0) +
+  geom_vline(xintercept = alpha, color = "red", linewidth = 1.5) +
+  labs(x = "p-value", title = "t-test p-values on non-normal data (H0 true)")
+```
+
+No longer a uniform distribution!! How often would we reject $H_0$ here?
+
+```{r}
+sum(p.t < alpha) / length(p.t)
+```
+
+Not exactly $\alpha$ anymore... So in the case of a non-normal distribution of the data, the false-positive rate is no longer equal to the significance level $\alpha$. **Hence, we can no longer control the FPR with $\alpha$!**
+
+> Repeat the same simulation, but use the **Wilcoxon test** (`wilcox.test`) instead of the t-test. Is the false-positive rate again close to $\alpha$? What do you conclude?
+
+# 3. When H0 is false: false negatives and power
+
+We have seen that $\alpha$ controls the **false-positive rate**. The other type of error are **false negatives**, i.e. **not seeing** a difference that actually exists!
+
+Let us imagine the following scenario:
+
+You are working in a clinical laboratory, testing patients for a rare genetic condition that affects enzyme levels in blood. The condition can be detected by measuring the concentration of a specific biomarker.
+
+**Healthy individuals** have an average biomarker level of $\mu_H = 50\,\mu g/L$ with a standard deviation of $\sigma = 12\,\mu g/L$.
+
+**Patients with the condition** have elevated levels: $\mu_D = 58\,\mu g/L$ with the same standard deviation $\sigma = 12\,\mu g/L$.
+
+Due to biological variation, you measure each patient's biomarker level $n=5$ times and use the average of these measurements for diagnosis.
+
+```{r}
+mu_healthy = 50    # mean biomarker level in healthy individuals
+mu_disease = 58    # mean biomarker level in diseased individuals
+sigma = 12         # standard deviation (same for both groups)
+n = 5              # number of replicate measurements per patient
+alpha = 0.05       # significance level
+```
+
+The **null hypothesis H0** is: *"The patient is healthy (does not have the condition)"*
+
+Here are the average biomarker measurements from your first 5 patients today:
+
+```{r}
+patient_means = c(56.3, 62.1, 51.8, 49.2, 54.7)
+```
+
+## What is the expected distribution of mean biomarker levels?
+
+For healthy individuals, when taking $n=5$ measurements and averaging them, the distribution of sample means is (remember the **Central Limit Theorem**!):
+
+```{r}
+x = seq(35, 65, by = 0.1)
+y = dnorm(x, mean = mu_healthy, sd = sigma/sqrt(n))
+healthy.table = data.frame(x, y)
+ggplot(healthy.table, aes(x = x, y = y)) +
+  geom_line(linewidth = 1.5, color = "blue") +
+  labs(x = 'Average biomarker level (μg/L)', y = 'Density',
+       title = paste0('Distribution of mean biomarker levels in healthy individuals (n=', n, ' measurements)'))
+```
+
+## When would you reject H0 and diagnose the patient as having the condition?
+
+Using a one-sided test with $\alpha=0.05$:
+
+```{r}
+rejection_threshold = qnorm(p = alpha, mean = mu_healthy, sd = sigma/sqrt(n), lower.tail = FALSE)
+rejection_threshold
+```
+
+If a patient's average biomarker level is **above** this value, you would reject H0 and diagnose them with the condition (**positive** diagnosis). Otherwise, you would not reject H0 (**negative** diagnosis).
+
+```{r}
+ggplot(healthy.table, aes(x = x, y = y)) +
+  geom_line(linewidth = 1.5, color = "blue") +
+  geom_vline(xintercept = rejection_threshold, linewidth = 1.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = patient_means, linewidth = 1, linetype = "dotted", color = "darkgreen") +
+  annotate("text", x = rejection_threshold, y = max(y) * 0.8,
+           label = paste0("Threshold = ", round(rejection_threshold, 2)),
+           hjust = -0.1, color = "red") +
+  labs(x = 'Average biomarker level (μg/L)', y = 'Density',
+       title = paste0('Diagnostic decision rule (n=', n, ' measurements)'),
+       subtitle = 'Blue: healthy distribution; red dashed: diagnostic threshold; green dotted: patient measurements')
+```
+
+Based on this threshold, patient 2 would be diagnosed with the condition, while the other 4 patients would be classified as healthy.
+
+## The problem: false negatives in diseased patients
+
+**However**, it turns out that all 5 of these patients actually **DO have the condition**! They were referred from a specialist clinic that had already identified them through genetic testing. So H0 is **false** for **all** of these patients.
+
+This means you failed to detect the disease in 4 out of 5 patients: **80% false negatives**!
+
+This is the **type II error rate (β)**, also called the **false-negative rate**. The complement **(1-β)** is called the **power** or **sensitivity** of the test.
+
+## Calculating the false-negative rate (β) by simulation
+
+Let's simulate what happens when we test 1000 patients who **actually have the condition**:
+
+```{r}
+set.seed(42)
+### Simulate 1000 patients with the disease (n measurements each)
+patient_means = sapply(1:1000, function(i) {
+  measurements = rnorm(n, mean = mu_disease, sd = sigma)
+  mean(measurements)
+})
+
+### For how many patients did we FAIL to detect the disease?
+### H0 is rejected (disease detected) if mean is ABOVE threshold
+### H0 is NOT rejected (disease missed) if mean is BELOW threshold
+beta = sum(patient_means < rejection_threshold) / length(patient_means)
+
+cat(sprintf("False-negative rate (β) = %.1f%%\n", beta*100))
+cat(sprintf("Test power/sensitivity (1-β) = %.1f%%\n", (1-beta)*100))
+```
+
+This means our diagnostic test only detects the disease in less than half of the patients who actually have it. This is a **very poor sensitivity** for a diagnostic test!
+
+## Calculating β exactly
+
+Since we know the distribution of the means of diseased patients, we do not even need a simulation: β is simply the area under the "diseased" curve to the **left** of the threshold:
+
+```{r}
+beta.exact = pnorm(rejection_threshold, mean = mu_disease, sd = sigma/sqrt(n))
+beta.exact
+1 - beta.exact   # the power
+```
+
+> Compare with the value obtained by simulation!
+
+## Visualizing type I and type II errors
+
+```{r}
+x = seq(35, 75, by = 0.1)
+y_healthy = dnorm(x, mean = mu_healthy, sd = sigma/sqrt(n))
+y_disease = dnorm(x, mean = mu_disease, sd = sigma/sqrt(n))
+
+# Put both distributions into one table
+curve.table = data.frame(x = rep(x, times = 2),
+                         density = c(y_healthy, y_disease),
+                         group = rep(c("Healthy patients", "Diseased patients"), each = length(x)))
+
+# False-negative region: diseased patients below the threshold
+fn.table = filter(data.frame(x, density = y_disease), x < rejection_threshold)
+# False-positive region: healthy patients above the threshold
+fp.table = filter(data.frame(x, density = y_healthy), x >= rejection_threshold)
+
+ggplot(curve.table, aes(x = x, y = density, color = group)) +
+  geom_area(data = fn.table, fill = "purple", alpha = 0.3, color = NA) +
+  geom_area(data = fp.table, fill = "blue", alpha = 0.3, color = NA) +
+  geom_line(linewidth = 1.5) +
+  geom_vline(xintercept = rejection_threshold, linewidth = 1.5, linetype = "dashed", color = "red") +
+  scale_color_manual(values = c("Healthy patients" = "blue", "Diseased patients" = "purple")) +
+  labs(x = 'Average biomarker level (μg/L)', y = 'Density', color = NULL,
+       title = 'Type I and type II errors in diagnostic testing',
+       subtitle = 'Blue area: false positives (α); purple area: false negatives (β)')
+```
+
+The **purple shaded area** represents diseased patients whose biomarker levels fall below the threshold: these are the **false negatives** that we fail to diagnose. The **blue shaded area** represents healthy patients who would be wrongly diagnosed: these are the **false positives**.
+
+> What happens to the two shaded areas if you move the threshold to the right (i.e. you choose a smaller $\alpha$)? Can you reduce both errors at the same time by moving the threshold?
+
+## What influences the power?
+
+Let's write a small function which computes the power for a given set of parameters:
+
+```{r}
+compute_power = function(n, delta, sigma = 12, alpha = 0.05) {
+  # delta = mu_disease - mu_healthy  (the effect size)
+  threshold = qnorm(alpha, mean = 0, sd = sigma/sqrt(n), lower.tail = FALSE)
+  pnorm(threshold, mean = delta, sd = sigma/sqrt(n), lower.tail = FALSE)
+}
+compute_power(n = 5, delta = 8)
+```
+
+Now we can see how the power changes with the number of measurements $n$, for several effect sizes $\delta = \mu_D - \mu_H$:
+
+```{r}
+power.table = expand.grid(n = 1:50, delta = c(4, 8, 12)) %>%
+  mutate(power = compute_power(n, delta))
+
+ggplot(power.table, aes(x = n, y = power, color = factor(delta))) +
+  geom_line(linewidth = 1.2) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "grey40") +
+  labs(x = "number of measurements n", y = "power (1 - β)", color = "effect size δ (μg/L)",
+       title = "Power curves (α = 0.05)")
+```
+
+> How does the false-negative rate β change with increasing number of measurements per patient (i.e., increasing n)? How many measurements are needed to reach 80% power for $\delta = 8$?
+
+> Modify the code above to show the power as a function of $n$ for $\delta = 8$, but for different values of $\alpha$ (0.001, 0.01, 0.05, 0.1). What do you observe?
+
+> Summarise: which **3 parameters** can you use to increase the power of a test?
+
+## Power analysis with `power.t.test`
+
+In practice, the power is computed **before** an experiment, in order to decide how many samples are needed. For the t-test, R provides the function `power.t.test`. You specify all parameters except one, and the function computes the missing one:
+
+```{r}
+# What is the power of a two-sample t-test with 10 samples per group,
+# a difference of means of 8 and a standard deviation of 12?
+power.t.test(n = 10, delta = 8, sd = 12, sig.level = 0.05)
+```
+
+```{r}
+# How many samples per group do we need to reach 80% power?
+power.t.test(power = 0.8, delta = 8, sd = 12, sig.level = 0.05)
+```
+
+We can verify this result by simulation: we draw many pairs of samples **with** a real difference (so $H_0$ is false) and count how often the t-test detects it:
+
+```{r}
+set.seed(1)
+p.h1 = sapply(1:2000, function(i) {
+  x = rnorm(10, mean = 50, sd = 12)
+  y = rnorm(10, mean = 58, sd = 12)
+  t.test(x, y)$p.value
+})
+sum(p.h1 < 0.05) / length(p.h1)   # empirical power
+```
+
+```{r}
+ggplot(data.frame(p = p.h1), aes(x = p)) +
+  geom_histogram(bins = 20, boundary = 0) +
+  geom_vline(xintercept = 0.05, color = "red", linewidth = 1.5) +
+  labs(x = "p-value", title = "Distribution of p-values when H1 is true")
+```
+
+> Compare this histogram with the one obtained in Section 2, when $H_0$ was true. Where are the true positives and the false negatives in this histogram?
+
+# 4. Multiple testing
+
+In genomics, we rarely run a single test: we typically test **thousands of genes** at the same time. What happens to the false positives then?
+
+## A simulated experiment
+
+We simulate an expression experiment with 1000 genes measured in 2 groups of 10 samples:
+
+-   genes 1 to 900 are **not** differentially expressed ($H_0$ true),
+-   genes 901 to 1000 **are** differentially expressed ($H_0$ false), with a mean difference of 1.5.
+
+```{r}
+set.seed(2025)
+n.genes = 1000
+n.de = 100        # number of truly differentially expressed genes
+n.samples = 10    # samples per group
+
+# group A: all genes have mean 0
+groupA = matrix(rnorm(n.genes * n.samples, mean = 0), nrow = n.genes)
+# group B: the last 100 genes have mean 1.5
+groupB = matrix(rnorm(n.genes * n.samples, mean = 0), nrow = n.genes)
+groupB[(n.genes - n.de + 1):n.genes, ] = groupB[(n.genes - n.de + 1):n.genes, ] + 1.5
+
+# the truth
+truth = rep(c("H0 true", "H0 false"), times = c(n.genes - n.de, n.de))
+```
+
+We run a t-test for each gene:
+
+```{r}
+pvals = sapply(1:n.genes, function(i) {
+  t.test(groupA[i, ], groupB[i, ])$p.value
+})
+
+genes = data.frame(gene = 1:n.genes, truth, p = pvals)
+head(genes)
+```
+
+Let's look at the distribution of all p-values:
+
+```{r}
+ggplot(genes, aes(x = p, fill = truth)) +
+  geom_histogram(bins = 40, boundary = 0) +
+  labs(x = "p-value", title = "p-values of 1000 t-tests")
+```
+
+> Describe this histogram: which part corresponds to the 900 null genes, and which part to the 100 differentially expressed genes?
+
+## The confusion matrix
+
+We now call a gene "significant" if $p < \alpha = 0.05$ and compare to the truth:
+
+```{r}
+alpha = 0.05
+genes = genes %>% mutate(decision = ifelse(p < alpha, "test positive", "test negative"))
+table(genes$decision, genes$truth)
+```
+
+> From this table, compute FP, TP, FN, TN, and then the FPR, the power and the FDR.
+
+Here is a function that does this for us:
+
+```{r}
+evaluate = function(significant, truth) {
+  fp = sum(significant & truth == "H0 true")
+  tn = sum(!significant & truth == "H0 true")
+  tp = sum(significant & truth == "H0 false")
+  fn = sum(!significant & truth == "H0 false")
+  data.frame(positives = fp + tp, FP = fp, TP = tp, FN = fn, TN = tn,
+             FPR = fp / (fp + tn),
+             power = tp / (tp + fn),
+             FDR = ifelse(fp + tp > 0, fp / (fp + tp), 0))
+}
+evaluate(genes$p < 0.05, genes$truth)
+```
+
+The FPR is (approximately) 5%, as expected. But 5% of 900 null genes is about 45 false positives! Hence a large part of the genes we call "significant" are in fact **false discoveries** (look at the FDR!).
+
+> Imagine you would now spend money and time to validate all your "significant" genes in the lab: what proportion of these experiments would be useless?
+
+## Correcting for multiple testing
+
+There are two main strategies:
+
+**1. Bonferroni correction: controlling the family-wise error rate (FWER)**
+
+The FWER is the probability of getting **at least one** false positive among all tests. With $m$ independent tests at level $\alpha$, this probability is $1 - (1-\alpha)^m$:
+
+```{r}
+m = c(1, 5, 10, 20, 50, 100, 1000)
+data.frame(m, FWER = 1 - (1 - 0.05)^m)
+```
+
+With 1000 tests, we are practically **certain** to get false positives! The Bonferroni correction uses $\alpha / m$ as significance threshold for each test, which guarantees $FWER \leq \alpha$. Equivalently, we multiply each p-value by $m$ (adjusted p-value) and compare it to $\alpha$:
+
+```{r}
+genes = genes %>% mutate(p.bonf = p.adjust(p, method = "bonferroni"))
+evaluate(genes$p.bonf < 0.05, genes$truth)
+```
+
+**2. Benjamini-Hochberg (BH) correction: controlling the false-discovery rate (FDR)**
+
+Bonferroni is very strict: we get almost no false positives, but we also lose a lot of power. The Benjamini-Hochberg procedure instead controls the **FDR**: with a threshold of 0.05 on the BH-adjusted p-values, we expect that **at most 5% of the significant genes are false discoveries**.
+
+```{r}
+genes = genes %>% mutate(p.bh = p.adjust(p, method = "BH"))
+evaluate(genes$p.bh < 0.05, genes$truth)
+```
+
+Let's compare the three strategies:
+
+```{r}
+bind_rows(none       = evaluate(genes$p < 0.05, genes$truth),
+          bonferroni = evaluate(genes$p.bonf < 0.05, genes$truth),
+          BH         = evaluate(genes$p.bh < 0.05, genes$truth),
+          .id = "correction")
+```
+
+> Which strategy would you choose (1) in an exploratory screen where you want to find candidate genes for further validation, (2) when a false positive would have very serious consequences (e.g. a diagnostic)?
+
+## How does the BH procedure work?
+
+The BH procedure goes as follows:
+
+1.  sort the $m$ p-values: $p_{(1)} \leq p_{(2)} \leq \dots \leq p_{(m)}$
+2.  find the largest rank $k$ such that $p_{(k)} \leq \frac{k}{m}\,\alpha$
+3.  declare the $k$ genes with the smallest p-values as significant.
+
+```{r}
+bh.table = genes %>%
+  arrange(p) %>%
+  mutate(rank = row_number(),
+         bh.line = rank / n.genes * 0.05)
+
+ggplot(filter(bh.table, rank <= 200), aes(x = rank, y = p, color = truth)) +
+  geom_point() +
+  geom_line(aes(y = bh.line), color = "black", linetype = "dashed") +
+  geom_hline(yintercept = 0.05 / n.genes, color = "red") +
+  labs(x = "rank of p-value", y = "p-value",
+       title = "Benjamini-Hochberg procedure (200 smallest p-values)",
+       subtitle = "Dashed line: k/m·α (BH); red line: α/m (Bonferroni)")
+```
+
+> Verify that the number of genes below the dashed line (up to the last crossing) corresponds to the number of significant genes found with `p.adjust(..., method = "BH")`.
+
+------------------------------------------------------------------------
+
+# Exercises
+
+#### Exercise 1: Type I and type II errors
+
+A new rapid test for an infection is evaluated on 1000 persons, among which 100 are truly infected. The test is positive for 90 of the infected persons and for 45 of the non-infected persons.
+
+1.  Build the confusion matrix (TP, FP, TN, FN) as an R matrix.
+2.  Compute the sensitivity (power), the specificity, the false-positive rate and the false-discovery rate.
+3.  A person gets a positive test result. What is the probability that this person is actually infected?
+4.  Same question if the test is used in a population where only 1% of the persons are infected (same sensitivity and specificity). What do you conclude?
+
+#### Exercise 2: Power of a t-test
+
+You plan an experiment to compare the expression of a gene between treated and untreated cell lines. From previous experiments you know that the standard deviation of the expression is about 0.8, and you expect a difference of means of 0.5.
+
+1.  Using `power.t.test`, compute the power of the experiment with 5 replicates per group.
+2.  How many replicates per group would you need to reach a power of 80%? And of 90%?
+3.  Verify your result of question 2 with a simulation (as in Section 3).
+4.  Plot the power as a function of the number of replicates (from 2 to 50) for $\alpha = 0.05$ and $\alpha = 0.01$.
+
+#### Exercise 3: Multiple testing on real data
+
+We use again the ALL/AML leukemia gene expression dataset from the previous chapter:
+
+```{r}
+all.aml = read.delim('https://www.dropbox.com/scl/fi/q4rbpl3un6oqbbwoxe1qw/all.aml.cleaned.csv?rlkey=igwbna22d6hpdmw3os79zoy7z&dl=1', header = TRUE)
+all.aml.anno = readRDS(url("https://www.dropbox.com/scl/fi/0lqjh3jcskki2bb8hxwj6/all.aml.anno.rds?rlkey=cijsx39kr9gx9bjl6wzpmkgnz&dl=1"))
+all.aml = data.matrix(all.aml)
+i.aml = which(all.aml.anno$ALL.AML == 'AML') ## column numbers of the AML patients
+```
+
+1.  Run a Wilcoxon test between ALL and AML patients for every gene and store the p-values in a vector.
+2.  Plot the histogram of the p-values. Compare it with the histograms of Section 2 and Section 4: what does it tell you about the number of differentially expressed genes?
+3.  How many genes are significant at $\alpha = 0.05$ without correction? How many false positives would you expect if no gene were differentially expressed?
+4.  Correct the p-values with the Bonferroni and the Benjamini-Hochberg methods. How many genes remain significant in each case?
+5.  **Control experiment:** randomly permute the ALL/AML labels (using `sample()`), and repeat questions 1 to 4. Since the labels are now random, $H_0$ is true for all genes. What do you observe? Why is this a useful sanity check?
+
+#### Exercise 4: Multiple testing in everyday life
+
+A researcher tests whether eating jelly beans causes acne. The overall test is not significant. The researcher then tests 20 different colours of jelly beans separately at $\alpha = 0.05$, and finds that green jelly beans are significantly associated with acne ($p = 0.03$).
+
+1.  What is the probability of finding at least one significant colour, if no colour has any effect?
+2.  Simulate this situation in R (20 tests under $H_0$, repeated 10000 times) to verify your answer.
+3.  Would the result for green jelly beans still be significant after a Bonferroni correction?

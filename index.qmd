@@ -180,43 +180,56 @@ const WEEKS = [
   {
     n: 8,
     title: "Chapter 8: Non-Parametric & Proportion Tests",
-    topics: "Wilcoxon Test · Fisher/Chi-Square · Power of a Test",
+    topics: "Wilcoxon Test · Fisher/Chi-Square · Odds-Ratio",
     href: "8_nonparametric_proportion_tests.html",
     checkIds: [
       "check_w8_slides",
       "check_w8_vid1",
       "check_w8_vid2",
-      "check_w8_vid3",
       "check_w8_md"
     ],
     quizIds: [
       "w8_q_nonparam",
-      "w8_q_proportion",
-      "w8_q_power",
-      "w8_q_errors"
+      "w8_q_proportion"
     ],
     lang: "r"
   },
   {
     n: 9,
-    title: "Chapter 9: Regression Analysis",
-    topics: "Linear Regression · Multiple Regression · RMSE · F-Test",
-    href: "9_regression_analysis.html",
+    title: "Chapter 9: Power of a Test & Multiple Testing",
+    topics: "TP/FP/TN/FN · Power of a Test · Multiple Testing · FDR",
+    href: "9_power_multipleTest.html",
     checkIds: [
       "check_w9_slides",
       "check_w9_vid1",
-      "check_w9_vid2",
-      "check_w9_vid3",
-      "check_w9_vid4",
-      "check_w9_vid5",
       "check_w9_md"
     ],
     quizIds: [
-      "w9_q_simple",
-      "w9_q_vardec",
-      "w9_q_multiple",
-      "w9_q_evaluation",
-      "w9_q_ftest"
+      "w9_q_power",
+      "w9_q_errors"
+    ],
+    lang: "r"
+  },
+  {
+    n: 10,
+    title: "Chapter 10: Regression Analysis",
+    topics: "Linear Regression · Multiple Regression · RMSE · F-Test",
+    href: "10_regression_analysis.html",
+    checkIds: [
+      "check_w10_slides",
+      "check_w10_vid1",
+      "check_w10_vid2",
+      "check_w10_vid3",
+      "check_w10_vid4",
+      "check_w10_vid5",
+      "check_w10_md"
+    ],
+    quizIds: [
+      "w10_q_simple",
+      "w10_q_vardec",
+      "w10_q_multiple",
+      "w10_q_evaluation",
+      "w10_q_ftest"
     ],
     lang: "r"
   }

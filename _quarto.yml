@@ -44,8 +44,10 @@ website:
         href: 7_hypothesis_testing.qmd
       - text: "Chapter 8: Non-Parametric & Proportion Tests"
         href: 8_nonparametric_proportion_tests.qmd
-      - text: "Chapter 9: Regression Analysis"
-        href: 9_regression_analysis.qmd
+      - text: "Chapter 9: Power & Multiple Testing"
+        href: 9_power_multipleTest.qmd
+      - text: "Chapter 10: Regression Analysis"
+        href: 10_regression_analysis.qmd
 
   navbar:
     background: "#ffffff"

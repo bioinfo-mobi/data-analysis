@@ -79,7 +79,7 @@ data-analysis/
 ├── materials/                  ← ORDNER B: die verlinkten Dateien selbst
 │   └── chapter1/ ... chapter9/ ← .Rmd, .ipynb, .pdf — Nummerierung entspricht 1:1 der Website!
 │
-├── 1_datentypen.qmd ... 9_regression_analysis.qmd   ← ORDNER C (lose im Root): dünne Hüllen,
+├── 1_datentypen.qmd ... 10_regression_analysis.qmd  ← ORDNER C (lose im Root): dünne Hüllen,
 ├── index.qmd                                          NICHT bearbeiten (Kommentar oben in jeder
 ├── coding_basics.qmd, 0_markdown.qmd                  Datei erinnert daran). Ausnahme: index.qmd
 │                                                       braucht manchmal einen neuen quizIds-Eintrag
