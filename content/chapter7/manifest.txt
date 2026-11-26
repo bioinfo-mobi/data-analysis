@@ -14,6 +14,5 @@ markdown_r: materials/chapter7/_07_hypothesis_testing_dplyr.Rmd | Chapter 7 – 
 markdown_python: materials/chapter7/_07_hypothesis_testing_python.ipynb | Chapter 7 – Hypothesis Testing (Python Notebook)
 dataset_note: **Dataset:** This sheet reuses the diabetes dataset from earlier chapters, loaded directly inside the R Markdown file — no separate download needed.
 bonus_note: **Bonus reference:** two companion scripts with more worked t-test examples, plus comprehension questions with solutions. Quizzes 2 & 4 below draw on this material.
-bonus: materials/chapter7/_07_t-tests.Rmd | t-Tests Companion (R Markdown)
-bonus: materials/chapter7/_07_ttests.Rmd | t-Tests Companion 2 (R Markdown)
-bonus: materials/chapter7/Verständnisfragen_mit_sol.Rmd | Comprehension Questions + Solutions (R Markdown) | | Verstaendnisfragen_mit_sol.Rmd
+bonus: materials/chapter7/Week7_plenum.Rmd | R Markdown script for Plenum
+bonus: materials/chapter7/DataAnalysis3FS_Week7_interactive.html | Interactive html 

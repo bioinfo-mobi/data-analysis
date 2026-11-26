@@ -345,11 +345,11 @@
       rInner += '<div class="d-flex gap-3 mb-3 flex-wrap">';
       manifest.bonus.forEach(function (b) {
         var filename = b.path.split('/').pop();
-        // PDFs open in a new tab (view in browser); everything else downloads —
+        // PDFs and HTML pages open in a new tab (view in browser); everything else downloads —
         // matches how these buttons were originally authored per file type.
         // The optional 3rd field (note) overrides the saved filename, e.g. to
         // avoid accented characters in a downloaded filename.
-        var isPdf = /\.pdf$/i.test(b.path);
+        var isPdf = /\.(pdf|html?)$/i.test(b.path);
         var attrs = isPdf ? 'target="_blank"' : ('download="' + escapeHtml(b.filenameOverride || filename) + '"');
         rInner += '<a href="' + encodePath(b.path) + '" ' + attrs + ' class="btn btn-outline-danger btn-sm">' + escapeHtml(b.label || filename) + '</a>';
       });

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Analysis – Week 6: Hypothesis testing, t-tests &amp; correlation</title>
+<style>
+  :root{--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--bg:#f8fafc;--card:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45}
+  header{background:#0f172a;color:#fff;padding:18px 24px}
+  header h1{margin:0;font-size:1.35rem;font-weight:650}
+  header p{margin:4px 0 0;color:#cbd5e1;font-size:.92rem}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  nav button{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:8px;font-size:.93rem;cursor:pointer;color:var(--ink)}
+  nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .panel{display:none}.panel.active{display:block}
+  .intro{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:.94rem}
+  .intro ul{margin:6px 0 0 18px;padding:0}
+  .grid{display:grid;grid-template-columns:310px 1fr;gap:16px;align-items:start}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .ctl{margin-bottom:14px}
+  .ctl label{display:flex;justify-content:space-between;font-size:.9rem;font-weight:600;margin-bottom:3px}
+  .ctl label span.v{font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%}
+  select{width:100%;padding:6px;border-radius:6px;border:1px solid var(--line);font-size:.92rem}
+  button.act{background:var(--blue);color:#fff;border:0;border-radius:7px;padding:8px 12px;font-size:.9rem;cursor:pointer;margin-right:6px}
+  button.sec{background:#e5e7eb;color:var(--ink)}
+  .chk{font-size:.9rem;display:flex;align-items:center;gap:6px;margin:6px 0}
+  canvas{width:100%;display:block}
+  .stats{font-size:.9rem;margin-top:10px}
+  .stats table{border-collapse:collapse;width:100%}
+  .stats td,.stats th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+  .stats th{color:var(--mute);font-weight:600;font-size:.82rem}
+  .stats tr.hl td{background:#eff6ff;font-weight:650}
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;background:#f1f5f9;border-radius:6px;padding:6px 8px;font-size:.88rem;margin:6px 0}
+  .note{color:var(--mute);font-size:.84rem;margin-top:6px}
+  .ok{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}
+  h3{margin:2px 0 8px;font-size:1rem}
+  .qbox{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-top:14px;font-size:.94rem}
+  .qbox h3{margin:0 0 6px;color:#92400e}
+  .qbox ol{margin:4px 0 0 20px;padding:0}.qbox li{margin:4px 0}
+  footer{color:var(--mute);font-size:.8rem;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Week 6 · Hypothesis testing, t-tests &amp; correlation</h1>
+  <p>Interactive companion – Data Analysis (Molecular Biotechnology). Move the sliders and watch what changes.</p>
+</header>
+<div class="wrap">
+<nav id="nav">
+  <button data-tab="t1" class="active">1 · p-value: one- vs two-sided</button>
+  <button data-tab="t2">2 · What a p-value is (not)</button>
+  <button data-tab="t3">3 · Effect size vs. n</button>
+  <button data-tab="t4">4 · Paired vs. unpaired</button>
+  <button data-tab="t6">5 · Checking normality</button>
+  <button data-tab="t7">6 · p-values for non-normal data</button>
+  <button data-tab="t8">7 · Testing a correlation</button>
+</nav>
+
+<!-- ================= TAB 1 ================= -->
+<section id="t1" class="panel active">
+  <div class="intro"><b>Idea.</b> The fertilizer example from the lecture: untreated plants grow to h = 1.5 m. Is the mean height after fertilizer different? The test statistic <i>t</i> = (x̄ − h)/(s/√n) is compared with its distribution <b>under H₀</b> (a t-distribution with n−1 df). The p-value is the <span style="color:#2563eb;font-weight:600">blue area</span>.
+    <ul><li>Take <b>F3</b> and switch the alternative between <i>greater</i>, <i>less</i> and <i>two-sided</i>: the same data, three different p-values. The question decides the test – and it must be fixed <i>before</i> looking at the data.</li>
+    <li>Check: p(two-sided) = 2 · min(p(less), p(greater)).</li>
+    <li>Edit the values (or add more plants) and see how t and p react. The red zone is the rejection region for the chosen α.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Data set</label>
+        <select id="t1set"><option value="F1">Fertilizer F1</option><option value="F2">Fertilizer F2</option><option value="F3" selected>Fertilizer F3</option></select></div>
+      <div class="ctl"><label>Plant heights (m) – editable</label><textarea id="t1x" rows="3" style="width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.85rem;border:1px solid #e5e7eb;border-radius:6px;padding:6px"></textarea></div>
+      <div class="ctl"><label>Reference h = μ₀ under H₀ <span class="v" id="t1muV"></span></label><input type="range" id="t1mu" min="1.3" max="1.7" step="0.01" value="1.5"></div>
+      <div class="ctl"><label>Alternative hypothesis H₁</label>
+        <select id="t1alt"><option value="greater">greater: E(X) &gt; h (upper tail)</option><option value="less">less: E(X) &lt; h (lower tail)</option><option value="two.sided" selected>two.sided: E(X) ≠ h</option></select></div>
+      <div class="ctl"><label>Significance level α</label>
+        <select id="t1a"><option>0.1</option><option selected>0.05</option><option>0.01</option><option>0.001</option></select></div>
+      <div class="stats" id="t1stats"></div>
+    </div>
+    <div class="card">
+      <h3>The data</h3>
+      <canvas id="t1d" style="height:110px"></canvas>
+      <h3 style="margin-top:12px">Distribution of t under H₀ (t-distribution, df = n−1)</h3>
+      <canvas id="t1c" style="height:300px"></canvas>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>Select F1, F2 and F3 in turn (two-sided). Which fertilizer gives a significant result at α = 0.05? Compare the mean x̄ with h = 1.5 m – does the direction of the difference match what you would expect?</li>
+    <li>For F3, note the p-values for <i>less</i>, <i>greater</i> and <i>two.sided</i>. Verify that p(two-sided) = 2 · min(p(less), p(greater)). Why is p(greater) so large for F3?</li>
+    <li>Move the reference h with the slider. For which values of h does the two-sided test for F2 stop being significant? (Hint: compare with the 95% confidence interval from week 5.)</li>
+    <li>Delete the smallest value 1.27 from F1. How do s, t and p change? What does this tell you about the influence of a single measurement when n = 10?</li>
+  </ol></div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section id="t2" class="panel">
+  <div class="intro"><b>Idea.</b> We simulate many experiments (two groups, n per group, Student t-test). In some of them H₀ is really true (no effect), in others there is a true effect δ (in units of the SD). We know which is which – in real life we don't!
+    <ul><li>Start with <b>share of true effects = 0</b>: all H₀ true. The p-values are <b>uniformly distributed</b> and ≈ α of them are "significant" anyway – these are the false positives (type I errors).</li>
+    <li>Now set the share to e.g. 10% and δ = 0.5: among the significant results, how many are false positives? This is why <b>"p = 0.03 means a 3% chance that H₀ is true" is wrong</b> (Question 4): p is computed <i>assuming</i> H₀, it is P(data at least this extreme | H₀), not P(H₀ | data).</li>
+    <li>Increase n: the power (share of true effects detected) goes up.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Samples per group n <span class="v" id="t2nV"></span></label><input type="range" id="t2n" min="3" max="100" step="1" value="15"></div>
+      <div class="ctl"><label>True effect δ (when H₁ is true) <span class="v" id="t2dV"></span></label><input type="range" id="t2d" min="0.1" max="2" step="0.05" value="0.5"></div>
+      <div class="ctl"><label>Share of experiments with a true effect <span class="v" id="t2piV"></span></label><input type="range" id="t2pi" min="0" max="1" step="0.05" value="0"></div>
+      <div class="ctl"><label>Significance level α</label><select id="t2a"><option>0.1</option><option selected>0.05</option><option>0.01</option></select></div>
+      <div class="ctl"><label>Number of experiments <span class="v" id="t2MV"></span></label><input type="range" id="t2M" min="500" max="20000" step="500" value="5000"></div>
+      <div style="margin-top:8px"><button class="act" id="t2new">Run new experiments</button></div>
+      <div class="stats" id="t2stats"></div>
+    </div>
+    <div class="card">
+      <h3>Histogram of p-values (stacked: <span style="color:#dc2626">H₀ true</span> / <span style="color:#2563eb">H₁ true</span>)</h3>
+      <canvas id="t2c" style="height:340px"></canvas>
+      <h3 style="margin-top:12px">The significant results (p &lt; α): who is who?</h3>
+      <canvas id="t2b" style="height:70px"></canvas>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>With share of true effects = 0 and α = 0.05: what fraction of the experiments is significant? Change α to 0.01 – does the fraction follow?</li>
+    <li>Set the share of true effects to 0.1, δ = 0.5, n = 15. Among the significant results, what proportion comes from H₀ true (red)? Is it close to 5%?</li>
+    <li>Keep share = 0.1 and increase n to 100. How do the power and the share of false positives among the significant results change?</li>
+    <li>What happens to the shape of the p-value histogram when you increase δ to 1.5? Which part of the histogram belongs to H₁, which to H₀?</li>
+  </ol></div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section id="t3" class="panel">
+  <div class="intro"><b>Idea.</b> Weight of men vs. women (lecture slide "Effect size vs. significance"). We keep adding individuals to the same study and recompute the t-test each time.
+    <ul><li>With a small true difference D (say 1–2 kg) and SD = 10 kg, what n do you need to become significant? The <b>effect size</b> (Cohen's d = difference / SD) hardly changes with n – only the p-value does.</li>
+    <li>A large effect can be non-significant with n = 3 – "not significant" ≠ "no effect".</li>
+    <li>Set D = 0: the curve wanders around and occasionally crosses the α-line by chance. Stopping as soon as p &lt; 0.05 ("p-hacking by optional stopping") inflates false positives!</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>True difference D (kg) <span class="v" id="t3DV"></span></label><input type="range" id="t3D" min="0" max="15" step="0.5" value="3"></div>
+      <div class="ctl"><label>SD within each group (kg) <span class="v" id="t3sV"></span></label><input type="range" id="t3s" min="2" max="20" step="0.5" value="10"></div>
+      <div class="ctl"><label>Current sample size n per group <span class="v" id="t3nV"></span></label><input type="range" id="t3n" min="3" max="500" step="1" value="10"></div>
+      <div style="margin-top:8px"><button class="act" id="t3new">New study (new individuals)</button></div>
+      <div class="stats" id="t3stats"></div>
+    </div>
+    <div class="card">
+      <h3>The two samples (first n individuals)</h3>
+      <canvas id="t3d" style="height:150px"></canvas>
+      <h3 style="margin-top:12px">−log₁₀(p) as the study grows (higher = more significant)</h3>
+      <canvas id="t3c" style="height:280px"></canvas>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>With D = 3 kg and SD = 10 kg, roughly what n per group do you need before p stays below 0.05? Press "New study" a few times – is it always the same n?</li>
+    <li>Compare D = 3 kg at n = 10 and at n = 400. How much does Cohen's d change? How much does p change?</li>
+    <li>Set D = 10 kg, SD = 10 kg and n = 3. Is the result significant? Would you conclude that there is no difference?</li>
+    <li>Set D = 0 and run several new studies. Does the −log₁₀(p) curve ever cross the α-line? What would happen if you stopped the study at that moment?</li>
+  </ol></div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section id="t4" class="panel">
+  <div class="intro"><b>Idea.</b> Question 1: cholesterol (mg/dL) of the same patients before and after 3 months of medication. Patients differ a lot from each other (between-patient SD), but each patient changes only a little (measurement/biological noise).
+    <ul><li>The <b>paired</b> test works on the differences after − before: the between-patient variability cancels out. The unpaired test treats both columns as independent groups and drowns the effect in that variability.</li>
+    <li>Set the between-patient SD to 0: now the two tests give similar results – pairing only helps when the pairs are correlated.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Number of patients n <span class="v" id="t4nV"></span></label><input type="range" id="t4n" min="3" max="60" step="1" value="15"></div>
+      <div class="ctl"><label>True mean change Δ (mg/dL) <span class="v" id="t4DV"></span></label><input type="range" id="t4D" min="-30" max="30" step="1" value="-8"></div>
+      <div class="ctl"><label>Between-patient SD <span class="v" id="t4bV"></span></label><input type="range" id="t4b" min="0" max="60" step="1" value="35"></div>
+      <div class="ctl"><label>Within-patient noise SD <span class="v" id="t4wV"></span></label><input type="range" id="t4w" min="1" max="30" step="1" value="7"></div>
+      <div style="margin-top:8px"><button class="act" id="t4new">New patients</button></div>
+      <div class="stats" id="t4stats"></div>
+    </div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:12px">
+        <div><h3>Before → after (each line = one patient)</h3><canvas id="t4c" style="height:330px"></canvas></div>
+        <div><h3>Differences after − before</h3><canvas id="t4e" style="height:330px"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>With the default settings, compare the p-values of the paired and the unpaired test. Which one detects the drug effect?</li>
+    <li>Reduce the between-patient SD step by step down to 0. At what point do the two tests give similar p-values? Explain why.</li>
+    <li>Increase the within-patient noise SD to 25. What happens to the spread of the differences and to the paired p-value?</li>
+    <li>Set Δ = 0 and press "New patients" several times. How often is the paired test significant? Is that what you expect?</li>
+  </ol></div>
+</section>
+
+<!-- ================= TAB 6 ================= -->
+<section id="t6" class="panel">
+  <div class="intro"><b>Idea.</b> Question 5: is the data (approximately) normal? Compare the QQ-plot and the Shapiro-Wilk test (H₀: data normally distributed) for different populations and sample sizes.
+    <ul><li><b>Normal</b> population, n = 10: draw several samples – even normal data wiggles around the line, and about 5% of samples are "rejected".</li>
+    <li><b>Exponential</b> or <b>t (df = 2)</b> with n = 8: the QQ-plot often looks suspicious, but Shapiro-Wilk frequently can't reject – low power at small n. Use "Repeat 1000×" to see how often it detects the non-normality.</li>
+    <li>With n = 500, even small deviations become "significant", although the t-test is then robust anyway (CLT, week 5). Look at the plot, not only at the p-value.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Population</label>
+        <select id="t6pop"><option value="normal" selected>Normal</option><option value="t2">t-distribution, df = 2 (heavy tails)</option><option value="exp">Exponential (skewed)</option><option value="lognormal">Lognormal (very skewed)</option><option value="uniform">Uniform (light tails)</option><option value="bimodal">Bimodal mixture</option></select></div>
+      <div class="ctl"><label>Sample size n <span class="v" id="t6nV"></span></label><input type="range" id="t6n" min="3" max="500" step="1" value="10"></div>
+      <div style="margin-top:8px"><button class="act" id="t6new">New sample</button><button class="act sec" id="t6rep">Repeat 1000×</button></div>
+      <div class="stats" id="t6stats"></div>
+      <div class="stats" id="t6rstats"></div>
+    </div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><h3>Histogram + fitted normal</h3><canvas id="t6h" style="height:320px"></canvas></div>
+        <div><h3>Normal QQ-plot</h3><canvas id="t6q" style="height:320px"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>Normal population, n = 10: press "Repeat 1000×". In what percentage of samples does Shapiro-Wilk reject normality? Why is this not 0%?</li>
+    <li>Exponential population, n = 8: does the QQ-plot look normal? How often (Repeat 1000×) does Shapiro-Wilk detect the non-normality? Repeat with n = 50.</li>
+    <li>Look at the QQ-plots for the t (df = 2), uniform and exponential populations with n = 100. Describe how heavy tails, light tails and skewness each bend the points away from the line.</li>
+    <li>Uniform population with n = 500: is the Shapiro-Wilk test significant? Would that worry you before running a t-test with this sample size?</li>
+  </ol></div>
+</section>
+
+<!-- ================= TAB 7 ================= -->
+<section id="t7" class="panel">
+  <div class="intro"><b>Idea.</b> In tab 2 we saw: if H₀ is true <i>and the assumptions of the test hold</i>, p-values are <b>uniformly distributed</b> between 0 and 1, so exactly a share α of them falls below α. The t-test assumes normally distributed data. What happens if the data are not normal? We simulate many experiments in which H₀ is <b>true</b> (μ₀ = true population mean, or both groups drawn from the same population) and look at the p-values.
+    <ul><li><b>Normal</b> population: flat histogram, ≈ 5% of p-values below 0.05 – the reference.</li>
+    <li><b>Exponential</b> or <b>lognormal</b>, one-sample test, n = 10: the histogram is <b>no longer flat</b> – too many small p-values (≈ 10–16% "significant" instead of 5%). With a one-sided alternative the effect is even stronger ("less") or reversed ("greater"). The right panel shows why: the t-statistic is no longer t-distributed, it becomes skewed.</li>
+    <li><b>t (df = 2)</b> (heavy tails): now there are <b>too few</b> small p-values – the test is conservative and loses power.</li>
+    <li>Increase n: the histogram becomes flat again (CLT, week 5) – but slowly for very skewed data. The two-sample test with equal n is much more robust, because the skewness of the two groups largely cancels.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>Population</label>
+        <select id="t7pop"><option value="normal">Normal</option><option value="t2">t-distribution, df = 2 (heavy tails)</option><option value="exp" selected>Exponential (skewed)</option><option value="lognormal">Lognormal (very skewed)</option><option value="uniform">Uniform (light tails)</option><option value="bimodal">Bimodal mixture</option></select></div>
+      <div class="ctl"><label>Test</label>
+        <select id="t7test"><option value="one" selected>One-sample t-test, H₀: μ = true mean</option><option value="two">Two-sample t-test (Welch), both groups from same population</option></select></div>
+      <div class="ctl"><label>Alternative</label>
+        <select id="t7alt"><option value="two.sided" selected>two-sided</option><option value="less">less</option><option value="greater">greater</option></select></div>
+      <div class="ctl"><label>Sample size n (per group) <span class="v" id="t7nV"></span></label><input type="range" id="t7n" min="3" max="200" step="1" value="10"></div>
+      <div class="ctl"><label>Number of experiments <span class="v" id="t7MV"></span></label><input type="range" id="t7M" min="1000" max="20000" step="1000" value="10000"></div>
+      <div class="ctl"><label>Significance level α</label><select id="t7a"><option>0.1</option><option selected>0.05</option><option>0.01</option></select></div>
+      <div style="margin-top:8px"><button class="act" id="t7new">Run new experiments</button></div>
+      <div class="stats" id="t7stats"></div>
+    </div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><h3>Histogram of p-values (H₀ true)</h3><canvas id="t7c" style="height:320px"></canvas></div>
+        <div><h3>Simulated t-statistics vs. t-distribution</h3><canvas id="t7t" style="height:320px"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>Normal population, one-sample test, n = 10: what share of p-values falls below 0.05? Use this as your reference.</li>
+    <li>Switch to the exponential and then the lognormal population (n = 10). How many "significant" results do you get now, although H₀ is true? How does the t-statistic histogram differ from the t-distribution?</li>
+    <li>Keep the lognormal population and increase n to 30, 100 and 200. From which n is the share of small p-values close to α again?</li>
+    <li>Lognormal, n = 10: switch from the one-sample test to the two-sample (Welch) test. Is the false-positive rate still inflated? Why might that be?</li>
+  </ol></div>
+</section>
+
+<!-- ================= TAB 8 ================= -->
+<section id="t8" class="panel">
+  <div class="intro"><b>Idea.</b> Is an observed correlation r different from 0, or could it be chance? H₀: ρ = 0 (no correlation in the population). Test statistic <b>t = r·√(n−2) / √(1−r²)</b>, which follows a t-distribution with <b>df = n − 2</b> under H₀ (for bivariate normal data).
+    <ul><li>True ρ = 0, n = 10: draw several samples – |r| = 0.4 or more happens often by chance. The right plot shows how large |r| must be to be significant.</li>
+    <li>ρ = 0.3, n = 10 vs. n = 100: same true correlation, but only the large sample reliably gives a significant result (use "Repeat 2000×" for the power).</li>
+    <li>ρ = 0.1, n = 500: significant, but r² ≈ 1% of the variance explained. <b>Significance ≠ relevance.</b></li>
+    <li>ρ = 0, n = 15, tick "add one outlier": a single point can create a significant Pearson correlation. Switch to Spearman (rank-based) – it is much less affected.</li></ul></div>
+  <div class="grid">
+    <div class="card">
+      <div class="ctl"><label>True correlation ρ <span class="v" id="t8rV"></span></label><input type="range" id="t8r" min="-0.95" max="0.95" step="0.05" value="0.3"></div>
+      <div class="ctl"><label>Sample size n <span class="v" id="t8nV"></span></label><input type="range" id="t8n" min="4" max="500" step="1" value="20"></div>
+      <div class="ctl"><label>Method</label><select id="t8m"><option value="pearson" selected>Pearson</option><option value="spearman">Spearman (ranks)</option></select></div>
+      <div class="ctl"><label>Significance level α</label><select id="t8a"><option>0.1</option><option selected>0.05</option><option>0.01</option></select></div>
+      <label class="chk"><input type="checkbox" id="t8out"> add one outlier at (5, 5)</label>
+      <div style="margin-top:8px"><button class="act" id="t8new">New sample</button><button class="act sec" id="t8rep">Repeat 2000×</button></div>
+      <div class="stats" id="t8stats"></div>
+      <div class="stats" id="t8rstats"></div>
+    </div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><h3>Sample (red: regression line)</h3><canvas id="t8s" style="height:300px"></canvas></div>
+        <div><h3>Distribution of r under H₀ (ρ = 0)</h3><canvas id="t8d" style="height:300px"></canvas></div>
+      </div>
+      <h3 style="margin-top:12px">How large must |r| be to be significant? (critical r vs. n)</h3>
+      <canvas id="t8c" style="height:200px"></canvas>
+    </div>
+  </div>
+  <div class="qbox"><h3>Questions to explore</h3><ol>
+    <li>ρ = 0, n = 10: draw several new samples. What is the largest |r| you observe? How large must |r| be to be significant at n = 10 (see the bottom plot)?</li>
+    <li>ρ = 0.3: use "Repeat 2000×" for n = 10, n = 30 and n = 100. How does the power change? Roughly what n do you need for 80% power?</li>
+    <li>ρ = 0.1, n = 500: is the result significant? How much of the variance in y is explained (r²)? Is this correlation biologically relevant?</li>
+    <li>ρ = 0, n = 15, tick "add one outlier": compare Pearson and Spearman with "Repeat 2000×". Which method gives more false positives?</li>
+  </ol></div>
+</section>
+
+</div>
+<footer>Everything runs locally in your browser – no internet connection needed.</footer>
+
+<script>
+"use strict";
+/* ---------- numerics ---------- */
+const SQ2PI=Math.sqrt(2*Math.PI);
+function erfc(x){const z=Math.abs(x),t=1/(1+0.5*z);const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));return x>=0?r:2-r;}
+const normCdf=x=>0.5*erfc(-x/Math.SQRT2);
+const normPdf=x=>Math.exp(-x*x/2)/SQ2PI;
+function normInv(p){const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00],b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01],c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00],d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];const pl=0.02425,ph=1-pl;let q,r;if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}if(p>ph){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let y=x,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;for(let j=0;j<6;j++)ser+=c[j]/++y;return -tmp+Math.log(2.5066282746310005*ser/x);}
+function betacf(a,b,x){const FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return h;}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tCdf(t,v){if(v>1000)return normCdf(t*(1-1/(4*v))/Math.sqrt(1+t*t/(2*v)));const ib=betai(v/2,0.5,v/(v+t*t));return t>=0?1-0.5*ib:0.5*ib;}
+function tPdf(t,v){return Math.exp(lgamma((v+1)/2)-lgamma(v/2))/Math.sqrt(v*Math.PI)*Math.pow(1+t*t/v,-(v+1)/2);}
+function tInv(p,v){if(p<0.5)return -tInv(1-p,v);if(v>1000){const z=normInv(p);return z+(z**3+z)/(4*v)+(5*z**5+16*z**3+3*z)/(96*v*v);}let lo=0,hi=1;while(tCdf(hi,v)<p&&hi<1e7)hi*=2;for(let i=0;i<70;i++){const mid=(lo+hi)/2;if(tCdf(mid,v)<p)lo=mid;else hi=mid;}return (lo+hi)/2;}
+
+/* ---------- random numbers ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeGen(seed){const u=mulberry32(seed);let spare=null;const z=()=>{if(spare!==null){const s=spare;spare=null;return s;}let a=0;while(a===0)a=u();const b=u(),r=Math.sqrt(-2*Math.log(a));spare=r*Math.sin(2*Math.PI*b);return r*Math.cos(2*Math.PI*b);};return {u,z};}
+const newSeed=()=>Math.floor(Math.random()*2**31);
+
+/* ---------- populations ---------- */
+
+/* ---------- canvas helpers ---------- */
+const COL={ink:'#1f2937',mute:'#6b7280',grid:'#e5e7eb',blue:'#2563eb',red:'#dc2626',green:'#059669',amber:'#d97706',purple:'#7c3aed'};
+function setup(c){const dpr=window.devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';return{ctx,w,h};}
+function frame(w,h,m,x0,x1,y0,y1,logx){const L=m.l,R=w-m.r,T=m.t,B=h-m.b;const fx=logx?(x=>Math.log(x)):(x=>x);const a=fx(x0),b=fx(x1);return{L,R,T,B,sx:x=>L+(fx(x)-a)/(b-a)*(R-L),sy:y=>B-(y-y0)/(y1-y0)*(B-T)};}
+function niceTicks(min,max,n){const span=max-min,raw=span/(n||6),mag=Math.pow(10,Math.floor(Math.log10(raw))),r=raw/mag,step=(r<1.5?1:r<3?2:r<7?5:10)*mag,out=[];for(let v=Math.ceil(min/step-1e-9)*step;v<=max+1e-9;v+=step)out.push(+v.toFixed(10));return out;}
+const fmt=v=>Math.abs(v)<1e-9?'0':(+v.toPrecision(3)).toString();
+function axisX(ctx,f,ticks,label){ctx.strokeStyle=COL.mute;ctx.fillStyle=COL.mute;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(f.L,f.B);ctx.lineTo(f.R,f.B);ctx.stroke();ctx.textAlign='center';ctx.textBaseline='top';for(const t of ticks){const x=f.sx(t);ctx.beginPath();ctx.moveTo(x,f.B);ctx.lineTo(x,f.B+4);ctx.stroke();ctx.fillText(fmt(t),x,f.B+6);}if(label){ctx.fillText(label,(f.L+f.R)/2,f.B+22);}}
+function axisY(ctx,f,ticks,label){ctx.strokeStyle=COL.mute;ctx.fillStyle=COL.mute;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(f.L,f.T);ctx.lineTo(f.L,f.B);ctx.stroke();ctx.textAlign='right';ctx.textBaseline='middle';for(const t of ticks){const y=f.sy(t);ctx.beginPath();ctx.moveTo(f.L-4,y);ctx.lineTo(f.L,y);ctx.stroke();ctx.fillText(fmt(t),f.L-7,y);}if(label){ctx.save();ctx.translate(12,(f.T+f.B)/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(label,0,0);ctx.restore();}}
+function clipTo(ctx,f){ctx.save();ctx.beginPath();ctx.rect(f.L,f.T-2,f.R-f.L,f.B-f.T+4);ctx.clip();}
+function $(id){return document.getElementById(id);}
+
+/* ---------- descriptive & tests ---------- */
+const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+const variance=a=>{const m=mean(a);return a.reduce((s,v)=>s+(v-m)*(v-m),0)/(a.length-1);};
+const sdv=a=>Math.sqrt(variance(a));
+function pFromT(t,df,alt){const lo=tCdf(t,df),up=1-lo;return alt==='greater'?up:alt==='less'?lo:Math.min(1,2*Math.min(lo,up));}
+function tOne(x,mu,alt){const n=x.length,m=mean(x),s=sdv(x),se=s/Math.sqrt(n),t=(m-mu)/se,df=n-1;return{n,m,s,se,t,df,p:pFromT(t,df,alt)};}
+function tStudent(x,y,alt){const n1=x.length,n2=y.length,m1=mean(x),m2=mean(y),v1=variance(x),v2=variance(y);const sp2=((n1-1)*v1+(n2-1)*v2)/(n1+n2-2);const se=Math.sqrt(sp2*(1/n1+1/n2));const t=(m1-m2)/se,df=n1+n2-2;return{t,df,p:pFromT(t,df,alt),m1,m2,se};}
+function tWelch(x,y,alt){const n1=x.length,n2=y.length,m1=mean(x),m2=mean(y),a=variance(x)/n1,b=variance(y)/n2;const se=Math.sqrt(a+b);const t=(m1-m2)/se,df=(a+b)*(a+b)/(a*a/(n1-1)+b*b/(n2-1));return{t,df,p:pFromT(t,df,alt),m1,m2,se};}
+function tPaired(x,y,alt){const d=x.map((v,i)=>v-y[i]);return tOne(d,0,alt);}
+
+/* ---------- Shapiro-Wilk (Royston 1995, as in R's swilk.c) ---------- */
+function poly(cc,x){let r=cc[0];if(cc.length>1){let p=x*cc[cc.length-1];for(let j=cc.length-2;j>0;j--)p=(p+cc[j])*x;r+=p;}return r;}
+function shapiro(xin){
+  const x=[...xin].sort((a,b)=>a-b),n=x.length;if(n<3)return{W:NaN,p:NaN};
+  const nn2=Math.floor(n/2),a=new Array(nn2);
+  if(n===3){a[0]=Math.SQRT1_2;}
+  else{
+    const an25=n+.25,m=[];for(let i=1;i<=nn2;i++)m.push(normInv((i-.375)/an25));
+    const summ2=2*m.reduce((s,v)=>s+v*v,0),ssumm2=Math.sqrt(summ2),rsn=1/Math.sqrt(n);
+    const c1=[0,.221157,-.147981,-2.07119,4.434685,-2.706056],c2=[0,.042981,-.293762,-1.752461,5.682633,-3.582633];
+    const a1=poly(c1,rsn)-m[0]/ssumm2;let i1,fac;
+    if(n>5){i1=3;const a2=-m[1]/ssumm2+poly(c2,rsn);fac=Math.sqrt((summ2-2*m[0]*m[0]-2*m[1]*m[1])/(1-2*a1*a1-2*a2*a2));a[1]=a2;}
+    else{i1=2;fac=Math.sqrt((summ2-2*m[0]*m[0])/(1-2*a1*a1));}
+    a[0]=a1;for(let i=i1;i<=nn2;i++)a[i-1]=-m[i-1]/fac;
+  }
+  const mu=mean(x);let ss=0;for(const v of x)ss+=(v-mu)*(v-mu);if(ss<=0)return{W:NaN,p:NaN};
+  let num=0;for(let i=0;i<nn2;i++)num+=Math.abs(a[i])*(x[n-1-i]-x[i]);
+  let w=Math.min(1,num*num/ss);
+  if(n===3){const pw=1.90985931710274*(Math.asin(Math.sqrt(w))-1.04719755119660);return{W:w,p:Math.max(0,pw)};}
+  let y=Math.log(1-w),m0,s0;const xx=Math.log(n);
+  if(n<=11){const gamma=poly([-2.273,.459],n);if(y>=gamma)return{W:w,p:1e-99};y=-Math.log(gamma-y);m0=poly([.544,-.39978,.025054,-6.714e-4],n);s0=Math.exp(poly([1.3822,-.77857,.062767,-.0020322],n));}
+  else{m0=poly([-1.5861,-.31082,-.083751,.0038915],xx);s0=Math.exp(poly([-.4803,-.082676,.0030302],xx));}
+  return{W:w,p:1-normCdf((y-m0)/s0)};
+}
+const ppoints=n=>{const a=n<=10?3/8:.5;return Array.from({length:n},(_,i)=>(i+1-a)/(n+1-2*a));};
+
+/* ---------- extra helpers ---------- */
+const fmtP=p=>p<1e-4?p.toExponential(1):p<0.001?p.toFixed(4):p.toFixed(3);
+function txt(ctx,s,x,y,col,align,base){ctx.fillStyle=col||COL.ink;ctx.textAlign=align||'left';ctx.textBaseline=base||'alphabetic';ctx.fillText(s,x,y);}
+function haloText(ctx,s,x,y,col,align,base){ctx.lineJoin='round';ctx.lineWidth=4;ctx.strokeStyle='#fff';ctx.textAlign=align||'left';ctx.textBaseline=base||'alphabetic';ctx.strokeText(s,x,y);ctx.fillStyle=col||COL.ink;ctx.fillText(s,x,y);}
+function vline(ctx,f,x,col,dash,lw){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=lw||1.5;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(f.sx(x),f.T);ctx.lineTo(f.sx(x),f.B);ctx.stroke();ctx.restore();}
+function hline(ctx,f,y,col,dash,lw){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=lw||1.5;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(f.L,f.sy(y));ctx.lineTo(f.R,f.sy(y));ctx.stroke();ctx.restore();}
+function dot(ctx,x,y,r,col,alpha){ctx.globalAlpha=alpha==null?1:alpha;ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,6.2832);ctx.fill();ctx.globalAlpha=1;}
+function rng(arr){let lo=Infinity,hi=-Infinity;for(const v of arr){if(v<lo)lo=v;if(v>hi)hi=v;}return[lo,hi];}
+function table(rows){return '<table>'+rows.map(r=>r.hl?`<tr class="hl"><td>${r[0]}</td><td>${r[1]}</td></tr>`:r.th?`<tr><th colspan="2">${r[0]}</th></tr>`:`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')+'</table>';}
+const verdict=(p,a)=>p<a?`<span class="bad">p &lt; α → reject H₀ (significant)</span>`:`<span class="ok">p ≥ α → H₀ cannot be rejected</span>`;
+
+/* shaded area under a pdf between a and b */
+function shade(ctx,f,pdf,a,b,col){if(b<=a)return;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(f.sx(a),f.sy(0));const N=120;for(let i=0;i<=N;i++){const x=a+(b-a)*i/N;ctx.lineTo(f.sx(x),f.sy(pdf(x)));}ctx.lineTo(f.sx(b),f.sy(0));ctx.closePath();ctx.fill();}
+function curve(ctx,f,fn,x0,x1,col,lw,dash){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=lw||2;ctx.setLineDash(dash||[]);ctx.beginPath();const N=300;for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N,y=fn(x);i?ctx.lineTo(f.sx(x),f.sy(y)):ctx.moveTo(f.sx(x),f.sy(y));}ctx.stroke();ctx.restore();}
+
+/* strip plot of several groups along x (horizontal) */
+function stripH(canvas,groups,opts){
+  const {ctx,w,h}=setup(canvas);const all=groups.flatMap(g=>g.x).concat(opts.extra||[]);let [lo,hi]=rng(all);const pad=(hi-lo||1)*.08;lo-=pad;hi+=pad;
+  const m={l:opts.lab?80:20,r:20,t:8,b:34};const f=frame(w,h,m,lo,hi,0,groups.length);
+  groups.forEach((g,k)=>{const yc=f.sy(groups.length-k-.5);const gen=makeGen(97+k);const jit=(f.B-f.T)/groups.length*.28;const r=g.x.length>150?2.2:g.x.length>40?3:4.5;
+    for(const v of g.x)dot(ctx,f.sx(v),yc+(gen.u()-.5)*2*jit,r,g.col,g.x.length>150?.35:.7);
+    const mu=mean(g.x);ctx.strokeStyle=COL.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(f.sx(mu),yc-jit-6);ctx.lineTo(f.sx(mu),yc+jit+6);ctx.stroke();
+    if(opts.lab)txt(ctx,g.name,f.L-8,yc,g.col,'right','middle');});
+  if(opts.ref!=null){vline(ctx,f,opts.ref,COL.purple,[5,4],2);haloText(ctx,opts.refLab,f.sx(opts.ref)+4,f.T+10,COL.purple,'left','top');}
+  axisX(ctx,f,niceTicks(lo,hi,8),opts.xlab||'');
+}
+
+/* =============================================================
+   TAB 1: p-value, one- vs two-sided
+   ============================================================= */
+const FERT={F1:[1.47,1.62,1.51,1.61,1.27,1.51,1.55,1.49,1.44,1.5],F2:[1.47,1.62,1.61,1.61,1.47,1.51,1.55,1.59,1.64,1.5],F3:[1.47,1.45,1.31,1.41,1.47,1.51,1.55,1.39,1.44,1.5]};
+function t1load(){$('t1x').value=FERT[$('t1set').value].join(', ');t1draw();}
+function t1data(){return $('t1x').value.split(/[\s,;]+/).map(Number).filter(v=>v!==''&&isFinite(v));}
+function t1draw(){
+  const x=t1data(),mu0=+$('t1mu').value,alt=$('t1alt').value,a=+$('t1a').value;$('t1muV').textContent=mu0.toFixed(2)+' m';
+  if(x.length<2){$('t1stats').innerHTML='<span class="bad">Need at least 2 numbers.</span>';return;}
+  const r=tOne(x,mu0,alt),df=r.df;
+  const pl=tCdf(r.t,df),pu=1-pl;
+  const tc=alt==='two.sided'?tInv(1-a/2,df):tInv(1-a,df);
+  stripH($('t1d'),[{x,col:COL.green,name:'F'}],{ref:mu0,refLab:'h = '+mu0.toFixed(2),xlab:'plant height (m)   (black bar = x̄)',extra:[mu0]});
+  /* t-distribution */
+  const {ctx,w,h}=setup($('t1c'));const xr=Math.max(4.5,Math.min(12,Math.abs(r.t)+1));const ym=tPdf(0,df)*1.18;
+  const f=frame(w,h,{l:44,r:20,t:18,b:40},-xr,xr,0,ym);const pdf=v=>tPdf(v,df);
+  clipTo(ctx,f);
+  // rejection region
+  ctx.globalAlpha=.25;
+  if(alt!=='less')shade(ctx,f,pdf,tc,xr,COL.red);
+  if(alt!=='greater')shade(ctx,f,pdf,-xr,alt==='less'?-tc:-tc,COL.red);
+  ctx.globalAlpha=.55;
+  // p-value area
+  const to=r.t;
+  if(alt==='greater')shade(ctx,f,pdf,to,xr,COL.blue);
+  else if(alt==='less')shade(ctx,f,pdf,-xr,to,COL.blue);
+  else{const at=Math.abs(to);shade(ctx,f,pdf,at,xr,COL.blue);shade(ctx,f,pdf,-xr,-at,COL.blue);}
+  ctx.globalAlpha=1;
+  curve(ctx,f,pdf,-xr,xr,COL.ink,2);
+  curve(ctx,f,normPdf,-xr,xr,COL.mute,1.2,[3,3]);
+  // critical values
+  ctx.fillStyle=COL.red;
+  if(alt!=='less'){vline(ctx,f,tc,COL.red,[4,3],1.3);haloText(ctx,'t_crit = '+tc.toFixed(2),f.sx(tc)+3,f.sy(ym*.62),COL.red,'left');}
+  if(alt!=='greater'){vline(ctx,f,-tc,COL.red,[4,3],1.3);haloText(ctx,'−'+tc.toFixed(2),f.sx(-tc)-3,f.sy(ym*.62),COL.red,'right');}
+  // observed
+  const tv=Math.max(-xr,Math.min(xr,to));vline(ctx,f,tv,COL.purple,[],2.5);
+  haloText(ctx,'observed t = '+to.toFixed(2),f.sx(tv)+(tv>0?-5:5),f.T+12,COL.purple,tv>0?'right':'left','top');
+  if(alt==='two.sided'&&Math.abs(to)>1e-9){const mt=-tv;vline(ctx,f,mt,COL.purple,[2,3],1.5);}
+  ctx.restore();
+  axisX(ctx,f,niceTicks(-xr,xr,10),'t');
+  haloText(ctx,'dashed grey: N(0,1)',f.R-4,f.T+2,COL.mute,'right','top');
+  const altTxt={greater:'E(X) > h',less:'E(X) < h','two.sided':'E(X) ≠ h'}[alt];
+  $('t1stats').innerHTML=table([
+    ['n',r.n],['x̄',r.m.toFixed(4)+' m'],['s (sample SD)',r.s.toFixed(4)],['effect x̄ − h',(r.m-mu0).toFixed(4)],['random effect s/√n',r.se.toFixed(4)],
+    ['t = (x̄ − h)/(s/√n)',r.t.toFixed(3)],['df',df],
+    {0:'p (less)',1:fmtP(pl),hl:alt==='less'},{0:'p (greater)',1:fmtP(pu),hl:alt==='greater'},{0:'p (two-sided)',1:fmtP(Math.min(1,2*Math.min(pl,pu))),hl:alt==='two.sided'},
+    ['critical value (α = '+a+')',(alt==='less'?'−':alt==='two.sided'?'±':'')+tc.toFixed(3)]
+  ])+`<p>H₁: ${altTxt}<br>${verdict(r.p,a)}</p><div class="formula">t.test(x, mu = ${mu0}, alternative = "${alt}")</div>`;
+}
+$('t1set').addEventListener('change',t1load);
+['t1x','t1mu','t1alt','t1a'].forEach(id=>$(id).addEventListener('input',t1draw));
+
+/* =============================================================
+   TAB 2: p-value distribution, false positives
+   ============================================================= */
+let D2=null;
+function t2run(){
+  const n=+$('t2n').value,d=+$('t2d').value,pi=+$('t2pi').value,M=+$('t2M').value,g=makeGen(newSeed());
+  const ps=new Float64Array(M),h1=new Uint8Array(M);const x=new Array(n),y=new Array(n);
+  for(let k=0;k<M;k++){const eff=g.u()<pi;h1[k]=eff?1:0;for(let i=0;i<n;i++){x[i]=g.z()+(eff?d:0);y[i]=g.z();}ps[k]=tStudent(x,y,'two.sided').p;}
+  D2={ps,h1};
+}
+function t2draw(){
+  if(!D2)return;const a=+$('t2a').value,{ps,h1}=D2,M=ps.length;
+  const B=20,c0=new Array(B).fill(0),c1=new Array(B).fill(0);
+  for(let k=0;k<M;k++){const b=Math.min(B-1,Math.floor(ps[k]*B));(h1[k]?c1:c0)[b]++;}
+  const ymax=Math.max(...c0.map((v,i)=>v+c1[i]))*1.12||1;
+  const {ctx,w,h}=setup($('t2c'));const f=frame(w,h,{l:52,r:20,t:14,b:40},0,1,0,ymax);
+  for(let b=0;b<B;b++){const x0=f.sx(b/B)+1,x1=f.sx((b+1)/B)-1;ctx.fillStyle=COL.red;ctx.globalAlpha=.75;ctx.fillRect(x0,f.sy(c0[b]),x1-x0,f.sy(0)-f.sy(c0[b]));ctx.fillStyle=COL.blue;ctx.fillRect(x0,f.sy(c0[b]+c1[b]),x1-x0,f.sy(c0[b])-f.sy(c0[b]+c1[b]));ctx.globalAlpha=1;}
+  const n0=h1.reduce((s,v)=>s+(1-v),0),n1=M-n0;
+  if(n0>0)hline(ctx,f,n0/B,COL.red,[5,4],1.5);
+  vline(ctx,f,a,COL.ink,[4,3],1.5);haloText(ctx,'α = '+a,f.sx(a)+4,f.T+4,COL.ink,'left','top');
+  if(n0>0)haloText(ctx,'expected height if all H₀-true p-values were uniform',f.R-4,f.sy(n0/B)-4,COL.red,'right','bottom');
+  axisX(ctx,f,niceTicks(0,1,10),'p-value (bins of width 0.05)');axisY(ctx,f,niceTicks(0,ymax,6),'number of experiments');
+  let fp=0,tp=0,mid0=0,mid=0;for(let k=0;k<M;k++){if(ps[k]<a){h1[k]?tp++:fp++;}if(ps[k]>.02&&ps[k]<.04){mid++;if(!h1[k])mid0++;}}
+  /* bar of significant results */
+  {const {ctx,w,h}=setup($('t2b'));const tot=fp+tp;const L=20,R=w-20,T=8,Bt=h-28;
+   if(tot>0){const xs=L+(R-L)*fp/tot;ctx.fillStyle=COL.red;ctx.fillRect(L,T,xs-L,Bt-T);ctx.fillStyle=COL.blue;ctx.fillRect(xs,T,R-xs,Bt-T);
+    ctx.font='13px -apple-system,Segoe UI,Roboto,sans-serif';
+    if(fp>0)txt(ctx,`${fp} false positives (${(100*fp/tot).toFixed(0)}%)`,L+6,(T+Bt)/2,'#fff','left','middle');
+    if(tp>0)txt(ctx,`${tp} true effects (${(100*tp/tot).toFixed(0)}%)`,R-6,(T+Bt)/2,'#fff','right','middle');}
+   else txt(ctx,'no significant results',L,(T+Bt)/2,COL.mute,'left','middle');
+   ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';txt(ctx,`all ${tot} experiments with p < ${a}`,L,h-6,COL.mute);}
+  $('t2stats').innerHTML=table([
+    ['experiments with H₀ true',n0],['… of these with p < α',n0?`${fp} (${(100*fp/n0).toFixed(1)}%)  ← type I error rate ≈ α`:'–'],
+    ['experiments with H₁ true',n1],['… of these with p < α (power)',n1?`${tp} (${(100*tp/n1).toFixed(1)}%)`:'–'],
+    {0:'share of significant results where H₀ is true',1:(fp+tp)?(100*fp/(fp+tp)).toFixed(1)+'%':'–',hl:true},
+    ['results with 0.02 &lt; p &lt; 0.04: H₀ true in',mid?`${(100*mid0/mid).toFixed(0)}% (${mid0}/${mid})`:'–']
+  ])+'<p class="note">The last two lines are P(H₀ | significant) – they depend on how many tested hypotheses are true, which the p-value knows nothing about.</p>';
+}
+function updT2labels(){$('t2nV').textContent=$('t2n').value;$('t2dV').textContent=(+$('t2d').value).toFixed(2)+' SD';$('t2piV').textContent=Math.round(100*$('t2pi').value)+'%';$('t2MV').textContent=$('t2M').value;}
+['t2n','t2d','t2pi','t2M'].forEach(id=>$(id).addEventListener('change',()=>{updT2labels();t2run();t2draw();}));
+['t2n','t2d','t2pi','t2M'].forEach(id=>$(id).addEventListener('input',updT2labels));
+$('t2a').addEventListener('input',t2draw);$('t2new').onclick=()=>{t2run();t2draw();};
+
+/* =============================================================
+   TAB 3: effect size vs sample size
+   ============================================================= */
+let D3=null;const N3=500;
+function t3run(){const g=makeGen(newSeed());const zm=[],zf=[];for(let i=0;i<N3;i++){zm.push(g.z());zf.push(g.z());}D3={zm,zf,curve:null};}
+function t3draw(){
+  if(!D3)t3run();const D=+$('t3D').value,s=+$('t3s').value,n=+$('t3n').value,a=0.05;
+  $('t3DV').textContent=D.toFixed(1)+' kg';$('t3sV').textContent=s.toFixed(1)+' kg';$('t3nV').textContent=n;
+  const wf=D3.zf.map(z=>67+s*z),wm=D3.zm.map(z=>67+D+s*z);
+  const lp=[];for(let k=3;k<=N3;k++){const r=tStudent(wm.slice(0,k),wf.slice(0,k),'two.sided');lp.push([k,-Math.log10(Math.max(r.p,1e-300))]);}
+  const xm=wm.slice(0,n),xf=wf.slice(0,n);const r=tStudent(xm,xf,'two.sided');
+  stripH($('t3d'),[{x:xm,col:COL.blue,name:'men'},{x:xf,col:COL.red,name:'women'}],{lab:true,xlab:'weight (kg)   (black bar = mean)'});
+  const {ctx,w,h}=setup($('t3c'));const ymax=Math.max(3,...lp.map(v=>v[1]))*1.1;
+  const f=frame(w,h,{l:48,r:20,t:14,b:40},3,N3,0,ymax,true);
+  clipTo(ctx,f);
+  ctx.globalAlpha=.12;ctx.fillStyle=COL.red;ctx.fillRect(f.L,f.sy(ymax),f.R-f.L,f.sy(-Math.log10(a))-f.sy(ymax));ctx.globalAlpha=1;
+  // expected curve: observed diff = D, s = SD
+  if(D>0)curve(ctx,f,k=>{const t=D/(s*Math.sqrt(2/k));return -Math.log10(Math.max(2*(1-tCdf(t,2*k-2)),1e-300));},3,N3,COL.mute,1.5,[5,4]);
+  ctx.strokeStyle=COL.purple;ctx.lineWidth=2;ctx.beginPath();lp.forEach(([k,v],i)=>i?ctx.lineTo(f.sx(k),f.sy(v)):ctx.moveTo(f.sx(k),f.sy(v)));ctx.stroke();
+  hline(ctx,f,-Math.log10(a),COL.red,[4,3],1.5);
+  vline(ctx,f,n,COL.ink,[2,3],1);dot(ctx,f.sx(n),f.sy(-Math.log10(Math.max(r.p,1e-300))),6,COL.purple);
+  ctx.restore();
+  haloText(ctx,'p = 0.05',f.L+4,f.sy(-Math.log10(a))-3,COL.red,'left','bottom');
+  haloText(ctx,'significant',f.L+4,f.T+3,COL.red,'left','top');
+  if(D>0)haloText(ctx,'dashed: if the observed difference were exactly D',f.R-4,f.B-6,COL.mute,'right','bottom');
+  axisX(ctx,f,[3,5,10,20,50,100,200,500],'sample size n per group (log scale)');axisY(ctx,f,niceTicks(0,ymax,6),'−log₁₀(p)');
+  const sp=Math.sqrt((variance(xm)+variance(xf))/2);
+  $('t3stats').innerHTML=table([['n per group',n],['observed difference',(r.m1-r.m2).toFixed(2)+' kg'],['Cohen\'s d = difference / SD',((r.m1-r.m2)/sp).toFixed(2)+`  (true: ${(D/s).toFixed(2)})`],['t',r.t.toFixed(3)],['df',r.df],{0:'p (two-sided)',1:fmtP(r.p),hl:true},['−log₁₀(p)',(-Math.log10(r.p)).toFixed(2)]])+`<p>${verdict(r.p,a)}</p><div class="formula">t.test(men, women, var.equal = TRUE)</div>`;
+}
+['t3D','t3s','t3n'].forEach(id=>$(id).addEventListener('input',t3draw));$('t3new').onclick=()=>{t3run();t3draw();};
+
+/* =============================================================
+   TAB 4: paired vs unpaired
+   ============================================================= */
+let D4=null;const N4=60;
+function t4run(){const g=makeGen(newSeed());D4={u:[],e1:[],e2:[]};for(let i=0;i<N4;i++){D4.u.push(g.z());D4.e1.push(g.z());D4.e2.push(g.z());}}
+function t4draw(){
+  if(!D4)t4run();const n=+$('t4n').value,Dl=+$('t4D').value,sb=+$('t4b').value,sw=+$('t4w').value;
+  $('t4nV').textContent=n;$('t4DV').textContent=(Dl>0?'+':'')+Dl;$('t4bV').textContent=sb;$('t4wV').textContent=sw;
+  const bef=[],aft=[];for(let i=0;i<n;i++){const base=220+sb*D4.u[i];bef.push(base+sw*D4.e1[i]);aft.push(base+Dl+sw*D4.e2[i]);}
+  const d=aft.map((v,i)=>v-bef[i]);const rp=tOne(d,0,'two.sided'),ru=tWelch(aft,bef,'two.sided');
+  /* before/after plot */
+  {const {ctx,w,h}=setup($('t4c'));let [lo,hi]=rng(bef.concat(aft));const pd=(hi-lo||10)*.08;lo-=pd;hi+=pd;
+   const f=frame(w,h,{l:52,r:20,t:14,b:34},-.5,1.5,lo,hi);
+   for(let i=0;i<n;i++){ctx.strokeStyle=aft[i]<bef[i]?COL.green:COL.amber;ctx.globalAlpha=.7;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(f.sx(0),f.sy(bef[i]));ctx.lineTo(f.sx(1),f.sy(aft[i]));ctx.stroke();ctx.globalAlpha=1;dot(ctx,f.sx(0),f.sy(bef[i]),4,COL.ink,.8);dot(ctx,f.sx(1),f.sy(aft[i]),4,COL.ink,.8);}
+   const mb=mean(bef),ma=mean(aft);ctx.strokeStyle=COL.purple;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(f.sx(-.2),f.sy(mb));ctx.lineTo(f.sx(.1),f.sy(mb));ctx.moveTo(f.sx(.9),f.sy(ma));ctx.lineTo(f.sx(1.2),f.sy(ma));ctx.stroke();
+   axisY(ctx,f,niceTicks(lo,hi,7),'cholesterol (mg/dL)');
+   txt(ctx,'before',f.sx(0),f.B+18,COL.ink,'center');txt(ctx,'after',f.sx(1),f.B+18,COL.ink,'center');
+   haloText(ctx,'green: decreased · orange: increased · purple: means',f.R,f.T,COL.mute,'right','top');}
+  /* differences */
+  {const {ctx,w,h}=setup($('t4e'));let [lo,hi]=rng(d.concat([0]));const pd=(hi-lo||10)*.12;lo-=pd;hi+=pd;
+   const f=frame(w,h,{l:46,r:14,t:14,b:34},-1,1,lo,hi);const g=makeGen(5);
+   hline(ctx,f,0,COL.mute,[4,3],1.2);
+   for(const v of d)dot(ctx,f.sx((g.u()-.5)*.6),f.sy(v),4.5,COL.blue,.75);
+   const md=mean(d);const ci=tInv(.975,n-1)*rp.se;
+   ctx.strokeStyle=COL.purple;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(f.sx(.45),f.sy(md-ci));ctx.lineTo(f.sx(.45),f.sy(md+ci));ctx.moveTo(f.sx(.35),f.sy(md));ctx.lineTo(f.sx(.55),f.sy(md));ctx.stroke();
+   haloText(ctx,'mean ± 95% CI',f.sx(.45),f.sy(md+ci)-4,COL.purple,'center','bottom');
+   axisY(ctx,f,niceTicks(lo,hi,7),'after − before (mg/dL)');}
+  const cor=(()=>{const mb=mean(bef),ma=mean(aft);let sxy=0,sx=0,sy=0;for(let i=0;i<n;i++){sxy+=(bef[i]-mb)*(aft[i]-ma);sx+=(bef[i]-mb)**2;sy+=(aft[i]-ma)**2;}return sxy/Math.sqrt(sx*sy);})();
+  $('t4stats').innerHTML=table([
+    ['SD before / SD after',sdv(bef).toFixed(1)+' / '+sdv(aft).toFixed(1)],['SD of the differences',sdv(d).toFixed(1)],['correlation before–after',cor.toFixed(2)],['mean difference',mean(d).toFixed(2)],
+    {th:1,0:'Paired t-test (correct here)'},['t, df',rp.t.toFixed(2)+', '+rp.df],{0:'p',1:fmtP(rp.p),hl:true},
+    {th:1,0:'Unpaired Welch t-test (ignores pairing)'},['t, df',ru.t.toFixed(2)+', '+ru.df.toFixed(1)],{0:'p',1:fmtP(ru.p),hl:true}
+  ])+'<div class="formula">t.test(after, before, paired = TRUE)<br>t.test(after - before, mu = 0)  # identical</div>';
+}
+['t4n','t4D','t4b','t4w'].forEach(id=>$(id).addEventListener('input',t4draw));$('t4new').onclick=()=>{t4run();t4draw();};
+
+/* =============================================================
+   TAB 6: normality
+   ============================================================= */
+const P6={
+  normal:{sample:g=>g.z(),pdf:normPdf},
+  t2:{sample:g=>{let u=0;while(u===0)u=g.u();return g.z()/Math.sqrt(-Math.log(u));}},
+  exp:{sample:g=>-Math.log(1-g.u())},
+  lognormal:{sample:g=>Math.exp(g.z())},
+  uniform:{sample:g=>g.u()},
+  bimodal:{sample:g=>(g.u()<.5?-2:2)+.7*g.z()}
+};
+let D6=null;
+function t6run(){const g=makeGen(newSeed()),pop=P6[$('t6pop').value];D6={pool:Array.from({length:500},()=>pop.sample(g))};$('t6rstats').innerHTML='';}
+function q7(sorted,p){const h=(sorted.length-1)*p,i=Math.floor(h);return sorted[i]+(h-i)*((sorted[i+1]??sorted[i])-sorted[i]);}
+function t6draw(){
+  if(!D6)t6run();const n=+$('t6n').value;$('t6nV').textContent=n;const x=D6.pool.slice(0,n),xs=[...x].sort((a,b)=>a-b);
+  const m=mean(x),s=sdv(x),sw=shapiro(x);
+  /* histogram */
+  {const {ctx,w,h}=setup($('t6h'));let [lo,hi]=rng(x);const span=(hi-lo)||1;lo-=span*.05;hi+=span*.05;
+   const B=Math.max(5,Math.min(30,Math.ceil(Math.sqrt(n)*1.3))),bw=(hi-lo)/B,c=new Array(B).fill(0);for(const v of x)c[Math.min(B-1,Math.floor((v-lo)/bw))]++;
+   const dens=c.map(v=>v/(n*bw));const ymax=Math.max(...dens,normPdf(0)/s)*1.12;const f=frame(w,h,{l:44,r:12,t:12,b:36},lo,hi,0,ymax);
+   for(let b=0;b<B;b++){ctx.fillStyle=COL.blue;ctx.globalAlpha=.55;const x0=f.sx(lo+b*bw)+.5,x1=f.sx(lo+(b+1)*bw)-.5;ctx.fillRect(x0,f.sy(dens[b]),x1-x0,f.sy(0)-f.sy(dens[b]));}ctx.globalAlpha=1;
+   clipTo(ctx,f);curve(ctx,f,v=>normPdf((v-m)/s)/s,lo,hi,COL.red,2);ctx.restore();
+   axisX(ctx,f,niceTicks(lo,hi,6),'value');axisY(ctx,f,niceTicks(0,ymax,5),'density');}
+  /* QQ */
+  {const {ctx,w,h}=setup($('t6q'));const pp=ppoints(n),th=pp.map(normInv);const [lo,hi]=rng(xs);const sp=(hi-lo)||1;const tl=th[0]-.3,thh=th[n-1]+.3;
+   const f=frame(w,h,{l:48,r:12,t:12,b:36},tl,thh,lo-sp*.06,hi+sp*.06);
+   const q1=q7(xs,.25),q3=q7(xs,.75),z1=normInv(.25),z3=normInv(.75),sl=(q3-q1)/(z3-z1),ic=q1-sl*z1;
+   clipTo(ctx,f);ctx.strokeStyle=COL.red;ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(f.sx(tl),f.sy(ic+sl*tl));ctx.lineTo(f.sx(thh),f.sy(ic+sl*thh));ctx.stroke();
+   for(let i=0;i<n;i++)dot(ctx,f.sx(th[i]),f.sy(xs[i]),n>200?2.5:3.8,COL.blue,.75);ctx.restore();
+   axisX(ctx,f,niceTicks(tl,thh,6),'theoretical quantiles N(0,1)');axisY(ctx,f,niceTicks(lo-sp*.06,hi+sp*.06,6),'sample quantiles');
+   haloText(ctx,'red: qqline()',f.L+6,f.T+4,COL.red,'left','top');}
+  $('t6stats').innerHTML=table([['n',n],['mean, SD',m.toFixed(2)+', '+s.toFixed(2)],['Shapiro-Wilk W',sw.W.toFixed(4)],{0:'p-value',1:fmtP(sw.p),hl:true}])+
+    `<p>${sw.p<0.05?'<span class="bad">p &lt; 0.05 → reject H₀: data not normal</span>':'<span class="ok">p ≥ 0.05 → normality cannot be rejected</span>'}</p><div class="formula">qqnorm(x); qqline(x)<br>shapiro.test(x)</div>`;
+}
+function t6rep(){const n=+$('t6n').value,pop=P6[$('t6pop').value],g=makeGen(newSeed());let rej=0;const R=1000;
+  for(let k=0;k<R;k++){const x=Array.from({length:n},()=>pop.sample(g));if(shapiro(x).p<0.05)rej++;}
+  const isN=$('t6pop').value==='normal';
+  $('t6rstats').innerHTML=`<p><b>1000 samples of size ${n}:</b> Shapiro-Wilk p &lt; 0.05 in <b>${(rej/10).toFixed(1)}%</b> ${isN?'(H₀ true → should be ≈ 5%: false alarms)':'(H₀ false → this is the power to detect non-normality)'}</p>`;}
+$('t6pop').addEventListener('change',()=>{t6run();t6draw();});$('t6n').addEventListener('input',()=>{$('t6rstats').innerHTML='';t6draw();});
+$('t6new').onclick=()=>{t6run();t6draw();};$('t6rep').onclick=t6rep;
+
+/* =============================================================
+   TAB 7: p-value distribution under H0 for non-normal data
+   ============================================================= */
+const MU7={normal:0,t2:0,exp:1,lognormal:Math.exp(.5),uniform:.5,bimodal:0};
+const R7={normal:'rnorm(n)',t2:'rt(n, df = 2)',exp:'rexp(n)',lognormal:'rlnorm(n)',uniform:'runif(n)',bimodal:'sample(c(-2, 2), n, TRUE) + rnorm(n, sd = 0.7)'};
+const MUR7={normal:'0',t2:'0',exp:'1',lognormal:'exp(0.5)',uniform:'0.5',bimodal:'0'};
+let D7=null;
+function updT7labels(){$('t7nV').textContent=$('t7n').value;$('t7MV').textContent=$('t7M').value;}
+function t7run(){
+  const popk=$('t7pop').value,pop=P6[popk],test=$('t7test').value,alt=$('t7alt').value,n=+$('t7n').value,M=+$('t7M').value,g=makeGen(newSeed());
+  const ps=new Float64Array(M),ts=new Float64Array(M),dfs=new Float64Array(M);const x=new Array(n),y=new Array(n);
+  for(let k=0;k<M;k++){
+    for(let i=0;i<n;i++)x[i]=pop.sample(g);
+    let r;if(test==='one')r=tOne(x,MU7[popk],alt);else{for(let i=0;i<n;i++)y[i]=pop.sample(g);r=tWelch(x,y,alt);}
+    ps[k]=isFinite(r.p)?r.p:1;ts[k]=r.t;dfs[k]=r.df;}
+  D7={ps,ts,dfs,popk,test,alt,n};
+}
+function t7draw(){
+  if(!D7)return;const a=+$('t7a').value,{ps,ts,dfs,popk,test,alt,n}=D7,M=ps.length;
+  /* p-value histogram */
+  {const B=20,c=new Array(B).fill(0);for(const p of ps)c[Math.min(B-1,Math.floor(p*B))]++;
+   const exp=M/B,ymax=Math.max(...c,exp)*1.15;
+   const {ctx,w,h}=setup($('t7c'));const f=frame(w,h,{l:52,r:14,t:14,b:40},0,1,0,ymax);
+   for(let b=0;b<B;b++){const x0=f.sx(b/B)+1,x1=f.sx((b+1)/B)-1;ctx.fillStyle=(b+1)/B<=a+1e-9?COL.red:COL.blue;ctx.globalAlpha=.7;ctx.fillRect(x0,f.sy(c[b]),x1-x0,f.sy(0)-f.sy(c[b]));}ctx.globalAlpha=1;
+   hline(ctx,f,exp,COL.ink,[5,4],1.8);haloText(ctx,'uniform (expected if assumptions hold)',f.R-4,f.sy(exp)-4,COL.ink,'right','bottom');
+   vline(ctx,f,a,COL.red,[4,3],1.3);haloText(ctx,'α = '+a,f.sx(a)+4,f.T+4,COL.red,'left','top');
+   axisX(ctx,f,niceTicks(0,1,10),'p-value (bins of width 0.05)');axisY(ctx,f,niceTicks(0,ymax,6),'number of experiments');}
+  /* t statistics vs t-distribution */
+  {const df=test==='one'?n-1:(()=>{const s=[...dfs].sort((u,v)=>u-v);return s[Math.floor(s.length/2)];})();
+   const xr=6,B=60,bw=2*xr/B,c=new Array(B).fill(0);let out=0;for(const t of ts){if(!isFinite(t)||t<-xr||t>=xr){out++;continue;}c[Math.floor((t+xr)/bw)]++;}
+   const dens=c.map(v=>v/(M*bw)),ymax=Math.max(...dens,tPdf(0,df))*1.15;
+   const {ctx,w,h}=setup($('t7t'));const f=frame(w,h,{l:44,r:12,t:14,b:40},-xr,xr,0,ymax);
+   for(let b=0;b<B;b++){const x0=f.sx(-xr+b*bw)+.5,x1=f.sx(-xr+(b+1)*bw)-.5;ctx.fillStyle=COL.blue;ctx.globalAlpha=.5;ctx.fillRect(x0,f.sy(dens[b]),x1-x0,f.sy(0)-f.sy(dens[b]));}ctx.globalAlpha=1;
+   clipTo(ctx,f);curve(ctx,f,v=>tPdf(v,df),-xr,xr,COL.red,2);ctx.restore();
+   haloText(ctx,'red: t-distribution, df = '+(test==='one'?df:df.toFixed(1)+' (median)'),f.L+4,f.T+2,COL.red,'left','top');
+   if(out)haloText(ctx,`${out} values outside ±${xr} not shown`,f.L+4,f.T+18,COL.mute,'left','top');
+   axisX(ctx,f,niceTicks(-xr,xr,8),'t');axisY(ctx,f,niceTicks(0,ymax,5),'density');}
+  const rate=al=>ps.reduce((s,p)=>s+(p<al),0)/M;const ra=rate(a);
+  const ks=(()=>{const s=[...ps].sort((u,v)=>u-v);let d=0;for(let i=0;i<M;i++)d=Math.max(d,Math.abs(s[i]-(i+.5)/M));return d;})();
+  const code=test==='one'?`t.test(${R7[popk]}, mu = ${MUR7[popk]}${alt==='two.sided'?'':`, alternative = "${alt}"`})$p.value`:`t.test(${R7[popk]}, ${R7[popk]}${alt==='two.sided'?'':`, alternative = "${alt}"`})$p.value`;
+  $('t7stats').innerHTML=table([
+    {th:1,0:M+' experiments, H₀ true'},
+    {0:`share with p < ${a} (should be ${a*100}%)`,1:(100*ra).toFixed(1)+'%',hl:true},
+    ['share with p < 0.01 (should be 1%)',(100*rate(.01)).toFixed(2)+'%'],
+    ['max. deviation from uniform (KS distance)',ks.toFixed(3)]
+  ])+(ra>a*1.3?'<p class="bad">Too many false positives → the test is anti-conservative.</p>':ra<a*.7?'<p class="note"><b>Too few small p-values</b> → the test is conservative (loses power).</p>':'<p class="ok">p-values ≈ uniform: the t-test is fine here.</p>')+
+   `<div class="formula">n &lt;- ${n}<br>p &lt;- replicate(${M}, ${code})<br>hist(p, breaks = 20)</div>`;
+}
+['t7pop','t7test','t7alt'].forEach(id=>$(id).addEventListener('change',()=>{t7run();t7draw();}));
+['t7n','t7M'].forEach(id=>{$(id).addEventListener('input',updT7labels);$(id).addEventListener('change',()=>{updT7labels();t7run();t7draw();});});
+$('t7a').addEventListener('input',t7draw);$('t7new').onclick=()=>{t7run();t7draw();};
+
+/* =============================================================
+   TAB 8: significance of a correlation
+   ============================================================= */
+function ranks(a){const idx=a.map((v,i)=>[v,i]).sort((p,q)=>p[0]-q[0]),r=new Array(a.length);for(let i=0;i<idx.length;){let j=i;while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++;const rk=(i+j)/2+1;for(let k=i;k<=j;k++)r[idx[k][1]]=rk;i=j+1;}return r;}
+function pearson(x,y){const mx=mean(x),my=mean(y);let sxy=0,sx=0,sy=0;for(let i=0;i<x.length;i++){sxy+=(x[i]-mx)*(y[i]-my);sx+=(x[i]-mx)**2;sy+=(y[i]-my)**2;}return sxy/Math.sqrt(sx*sy);}
+function corTest(x,y,method,alt){const n=x.length,r=method==='spearman'?pearson(ranks(x),ranks(y)):pearson(x,y);const df=n-2,rr=Math.max(-0.999999999,Math.min(0.999999999,r));const t=rr*Math.sqrt(df)/Math.sqrt(1-rr*rr);return{r,t,df,p:pFromT(t,df,alt||'two.sided')};}
+const rCrit=(n,a)=>{const tc=tInv(1-a/2,n-2);return tc/Math.sqrt(n-2+tc*tc);};
+const rNullPdf=(r,n)=>Math.abs(r)>=1?0:Math.exp(lgamma((n-1)/2)-lgamma(.5)-lgamma((n-2)/2)+((n-4)/2)*Math.log(1-r*r));
+let D8=null;
+function t8run(){const g=makeGen(newSeed());D8={z1:[],z2:[]};for(let i=0;i<500;i++){D8.z1.push(g.z());D8.z2.push(g.z());}$('t8rstats').innerHTML='';}
+function t8data(){const rho=+$('t8r').value,n=+$('t8n').value;const x=[],y=[];for(let i=0;i<n;i++){x.push(D8.z1[i]);y.push(rho*D8.z1[i]+Math.sqrt(1-rho*rho)*D8.z2[i]);}
+  if($('t8out').checked){x[n-1]=5;y[n-1]=5;}return{x,y,rho,n};}
+function updT8labels(){$('t8rV').textContent=(+$('t8r').value).toFixed(2);$('t8nV').textContent=$('t8n').value;}
+function t8draw(){
+  if(!D8)t8run();updT8labels();const {x,y,rho,n}=t8data(),a=+$('t8a').value,meth=$('t8m').value,res=corTest(x,y,meth),rc=rCrit(n,a);
+  /* scatter */
+  {const {ctx,w,h}=setup($('t8s'));let [xl,xh]=rng(x),[yl,yh]=rng(y);const px=(xh-xl||1)*.08,py=(yh-yl||1)*.08;xl-=px;xh+=px;yl-=py;yh+=py;
+   const f=frame(w,h,{l:40,r:10,t:10,b:36},xl,xh,yl,yh);const out=$('t8out').checked;
+   for(let i=0;i<n;i++)dot(ctx,f.sx(x[i]),f.sy(y[i]),n>200?2.2:n>50?3:4,out&&i===n-1?COL.amber:COL.blue,out&&i===n-1?1:.65);
+   const mx=mean(x),my=mean(y);let sxy=0,sxx=0;for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my);sxx+=(x[i]-mx)**2;}const b=sxy/sxx;
+   clipTo(ctx,f);ctx.strokeStyle=COL.red;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(f.sx(xl),f.sy(my+b*(xl-mx)));ctx.lineTo(f.sx(xh),f.sy(my+b*(xh-mx)));ctx.stroke();ctx.restore();
+   axisX(ctx,f,niceTicks(xl,xh,6),'x');axisY(ctx,f,niceTicks(yl,yh,6),'y');
+   haloText(ctx,`r = ${res.r.toFixed(3)}`,f.L+6,f.T+4,COL.ink,'left','top');}
+  /* null distribution of r */
+  {const {ctx,w,h}=setup($('t8d'));const pdf=r=>rNullPdf(r,n);let ym=0;for(let i=1;i<200;i++)ym=Math.max(ym,pdf(-1+2*i/200));ym=Math.min(ym,12)*1.18;
+   const f=frame(w,h,{l:40,r:10,t:14,b:36},-1,1,0,ym);clipTo(ctx,f);
+   ctx.globalAlpha=.25;shade(ctx,f,pdf,rc,0.9999,COL.red);shade(ctx,f,pdf,-0.9999,-rc,COL.red);ctx.globalAlpha=.55;
+   const ar=Math.abs(res.r);shade(ctx,f,pdf,Math.min(ar,.9999),.9999,COL.blue);shade(ctx,f,pdf,-.9999,-Math.min(ar,.9999),COL.blue);ctx.globalAlpha=1;
+   curve(ctx,f,pdf,-.9999,.9999,COL.ink,2);
+   vline(ctx,f,rc,COL.red,[4,3],1.3);vline(ctx,f,-rc,COL.red,[4,3],1.3);
+   vline(ctx,f,res.r,COL.purple,[],2.5);ctx.restore();
+   haloText(ctx,'±r_crit = '+rc.toFixed(3),f.sx(rc)+3,f.sy(ym*.7),COL.red,'left');
+   haloText(ctx,'observed r',f.sx(res.r)+(res.r>0?-5:5),f.T+2,COL.purple,res.r>0?'right':'left','top');
+   axisX(ctx,f,niceTicks(-1,1,8),'r (if ρ = 0, n = '+n+')');}
+  /* critical r vs n */
+  {const {ctx,w,h}=setup($('t8c'));const f=frame(w,h,{l:60,r:20,t:10,b:36},4,500,0,1,true);
+   clipTo(ctx,f);ctx.globalAlpha=.1;ctx.fillStyle=COL.red;ctx.beginPath();ctx.moveTo(f.sx(4),f.sy(1));for(let k=4;k<=500;k++)ctx.lineTo(f.sx(k),f.sy(rCrit(k,a)));ctx.lineTo(f.sx(500),f.sy(1));ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+   ctx.strokeStyle=COL.red;ctx.lineWidth=2;ctx.beginPath();for(let k=4;k<=500;k++){k===4?ctx.moveTo(f.sx(k),f.sy(rCrit(k,a))):ctx.lineTo(f.sx(k),f.sy(rCrit(k,a)));}ctx.stroke();
+   vline(ctx,f,n,COL.ink,[2,3],1);dot(ctx,f.sx(n),f.sy(Math.min(1,Math.abs(res.r))),6,COL.purple);ctx.restore();
+   haloText(ctx,'|r| significant (p < '+a+')',f.R-6,f.T+4,COL.red,'right','top');
+   axisX(ctx,f,[4,5,10,20,50,100,200,500],'sample size n (log scale)');axisY(ctx,f,[0,.25,.5,.75,1],'|r|');}
+  const fz=(()=>{if(meth!=='pearson'||n<4||Math.abs(res.r)>=1)return null;const z=Math.atanh(res.r),se=1/Math.sqrt(n-3),q=normInv(1-a/2);return[Math.tanh(z-q*se),Math.tanh(z+q*se)];})();
+  $('t8stats').innerHTML=table([['n',n],['true ρ',rho.toFixed(2)],[meth==='pearson'?'Pearson r':'Spearman ρₛ (r of the ranks)',res.r.toFixed(3)],['r² (variance explained)',(100*res.r*res.r).toFixed(1)+'%'],
+    ['t = r·√(n−2)/√(1−r²)',res.t.toFixed(3)],['df = n − 2',res.df],{0:'p (two-sided)',1:fmtP(res.p),hl:true},['critical |r| (α = '+a+')',rc.toFixed(3)],
+    ...(fz?[[(100*(1-a)).toFixed(0)+'% CI for ρ (Fisher z)','['+fz[0].toFixed(3)+', '+fz[1].toFixed(3)+']']]:[])])+
+    `<p>${verdict(res.p,a)}</p>`+(meth==='spearman'?'<p class="note">p-value via t-approximation; R uses an exact test for small n without ties.</p>':'')+
+    `<div class="formula">cor(x, y${meth==='spearman'?', method = "spearman"':''})<br>cor.test(x, y${meth==='spearman'?', method = "spearman"':''})</div>`;
+}
+function t8rep(){const rho=+$('t8r').value,n=+$('t8n').value,a=+$('t8a').value,meth=$('t8m').value,out=$('t8out').checked,g=makeGen(newSeed());let rej=0;const R=2000;
+  for(let k=0;k<R;k++){const x=[],y=[];for(let i=0;i<n;i++){const z=g.z();x.push(z);y.push(rho*z+Math.sqrt(1-rho*rho)*g.z());}if(out){x[n-1]=5;y[n-1]=5;}if(corTest(x,y,meth).p<a)rej++;}
+  $('t8rstats').innerHTML=`<p><b>${R} samples of size ${n}:</b> p &lt; ${a} in <b>${(100*rej/R).toFixed(1)}%</b> ${rho===0?(out?'(ρ = 0 but with outlier → false positives)':'(H₀ true → should be ≈ '+(100*a)+'%)'):'(H₀ false → power)'}</p>`;}
+['t8r','t8n'].forEach(id=>$(id).addEventListener('input',()=>{$('t8rstats').innerHTML='';t8draw();}));
+['t8m','t8a','t8out'].forEach(id=>$(id).addEventListener('change',()=>{$('t8rstats').innerHTML='';t8draw();}));
+$('t8new').onclick=()=>{t8run();t8draw();};$('t8rep').onclick=t8rep;
+
+/* =============================================================
+   tabs
+   ============================================================= */
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  redraw(id);
+}
+function redraw(id){
+  if(id==='t1')t1draw();
+  if(id==='t2'){updT2labels();if(!D2)t2run();t2draw();}
+  if(id==='t3')t3draw();
+  if(id==='t4')t4draw();
+  if(id==='t6')t6draw();
+  if(id==='t7'){updT7labels();if(!D7)t7run();t7draw();}
+  if(id==='t8')t8draw();
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+window.addEventListener('resize',()=>{const a=document.querySelector('.panel.active');if(a)redraw(a.id);});
+$('t1x').value=FERT.F3.join(', ');
+showTab('t1');
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+---
+title: "Week 6 – Plenum: Hypothesis testing, t-tests & correlation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 7, fig.height = 4)
+set.seed(1)
+```
+
+# Key points of the week
+
+* **Logic of a test.** Formulate H₀ (no effect) and H₁ *before* looking at the data → compute a test statistic → compare it with its distribution **under H₀** → p-value.
+* **t = effect / random effect** = (x̄ − μ₀) / (s/√n). Under H₀ it follows a t-distribution with the appropriate df (→ N(0,1) for large n).
+* **p-value** = P(test statistic at least as extreme as observed | H₀). The question decides the tail: `greater`, `less`, `two.sided`, and p(two-sided) = 2·min(p_lower, p_upper).
+* **α** is fixed in advance (0.05 is a convention, not a law). p < α → reject H₀. p ≥ α → H₀ is *not* proven, the data are just compatible with chance.
+* **Significance ≠ relevance.** With large n tiny effects become significant; with small n large effects may not be.
+* **Which t-test?** one-sample / two-sample unpaired (Student if equal variances, Welch otherwise – Welch is R's default) / paired (same units measured twice).
+* **Correlation test.** H₀: ρ = 0, t = r·√(n−2)/√(1−r²) with df = n − 2 (`cor.test()`).
+* **Assumptions.** approximately normal data (QQ-plot, Shapiro-Wilk), equal variances (or use Welch), independence.
+
+Interactive companion: `DataAnalysis3FS_Week6_interactive.html` (seven tabs, matching the points above).
+
+# Warm-up: the fertilizer examples from the lecture
+
+```{r fertilizer}
+F1 <- c(1.47,1.62,1.51,1.61,1.27,1.51,1.55,1.49,1.44,1.50)
+F2 <- c(1.47,1.62,1.61,1.61,1.47,1.51,1.55,1.59,1.64,1.50)
+F3 <- c(1.47,1.45,1.31,1.41,1.47,1.51,1.55,1.39,1.44,1.50)
+
+data <- F1
+
+# t statistic "by hand" for F2
+t_value <- (mean(data) - 1.5) / (sd(data) / sqrt(length(data)))
+t_value
+
+# same data, different questions -> different p-values
+sapply(c("greater", "less", "two.sided"),
+       function(a) t.test(data, mu = 1.5, alternative = a)$p.value)
+```
+
+For F3 the "does it enhance growth?" question gives p ≈ 0.98, the "does it reduce growth?" question p ≈ 0.02 and the "any effect?" question p ≈ 0.045. **Discussion point:** choosing the alternative *after* seeing the data (e.g. switching to the one-sided test because the two-sided one is not significant) is cheating.
+
+
+```{r}
+x <- seq(-4,4,by=0.01)
+y <- dt(x,df=length(data)-1)
+plot(x,y,lwd=2,col='red',type="l");abline(v=t_value,lty=2,col='blue')
+```
+
+
+
+# Question 1: Which t-test for cholesterol before/after treatment?
+
+Answer: **d) paired t-test** – the same 30 patients are measured twice, so each "after" value belongs to one "before" value.
+
+```{r q1}
+n      <- 30
+base   <- rnorm(n, mean = 220, sd = 35)        # patients differ a lot
+before <- base + rnorm(n, sd = 7)
+after  <- base - 8 + rnorm(n, sd = 7)          # true reduction of 8 mg/dL
+
+t.test(after, before, paired = TRUE)$p.value   # correct
+t.test(after - before, mu = 0)$p.value         # identical: one-sample test on differences
+t.test(after, before)$p.value                  # unpaired (wrong here)
+```
+
+The paired test removes the between-patient variability (SD ≈ 35) and only keeps the noise of the differences. The unpaired test ignores this and loses most of its power. (HTML tab 4)
+
+# Question 2: H₀ vs. H₁
+
+* **H₀ (null hypothesis):** the "no effect" statement, e.g. E(X_treated) = E(X_control). This is the hypothesis we *assume* in order to compute the distribution of the test statistic.
+* **H₁ (alternative):** what we would like to show, e.g. E(X_treated) ≠ E(X_control) (or > / < for one-sided questions).
+* The test can only **reject** H₀ or **fail to reject** it. It never proves H₀.
+
+# Question 3: What does α = 0.05 mean? p = 0.03?
+
+* α = 0.05: we accept a **5% risk of rejecting H₀ although it is true** (type I error / false positive).
+* p = 0.03 < 0.05 → reject H₀, the result is significant at the 5% level. If H₀ were true, data at least this extreme would occur only in 3% of the experiments.
+
+```{r q3}
+# If H0 is true, about 5% of the tests are significant anyway
+p <- replicate(10000, t.test(rnorm(15), rnorm(15))$p.value)
+mean(p < 0.05)
+hist(p, breaks = 20, main = "p-values when H0 is true: uniform")
+```
+
+# Question 4: "p = 0.03 means a 3% chance that H₀ is true" – right or wrong?
+
+**Wrong.** The p-value is computed **assuming H₀ is true**: p = P(data at least this extreme | H₀), not P(H₀ | data). How likely H₀ is given a significant result also depends on how many of the tested hypotheses were true in the first place.
+
+`
+# Question 5: QQ-plot deviates, Shapiro-Wilk p = 0.003
+
+Shapiro-Wilk tests H₀: "the data are normally distributed". p = 0.003 → reject normality. The t-test assumption is violated for this group, so:
+
+* use a **non-parametric test** (Wilcoxon / Mann-Whitney, `wilcox.test()`, next week), or
+* **transform** the data (e.g. log for right-skewed concentrations) and check again.
+
+```{r q5, fig.height = 3.5}
+x <- rexp(25)           # skewed
+y <- rnorm(25, 1, 1)
+par(mfrow = c(1, 2))
+qqnorm(x, main = "skewed group"); qqline(x, col = "red")
+qqnorm(y, main = "normal group"); qqline(y, col = "red")
+shapiro.test(x)$p.value
+shapiro.test(y)$p.value
+wilcox.test(x, y)$p.value
+```
+
+**Caveats for discussion:** with small n, Shapiro-Wilk has little power (non-normal data often pass); with large n, tiny deviations are significant although the t-test is then robust (CLT, week 5). Look at the plot, not only the p-value. (HTML tab 5; tab 6 shows what non-normal data do to the p-values under H₀)
+
+# Testing a correlation
+
+Is an observed correlation coefficient r different from 0, or could it be chance? H₀: ρ = 0 (no correlation in the population). Test statistic
+
+t = r · √(n − 2) / √(1 − r²),  which follows a t-distribution with **df = n − 2** under H₀ (independent pairs, approximately bivariate normal data).
+
+```{r correlation}
+n <- 20
+x <- rnorm(n)
+y <- 0.3 * x + sqrt(1 - 0.3^2) * rnorm(n)    # true correlation rho = 0.3
+
+r <- cor(x, y)
+t <- r * sqrt(n - 2) / sqrt(1 - r^2)
+c(r = r, t = t, p = 2 * pt(-abs(t), df = n - 2))   # "by hand"
+cor.test(x, y)                                     # same t, df, p + 95% CI for rho
+```
+
+How large must |r| be to be significant? The critical value shrinks with n:
+
+```{r rcrit}
+rcrit <- function(n, alpha = 0.05) {
+  tc <- qt(1 - alpha / 2, df = n - 2)
+  tc / sqrt(n - 2 + tc^2)
+}
+round(sapply(c(5, 10, 20, 50, 100, 500), rcrit), 3)
+```
+
+With n = 10, even r = 0.6 is not significant; with n = 500, r = 0.09 already is. **Significance ≠ relevance** again:
+
+```{r cor-large-n}
+x <- rnorm(500)
+y <- 0.1 * x + rnorm(500)
+cor.test(x, y)$p.value   # significant ...
+cor(x, y)^2              # ... but only ~1% of the variance explained
+```
+
+A single outlier can create a "significant" Pearson correlation; Spearman (correlation of the ranks) is much more robust:
+
+```{r cor-outlier, fig.height = 3.5}
+x <- c(rnorm(14), 5)     # no correlation + one extreme point
+y <- c(rnorm(14), 5)
+plot(x, y, pch = 19)
+cor.test(x, y)$p.value                        # Pearson
+cor.test(x, y, method = "spearman")$p.value   # Spearman
+```
+
+**Discussion points:** a significant correlation says nothing about causation; Pearson only measures *linear* association (always plot the data); with many variables tested pairwise, ~5% of the correlations are "significant" by chance. (HTML tab 7)
+
+# Bonus: Student vs. Welch
+
+```{r welch}
+# small group with large variance, H0 true
+p <- replicate(5000, {
+  x <- rnorm(5, 0, 3); y <- rnorm(40, 0, 1)
+  c(student = t.test(x, y, var.equal = TRUE)$p.value,
+    welch   = t.test(x, y)$p.value)
+})
+rowMeans(p < 0.05)   # Student: far above 5%, Welch: ~5%
+```
+
+When in doubt, use Welch (R's default).
