@@ -47,7 +47,7 @@
 </head>
 <body>
 <header>
-  <h1>Week 6 · Hypothesis testing, t-tests &amp; correlation</h1>
+  <h1>Chapter 7 · Hypothesis testing, t-tests &amp; correlation</h1>
   <p>Interactive companion – Data Analysis (Molecular Biotechnology). Move the sliders and watch what changes.</p>
 </header>
 <div class="wrap">
@@ -188,7 +188,7 @@
   <div class="intro"><b>Idea.</b> Question 5: is the data (approximately) normal? Compare the QQ-plot and the Shapiro-Wilk test (H₀: data normally distributed) for different populations and sample sizes.
     <ul><li><b>Normal</b> population, n = 10: draw several samples – even normal data wiggles around the line, and about 5% of samples are "rejected".</li>
     <li><b>Exponential</b> or <b>t (df = 2)</b> with n = 8: the QQ-plot often looks suspicious, but Shapiro-Wilk frequently can't reject – low power at small n. Use "Repeat 1000×" to see how often it detects the non-normality.</li>
-    <li>With n = 500, even small deviations become "significant", although the t-test is then robust anyway (CLT, week 5). Look at the plot, not only at the p-value.</li></ul></div>
+    <li>With n = 500, even small deviations become "significant", although the t-test is then robust anyway (CLT, Chapter 6). Look at the plot, not only at the p-value.</li></ul></div>
   <div class="grid">
     <div class="card">
       <div class="ctl"><label>Population</label>
@@ -219,7 +219,7 @@
     <ul><li><b>Normal</b> population: flat histogram, ≈ 5% of p-values below 0.05 – the reference.</li>
     <li><b>Exponential</b> or <b>lognormal</b>, one-sample test, n = 10: the histogram is <b>no longer flat</b> – too many small p-values (≈ 10–16% "significant" instead of 5%). With a one-sided alternative the effect is even stronger ("less") or reversed ("greater"). The right panel shows why: the t-statistic is no longer t-distributed, it becomes skewed.</li>
     <li><b>t (df = 2)</b> (heavy tails): now there are <b>too few</b> small p-values – the test is conservative and loses power.</li>
-    <li>Increase n: the histogram becomes flat again (CLT, week 5) – but slowly for very skewed data. The two-sample test with equal n is much more robust, because the skewness of the two groups largely cancels.</li></ul></div>
+    <li>Increase n: the histogram becomes flat again (CLT, Chapter 6) – but slowly for very skewed data. The two-sample test with equal n is much more robust, because the skewness of the two groups largely cancels.</li></ul></div>
   <div class="grid">
     <div class="card">
       <div class="ctl"><label>Population</label>
